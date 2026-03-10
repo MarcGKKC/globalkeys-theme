@@ -17,6 +17,15 @@ get_header();
 
 	<main id="primary" class="site-main">
 
+		<?php if ( is_front_page() && is_home() ) : ?>
+		<div class="gk-test-banner" style="background: #e8f4f8; padding: 0.5rem 1rem; margin-bottom: 1rem; border-left: 4px solid #0073aa;">
+			✨ Test: Du siehst diese Box auf der Homepage – funktioniert!
+		</div>
+		<div class="gk-test-2" style="background: #e8f8e8; padding: 0.5rem 1rem; margin-bottom: 1rem; border-left: 4px solid #46b450;">
+			🚀 Mini-Test 2: Auch diese zweite Box wird angezeigt!
+		</div>
+		<?php endif; ?>
+
 		<?php
 		if ( have_posts() ) :
 
