@@ -59,6 +59,12 @@ get_header();
 		endif;
 		?>
 
+		<?php if ( is_front_page() && is_home() ) : ?>
+		<div class="gk-test-3" style="background: #f8f0e8; padding: 0.5rem 1rem; margin-top: 2rem; margin-bottom: 1rem; border-left: 4px solid #d47500;">
+			🏁 Finaler Test 3: Diese Box sitzt weiter unten – alle Tests bestanden!
+		</div>
+		<?php endif; ?>
+
 	</main><!-- #main -->
 
 <?php
