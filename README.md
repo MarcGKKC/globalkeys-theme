@@ -68,3 +68,7 @@ $ npm install
 Now you're ready to go! The next step is easy to say, but harder to do: make an awesome WordPress theme. :)
 
 Good luck!
+
+---
+
+**Git-Sync-Test (10.03.2025):** Diese Zeile wurde hinzugefügt, um mit dem Kollegen Pull/Push zu testen. Kann wieder gelöscht werden.
