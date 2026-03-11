@@ -227,17 +227,9 @@ function globalkeys_scripts() {
 
 	// Account-Icon: rechts positionieren, My-account-Text ausblenden (übersteuert Cache/Plugins).
 	$account_css = '
-		#masthead .account-icon-link {
-			position: absolute !important;
-			right: 1rem !important;
-			left: auto !important;
-			top: 50% !important;
-			transform: translateY(-50%);
-			z-index: 10;
-		}
-		#masthead .main-navigation li.gk-hide-myaccount,
-		#masthead .main-navigation li:has(a[href*="my-account"]),
-		#masthead .main-navigation li:has(a[href*="myaccount"]) {
+		#masthead .header-pill-nav li.gk-hide-myaccount,
+		#masthead .header-pill-nav li:has(a[href*="my-account"]),
+		#masthead .header-pill-nav li:has(a[href*="myaccount"]) {
 			display: none !important;
 		}
 		.gk-gamertag-error {

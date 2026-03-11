@@ -645,56 +645,239 @@ textarea {
 # Components
 --------------------------------------------------------------*/
 
-/* Site Header
+/* Site Header (transparent über Hero) – eine Zeile: Logo | Pill | Warenkorb + Konto
 --------------------------------------------- */
 .site-header {
-	position: relative;
-	display: flex;
-	align-items: center;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 100;
 	width: 100%;
-	min-height: 3rem;
+}
+
+.site-header--transparent {
+	background: transparent;
+	color: #fff;
 }
 
 .site-header-inner {
 	display: flex;
-	flex-wrap: wrap;
 	align-items: center;
-	gap: 1rem;
+	justify-content: space-between;
+	gap: 0;
+	width: 100%;
+	max-width: 100%;
+	margin: 0;
+	padding: 0.75rem 1.25rem;
+	min-height: 4rem;
+}
+
+/* Links: Logo – direkt am linken Rand (nur Platz für Logo) */
+.site-branding {
+	flex: 0 0 auto;
+	display: flex;
+	align-items: center;
+}
+
+.site-branding .custom-logo,
+.site-branding .site-logo-img {
+	max-height: 2.5rem;
+	width: auto;
+	height: auto;
+	display: block;
+}
+
+.site-logo-link {
+	display: inline-block;
+	color: #fff;
+	text-decoration: none;
+	font-weight: 700;
+	font-size: 1.125rem;
+	letter-spacing: 0.02em;
+}
+
+.site-logo-link:hover {
+	color: #fff;
+	opacity: 0.9;
+}
+
+.site-logo-placeholder {
+	display: block;
+}
+
+/* Mitte: Großer pillenförmiger Bereich */
+/* Mitte: Pill – zentriert im verbleibenden Platz */
+.header-pill-wrapper {
+	flex: 1 1 0;
+	min-width: 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 0 0.75rem;
+}
+
+.header-pill {
+	display: flex;
+	align-items: center;
+	flex: 0 0 auto;
+	gap: 0 1.25rem;
+	padding: 0.28rem 0.5rem 0.28rem 1rem;
+	background: rgba(50, 50, 55, 0.85);
+	border-radius: 9999px;
+	max-width: 32rem;
+}
+
+.header-pill-platforms {
+	display: flex;
+	align-items: center;
+	gap: 0.25rem 0.75rem;
+	flex-shrink: 0;
+}
+
+.header-pill .platform-filter {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+	color: #fff;
+	text-decoration: none;
+	font-size: 0.8125rem;
+	padding: 0.25rem 0.4rem;
+	border-radius: 6px;
+	transition: background 0.2s;
+}
+
+.header-pill .platform-filter:hover {
+	background: rgba(255, 255, 255, 0.12);
+	color: #fff;
+}
+
+.header-pill .platform-filter.active {
+	background: rgba(255, 255, 255, 0.2);
+}
+
+.header-pill .platform-filter-icon {
+	width: 1rem;
+	height: 1rem;
+	flex-shrink: 0;
+}
+
+.header-pill-search {
+	display: flex;
+	align-items: center;
+	gap: 0.35rem;
+	margin-left: auto;
+	min-width: 0;
+	flex: 1;
+	max-width: 200px;
+}
+
+.header-pill-search-input {
 	flex: 1;
 	min-width: 0;
+	padding: 0.28rem 0.5rem;
+	font-size: 0.8125rem;
+	border: none;
+	border-radius: 6px;
+	background: rgba(255, 255, 255, 0.08);
+	color: #fff;
 }
 
-/* My account: nur Icon nutzen, Menü-Textlink ausblenden */
-.main-navigation li.gk-hide-myaccount,
-.main-navigation li:has(a[href*="my-account"]),
-.main-navigation li:has(a[href*="myaccount"]) {
-	display: none !important;
+.header-pill-search-input::placeholder {
+	color: rgba(255, 255, 255, 0.5);
 }
 
-.account-icon-link {
-	position: absolute !important;
-	right: 1rem !important;
-	left: auto !important;
-	top: 50%;
-	transform: translateY(-50%);
+.header-pill-search-input:focus {
+	outline: none;
+	background: rgba(255, 255, 255, 0.12);
+}
+
+.header-pill-search-submit {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	padding: 0.5rem 0.25rem 0.5rem 0.5rem;
-	color: currentColor;
+	width: 2.15rem;
+	height: 2.15rem;
+	padding: 0;
+	border: none;
+	border-radius: 50%;
+	background: linear-gradient(135deg, #f90 0%, #e65c00 100%);
+	color: #fff;
+	cursor: pointer;
+	transition: opacity 0.2s, transform 0.15s;
+	flex-shrink: 0;
+}
+
+.header-pill-search-submit:hover {
+	opacity: 0.95;
+	transform: scale(1.05);
+	color: #fff;
+}
+
+.header-pill .search-submit-icon {
+	width: 1rem;
+	height: 1rem;
+}
+
+/* Rechts: Warenkorb + Konto – direkt am rechten Rand */
+.site-header-actions {
+	flex: 0 0 auto;
+	display: flex;
+	align-items: center;
+	gap: 0.25rem;
+}
+
+.header-icon-link {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.5rem;
+	color: #fff;
 	text-decoration: none;
 	border-radius: 4px;
-	transition: opacity 0.2s;
-	z-index: 10;
+	transition: opacity 0.2s, color 0.2s;
+	position: relative;
 }
 
-.account-icon-link:hover {
-	opacity: 0.8;
+.header-icon-link:hover {
+	color: #fff;
+	opacity: 0.85;
 }
 
-.account-icon {
-	width: 1.5rem;
-	height: 1.5rem;
+.header-icon {
+	width: 1.875rem;
+	height: 1.875rem;
+	flex-shrink: 0;
+}
+
+/* Cart- und Login-Icons (SVG als img) in Weiß */
+.header-icon-cart,
+.header-icon-account {
+	filter: brightness(0) invert(1);
+}
+
+.header-cart-link .header-cart-count {
+	position: absolute;
+	top: 2px;
+	right: 2px;
+	background: #f90;
+	color: #1a1a1a;
+	font-size: 0.65rem;
+	font-weight: 700;
+	min-width: 1.1rem;
+	height: 1.1rem;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	line-height: 1;
+}
+
+/* My account nur als Icon rechts – Menü-Textlink in der Pill ausblenden */
+.header-pill-nav li.gk-hide-myaccount,
+.header-pill-nav li:has(a[href*="my-account"]),
+.header-pill-nav li:has(a[href*="myaccount"]) {
+	display: none !important;
 }
 
 /* Navigation
@@ -750,20 +933,33 @@ textarea {
 	text-decoration: none;
 }
 
-/* Small menu. */
-.menu-toggle,
-.main-navigation.toggled ul {
-	display: block;
+/* Abstand unter Header (Startseite: Hero-padding; andere: site-main) */
+.site-main {
+	padding-top: 8rem;
 }
 
-@media screen and (min-width: 37.5em) {
+.site-main--front {
+	padding-top: 0;
+}
 
-	.menu-toggle {
-		display: none;
+/* Pill auf kleinen Screens schmaler und umbruchfähig */
+@media screen and (max-width: 767px) {
+	.header-pill {
+		min-width: 0;
+		flex-wrap: wrap;
+		padding: 0.35rem 0.5rem 0.35rem 0.75rem;
 	}
 
-	.main-navigation ul {
-		display: flex;
+	.header-pill-platforms {
+		order: 1;
+		width: auto;
+	}
+
+	.header-pill-search {
+		order: 2;
+		max-width: none;
+		flex: 1;
+		min-width: 100px;
 	}
 }
 
@@ -1043,8 +1239,25 @@ textarea {
 	margin: 0;
 }
 
+/* Hero: Hintergrund reicht bis oben (transparenter Header darüber); Inhalt unter dem Header */
 .gk-section-hero {
-	background: #e8f4f8;
+	background-color: #2a2a2a;
+	background-size: cover;
+	background-position: center top;
+	background-repeat: no-repeat;
+	padding-top: 8rem;
+	padding-bottom: 5rem;
+	min-height: 28rem;
+	border-left-color: transparent;
+}
+
+.gk-section-hero.has-hero-image {
+	background-color: transparent;
+}
+
+.gk-section-hero .gk-section-title,
+.gk-section-hero .gk-section-text {
+	color: #fff;
 }
 
 .gk-section-intro {
