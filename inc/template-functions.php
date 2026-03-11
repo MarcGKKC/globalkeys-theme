@@ -27,6 +27,11 @@ function globalkeys_body_classes( $classes ) {
 		$classes[] = 'has-front-page-sections';
 	}
 
+	// My Account Login/Register: Sidebar und Footer ausblenden.
+	if ( function_exists( 'is_account_page' ) && is_account_page() && ! is_user_logged_in() ) {
+		$classes[] = 'gk-account-login';
+	}
+
 	return $classes;
 }
 add_filter( 'body_class', 'globalkeys_body_classes' );
