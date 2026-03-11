@@ -176,6 +176,46 @@ function globalkeys_hide_myaccount_menu_class( $classes, $item ) {
 add_filter( 'nav_menu_css_class', 'globalkeys_hide_myaccount_menu_class', 10, 2 );
 
 /**
+ * Registrierung für neue Kunden aktivieren (Online-Shop).
+ *
+ * Aktiviert WordPress-Registrierung und WooCommerce-Registrierung auf der
+ * My-Account-Seite. Läuft einmalig beim ersten Aufruf nach Theme-Update.
+ */
+function globalkeys_enable_customer_registration() {
+	if ( get_option( 'globalkeys_registration_enabled' ) ) {
+		if ( get_option( 'globalkeys_registration_v2' ) ) {
+			// V3: Gamertag als Benutzername.
+			if ( get_option( 'globalkeys_registration_v3' ) ) {
+				return;
+			}
+		}
+	}
+
+	// WordPress: Konto-Erstellung erlauben.
+	update_option( 'users_can_register', 1 );
+
+	// WooCommerce: Registrierung auf My-Account-Seite.
+	if ( class_exists( 'WooCommerce' ) ) {
+		update_option( 'woocommerce_enable_myaccount_registration', 'yes' );
+		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
+		// Passwort direkt beim Registrieren setzen, keine Bestätigungs-E-Mail.
+		update_option( 'woocommerce_registration_generate_password', 'no' );
+		// Gamertag als Benutzername.
+		update_option( 'woocommerce_registration_generate_username', 'no' );
+	}
+
+	update_option( 'globalkeys_registration_enabled', 1 );
+	update_option( 'globalkeys_registration_v2', 1 );
+	update_option( 'globalkeys_registration_v3', 1 );
+}
+add_action( 'init', 'globalkeys_enable_customer_registration', 1 );
+
+/**
+ * WooCommerce-Registrierung: Vorname und Nachname.
+ */
+require get_template_directory() . '/inc/woocommerce-registration.php';
+
+/**
  * Enqueue scripts and styles.
  */
 function globalkeys_scripts() {
@@ -200,10 +240,39 @@ function globalkeys_scripts() {
 		#masthead .main-navigation li:has(a[href*="myaccount"]) {
 			display: none !important;
 		}
+		.gk-gamertag-error {
+			display: block;
+			color: #b32d2e;
+			font-size: 0.9em;
+			font-weight: 600;
+			margin-bottom: 0.5em;
+			padding: 0.4em 0.6em;
+			background: #fef2f2;
+			border-left: 3px solid #b32d2e;
+			border-radius: 3px;
+		}
+		.gk-gamertag-row input[aria-invalid="true"],
+		.gk-email-row input[aria-invalid="true"] {
+			border-color: #b32d2e;
+			box-shadow: 0 0 0 1px #b32d2e;
+		}
 	';
 	wp_add_inline_style( 'globalkeys-style', $account_css );
 
 	wp_enqueue_script( 'globalkeys-navigation', get_template_directory_uri() . '/js/navigation.js', array(), _S_VERSION, true );
+
+	if ( function_exists( 'is_account_page' ) && is_account_page() && ! is_user_logged_in() ) {
+		wp_enqueue_script( 'globalkeys-gamertag-check', get_template_directory_uri() . '/js/gamertag-check.js', array(), _S_VERSION, true );
+		wp_localize_script(
+			'globalkeys-gamertag-check',
+			'globalkeysGamertagCheck',
+			array(
+				'ajaxUrl'       => admin_url( 'admin-ajax.php' ),
+				'takenMessage'  => __( 'Dieser Gamertag wird bereits verwendet.', 'globalkeys' ),
+				'emailMessage'  => __( 'Diese E-Mail-Adresse wird bereits verwendet.', 'globalkeys' ),
+			)
+		);
+	}
 
 	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
 		wp_enqueue_script( 'comment-reply' );
