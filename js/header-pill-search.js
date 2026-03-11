@@ -16,7 +16,7 @@
 
 	var closeFallbackTimeout = null;
 	var closeTransitionEndHandler = null;
-	var ANIMATION_MS = 750;
+	var ANIMATION_MS = 520;
 
 	function cancelPendingClose() {
 		if ( closeFallbackTimeout ) {
@@ -32,8 +32,6 @@
 	function openSearch() {
 		cancelPendingClose();
 		if ( overlay ) {
-			overlay.classList.remove( 'is-search-animating' );
-			overlay.classList.add( 'is-search-animating' );
 			overlay.removeAttribute( 'hidden' );
 			void overlay.offsetHeight;
 		}
@@ -46,22 +44,12 @@
 		if ( searchInput ) {
 			setTimeout( function() {
 				searchInput.focus();
-				if ( overlay ) {
-					overlay.classList.remove( 'is-search-animating' );
-				}
-			}, ANIMATION_MS );
-		} else if ( overlay ) {
-			setTimeout( function() {
-				overlay.classList.remove( 'is-search-animating' );
 			}, ANIMATION_MS );
 		}
 	}
 
 	function closeSearch() {
 		cancelPendingClose();
-		if ( overlay ) {
-			overlay.classList.add( 'is-search-animating' );
-		}
 		container.classList.remove( 'is-search-open' );
 		if ( trigger ) {
 			trigger.setAttribute( 'aria-expanded', 'false' );

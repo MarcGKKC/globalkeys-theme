@@ -791,7 +791,7 @@ textarea {
 	background: #04DA8D;
 	border-radius: 9999px;
 	transform: translateX(100%);
-	transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+	transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 	z-index: 2;
 }
 
@@ -836,11 +836,6 @@ textarea {
 
 .header-pill-search-form .header-pill-search-input::placeholder {
 	color: #fff;
-}
-
-/* Während der Öffnungs-/Schließ-Animation: Platzhalter ausblenden */
-.header-pill-search-overlay.is-search-animating .header-pill-search-input::placeholder {
-	color: transparent;
 }
 
 .header-pill-search-form .header-pill-search-input:focus {
