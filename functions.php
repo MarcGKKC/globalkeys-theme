@@ -179,8 +179,29 @@ add_filter( 'nav_menu_css_class', 'globalkeys_hide_myaccount_menu_class', 10, 2 
  * Enqueue scripts and styles.
  */
 function globalkeys_scripts() {
-	wp_enqueue_style( 'globalkeys-style', get_stylesheet_uri(), array(), _S_VERSION );
+	$style_version = file_exists( get_stylesheet_directory() . '/style.css' )
+		? filemtime( get_stylesheet_directory() . '/style.css' )
+		: _S_VERSION;
+	wp_enqueue_style( 'globalkeys-style', get_stylesheet_uri(), array(), $style_version );
 	wp_style_add_data( 'globalkeys-style', 'rtl', 'replace' );
+
+	// Account-Icon: rechts positionieren, My-account-Text ausblenden (übersteuert Cache/Plugins).
+	$account_css = '
+		#masthead .account-icon-link {
+			position: absolute !important;
+			right: 1rem !important;
+			left: auto !important;
+			top: 50% !important;
+			transform: translateY(-50%);
+			z-index: 10;
+		}
+		#masthead .main-navigation li.gk-hide-myaccount,
+		#masthead .main-navigation li:has(a[href*="my-account"]),
+		#masthead .main-navigation li:has(a[href*="myaccount"]) {
+			display: none !important;
+		}
+	';
+	wp_add_inline_style( 'globalkeys-style', $account_css );
 
 	wp_enqueue_script( 'globalkeys-navigation', get_template_directory_uri() . '/js/navigation.js', array(), _S_VERSION, true );
 
