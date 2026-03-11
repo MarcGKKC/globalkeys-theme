@@ -17,13 +17,13 @@ get_header();
 
 	<main id="primary" class="site-main">
 
-		<?php if ( is_front_page() && is_home() ) : ?>
-		<div class="gk-test-banner" style="background: #e8f4f8; padding: 0.5rem 1rem; margin-bottom: 1rem; border-left: 4px solid #0073aa;">
-			✨ Test: Du siehst diese Box auf der Homepage – funktioniert!
-		</div>
-		<div class="gk-test-2" style="background: #e8f8e8; padding: 0.5rem 1rem; margin-bottom: 1rem; border-left: 4px solid #46b450;">
-			🚀 Mini-Test 2: Auch diese zweite Box wird angezeigt!
-		</div>
+		<?php if ( globalkeys_has_front_page_sections() ) : ?>
+			<?php foreach ( globalkeys_get_front_page_sections() as $gk_section ) : ?>
+				<?php
+				set_query_var( 'gk_section', $gk_section );
+				get_template_part( 'template-parts/section', $gk_section['slug'] );
+				?>
+			<?php endforeach; ?>
 		<?php endif; ?>
 
 		<?php
@@ -58,12 +58,6 @@ get_header();
 
 		endif;
 		?>
-
-		<?php if ( is_front_page() && is_home() ) : ?>
-		<div class="gk-test-3" style="background: #f8f0e8; padding: 0.5rem 1rem; margin-top: 2rem; margin-bottom: 1rem; border-left: 4px solid #d47500;">
-			🏁 Finaler Test 3: Diese Box sitzt weiter unten – alle Tests bestanden!
-		</div>
-		<?php endif; ?>
 
 	</main><!-- #main -->
 

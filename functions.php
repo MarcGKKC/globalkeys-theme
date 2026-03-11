@@ -150,6 +150,11 @@ function globalkeys_scripts() {
 add_action( 'wp_enqueue_scripts', 'globalkeys_scripts' );
 
 /**
+ * Front-page sections configuration.
+ */
+require get_template_directory() . '/inc/sections.php';
+
+/**
  * Implement the Custom Header feature.
  */
 require get_template_directory() . '/inc/custom-header.php';

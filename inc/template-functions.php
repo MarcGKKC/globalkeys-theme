@@ -22,6 +22,11 @@ function globalkeys_body_classes( $classes ) {
 		$classes[] = 'no-sidebar';
 	}
 
+	// Page has front-page sections (Hero, Intro, CTA etc.).
+	if ( function_exists( 'globalkeys_has_front_page_sections' ) && globalkeys_has_front_page_sections() ) {
+		$classes[] = 'has-front-page-sections';
+	}
+
 	return $classes;
 }
 add_filter( 'body_class', 'globalkeys_body_classes' );

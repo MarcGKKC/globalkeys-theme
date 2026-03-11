@@ -45,7 +45,7 @@
 			<?php endif; ?>
 		</div><!-- .site-branding -->
 
-		<nav id="site-navigation" class="main-navigation">
+		<nav id="site-navigation" class="main-navigation" aria-label="<?php esc_attr_e( 'Primary', 'globalkeys' ); ?>">
 			<button class="menu-toggle" aria-controls="primary-menu" aria-expanded="false"><?php esc_html_e( 'Primary Menu', 'globalkeys' ); ?></button>
 			<?php
 			wp_nav_menu(
@@ -55,5 +55,14 @@
 				)
 			);
 			?>
+			<?php if ( function_exists( 'globalkeys_has_front_page_sections' ) && globalkeys_has_front_page_sections() ) : ?>
+				<nav class="section-nav" aria-label="<?php esc_attr_e( 'Sprunglinks zu Bereichen', 'globalkeys' ); ?>">
+					<ul class="section-nav-list">
+						<?php foreach ( globalkeys_get_front_page_sections() as $section ) : ?>
+							<li><a href="#<?php echo esc_attr( $section['id'] ); ?>" class="section-nav-link"><?php echo esc_html( $section['label'] ); ?></a></li>
+						<?php endforeach; ?>
+					</ul>
+				</nav>
+			<?php endif; ?>
 		</nav><!-- #site-navigation -->
 	</header><!-- #masthead -->
