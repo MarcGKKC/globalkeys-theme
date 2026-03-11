@@ -645,11 +645,64 @@ textarea {
 # Components
 --------------------------------------------------------------*/
 
+/* Site Header
+--------------------------------------------- */
+.site-header {
+	position: relative;
+	display: flex;
+	align-items: center;
+	width: 100%;
+	min-height: 3rem;
+}
+
+.site-header-inner {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 1rem;
+	flex: 1;
+	min-width: 0;
+}
+
+/* My account: nur Icon nutzen, Menü-Textlink ausblenden */
+.main-navigation li.gk-hide-myaccount,
+.main-navigation li:has(a[href*="my-account"]),
+.main-navigation li:has(a[href*="myaccount"]) {
+	display: none !important;
+}
+
+.account-icon-link {
+	position: absolute !important;
+	right: 1rem !important;
+	left: auto !important;
+	top: 50%;
+	transform: translateY(-50%);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.5rem 0.25rem 0.5rem 0.5rem;
+	color: currentColor;
+	text-decoration: none;
+	border-radius: 4px;
+	transition: opacity 0.2s;
+	z-index: 10;
+}
+
+.account-icon-link:hover {
+	opacity: 0.8;
+}
+
+.account-icon {
+	width: 1.5rem;
+	height: 1.5rem;
+}
+
 /* Navigation
 --------------------------------------------- */
 .main-navigation {
 	display: block;
-	width: 100%;
+	flex: 1;
+	min-width: 0;
 }
 
 .main-navigation ul {

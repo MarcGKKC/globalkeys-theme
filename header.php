@@ -26,6 +26,7 @@
 	<a class="skip-link screen-reader-text" href="#primary"><?php esc_html_e( 'Skip to content', 'globalkeys' ); ?></a>
 
 	<header id="masthead" class="site-header">
+		<div class="site-header-inner">
 		<div class="site-branding">
 			<?php
 			the_custom_logo();
@@ -55,14 +56,13 @@
 				)
 			);
 			?>
-			<?php if ( function_exists( 'globalkeys_has_front_page_sections' ) && globalkeys_has_front_page_sections() ) : ?>
-				<nav class="section-nav" aria-label="<?php esc_attr_e( 'Sprunglinks zu Bereichen', 'globalkeys' ); ?>">
-					<ul class="section-nav-list">
-						<?php foreach ( globalkeys_get_front_page_sections() as $section ) : ?>
-							<li><a href="#<?php echo esc_attr( $section['id'] ); ?>" class="section-nav-link"><?php echo esc_html( $section['label'] ); ?></a></li>
-						<?php endforeach; ?>
-					</ul>
-				</nav>
-			<?php endif; ?>
 		</nav><!-- #site-navigation -->
+		</div><!-- .site-header-inner -->
+
+		<a href="<?php echo esc_url( class_exists( 'WooCommerce' ) ? wc_get_page_permalink( 'myaccount' ) : wp_login_url() ); ?>" class="account-icon-link" aria-label="<?php echo esc_attr( is_user_logged_in() ? __( 'Mein Konto', 'globalkeys' ) : __( 'Anmelden oder registrieren', 'globalkeys' ) ); ?>">
+			<svg class="account-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+				<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+				<circle cx="12" cy="7" r="4"></circle>
+			</svg>
+		</a>
 	</header><!-- #masthead -->

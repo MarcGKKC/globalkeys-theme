@@ -135,6 +135,47 @@ function globalkeys_widgets_init() {
 add_action( 'widgets_init', 'globalkeys_widgets_init' );
 
 /**
+ * Remove "My account" from primary menu (we use the account icon instead).
+ *
+ * @param array    $items Menu items.
+ * @param stdClass $args  Menu arguments.
+ * @return array
+ */
+function globalkeys_remove_myaccount_menu_item( $items, $args ) {
+	$theme_location = '';
+	if ( is_object( $args ) && isset( $args->theme_location ) ) {
+		$theme_location = $args->theme_location;
+	} elseif ( is_array( $args ) && isset( $args['theme_location'] ) ) {
+		$theme_location = $args['theme_location'];
+	}
+	if ( 'menu-1' !== $theme_location ) {
+		return $items;
+	}
+	foreach ( $items as $key => $item ) {
+		if ( isset( $item->url ) && ( strpos( $item->url, 'my-account' ) !== false || strpos( $item->url, 'myaccount' ) !== false ) ) {
+			unset( $items[ $key ] );
+		}
+	}
+	return $items;
+}
+add_filter( 'wp_nav_menu_objects', 'globalkeys_remove_myaccount_menu_item', 10, 2 );
+
+/**
+ * Add class to "My account" menu item for CSS hiding (fallback if filter doesn't remove it).
+ *
+ * @param array    $classes Menu item classes.
+ * @param WP_Post  $item    Menu item.
+ * @return array
+ */
+function globalkeys_hide_myaccount_menu_class( $classes, $item ) {
+	if ( isset( $item->url ) && ( strpos( $item->url, 'my-account' ) !== false || strpos( $item->url, 'myaccount' ) !== false ) ) {
+		$classes[] = 'gk-hide-myaccount';
+	}
+	return $classes;
+}
+add_filter( 'nav_menu_css_class', 'globalkeys_hide_myaccount_menu_class', 10, 2 );
+
+/**
  * Enqueue scripts and styles.
  */
 function globalkeys_scripts() {
