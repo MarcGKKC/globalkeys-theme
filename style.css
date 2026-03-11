@@ -757,6 +757,7 @@ textarea {
 
 /* Container für Pill + Such-Overlay (Animation) */
 .header-pill-container {
+	--gk-pill-height: 3.5rem;
 	position: relative;
 	display: inline-flex;
 	overflow: hidden;
@@ -769,13 +770,15 @@ textarea {
 	align-items: center;
 	flex: 0 0 auto;
 	gap: 0 1.25rem;
-	padding: 0.75rem 0.65rem 0.75rem 1.35rem;
+	height: var(--gk-pill-height);
+	box-sizing: border-box;
+	padding: 0 0 0 1.35rem;
 	background: rgba(50, 50, 55, 0.85);
 	border-radius: 9999px;
 	max-width: 40rem;
 }
 
-/* Such-Overlay: gleiche Größe wie Pill, schiebt von rechts nach links */
+/* Such-Overlay: Öffnen von rechts nach links, Schließen von links nach rechts */
 .header-pill-search-overlay {
 	position: absolute;
 	top: 0;
@@ -785,10 +788,10 @@ textarea {
 	display: flex;
 	align-items: center;
 	padding: 0 3rem 0 1.35rem;
-	background: rgb(50, 50, 55);
+	background: #04DA8D;
 	border-radius: 9999px;
 	transform: translateX(100%);
-	transition: transform 0.3s ease;
+	transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
 	z-index: 2;
 }
 
@@ -796,7 +799,18 @@ textarea {
 	transform: translateX(0);
 }
 
+/* Lupen-Button ausblenden, wenn Such-Overlay offen ist */
+.header-pill-container.is-search-open .header-pill-search-trigger {
+	visibility: hidden;
+	pointer-events: none;
+}
+
 .header-pill-search-overlay[hidden] {
+	display: none !important;
+}
+
+/* In der zweiten Pill (Overlay): orangenen Such-Button ausblenden – Suche per Enter */
+.header-pill-search-overlay .header-pill-search-submit {
 	display: none !important;
 }
 
@@ -815,17 +829,24 @@ textarea {
 	font-size: 0.9375rem;
 	border: none;
 	border-radius: 6px;
-	background: rgba(255, 255, 255, 0.1);
+	background: #04DA8D;
 	color: #fff;
+	caret-color: #fff;
 }
 
 .header-pill-search-form .header-pill-search-input::placeholder {
-	color: rgba(255, 255, 255, 0.5);
+	color: #fff;
+}
+
+/* Während der Öffnungs-/Schließ-Animation: Platzhalter ausblenden */
+.header-pill-search-overlay.is-search-animating .header-pill-search-input::placeholder {
+	color: transparent;
 }
 
 .header-pill-search-form .header-pill-search-input:focus {
 	outline: none;
-	background: rgba(255, 255, 255, 0.15);
+	background: #04DA8D;
+	color: #fff;
 }
 
 .header-pill-search-close {
@@ -890,10 +911,19 @@ textarea {
 	filter: brightness(0) invert(1);
 }
 
-/* Lupen-Button (Kreis) – öffnet Such-Overlay, kein Bounce-Hover */
+/* Lupen-Button (Kreis) – gleiche Höhe wie Pill, bildet rechten Abschluss (Bild 1) */
 .header-pill-search-trigger {
 	margin-left: auto;
 	flex-shrink: 0;
+	align-self: stretch;
+	width: var(--gk-pill-height, 3.5rem);
+	min-width: var(--gk-pill-height, 3.5rem);
+}
+
+.header-pill-search-trigger.header-pill-search-submit {
+	height: 100%;
+	width: var(--gk-pill-height, 3.5rem);
+	min-width: var(--gk-pill-height, 3.5rem);
 }
 
 .header-pill-search-submit {
@@ -905,10 +935,17 @@ textarea {
 	padding: 0;
 	border: none;
 	border-radius: 50%;
-	background: linear-gradient(135deg, #f90 0%, #e65c00 100%);
+	background: #04DA8D;
 	color: #fff;
 	cursor: pointer;
 	transition: opacity 0.2s;
+}
+
+/* Submit im Overlay: gleiche Größe wie Pill-Höhe */
+.header-pill-search-form .header-pill-search-submit {
+	width: var(--gk-pill-height, 3.5rem);
+	height: var(--gk-pill-height, 3.5rem);
+	flex-shrink: 0;
 }
 
 .header-pill-search-trigger:hover,
@@ -917,9 +954,16 @@ textarea {
 	color: #fff;
 }
 
-.header-pill .search-submit-icon {
-	width: 1rem;
-	height: 1rem;
+.header-pill .search-submit-icon,
+.header-pill-search-submit .search-submit-icon {
+	width: 1.2rem;
+	height: 1.2rem;
+	transition: transform 0.2s ease;
+}
+
+.header-pill-search-trigger:hover .search-submit-icon,
+.header-pill-search-submit:hover .search-submit-icon {
+	transform: scale(1.15);
 }
 
 /* Rechts: Warenkorb + Konto – direkt am rechten Rand */

@@ -49,8 +49,9 @@
 			toggle.addEventListener('click', function() {
 				var isPass = input.type === 'password';
 				input.type = isPass ? 'text' : 'password';
-				openIcon.style.display = isPass ? 'none' : 'block';
-				closedIcon.style.display = isPass ? 'block' : 'none';
+				// Passwort versteckt: durchgestrichenes Auge. Passwort sichtbar: offenes Auge.
+				openIcon.style.display = isPass ? 'block' : 'none';
+				closedIcon.style.display = isPass ? 'none' : 'block';
 			});
 		}
 	}

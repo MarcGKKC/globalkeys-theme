@@ -216,6 +216,26 @@ add_action( 'init', 'globalkeys_enable_customer_registration', 1 );
 require get_template_directory() . '/inc/woocommerce-registration.php';
 
 /**
+ * Bei Login-Fehler: Redirect mit Transient, damit Formular leer geladen wird und eigene Fehlermeldung als Modal.
+ */
+function globalkeys_login_failed_redirect() {
+	if ( ! function_exists( 'wc_get_notices' ) || ! function_exists( 'wc_clear_notices' ) ) {
+		return;
+	}
+	$notices = wc_get_notices( 'error' );
+	$msg    = __( 'Ungültige E-Mail oder Passwort.', 'globalkeys' );
+	if ( ! empty( $notices ) ) {
+		$last = end( $notices );
+		$msg  = isset( $last['notice'] ) ? wp_strip_all_tags( $last['notice'] ) : $msg;
+	}
+	set_transient( 'gk_login_error', $msg, 60 );
+	wc_clear_notices();
+	wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
+	exit;
+}
+add_action( 'woocommerce_login_failed', 'globalkeys_login_failed_redirect', 5 );
+
+/**
  * Enqueue scripts and styles.
  */
 function globalkeys_scripts() {
@@ -293,7 +313,7 @@ function globalkeys_scripts() {
 		body.gk-account-login .gk-account-blocks {
 			width: 100%;
 			max-width: 480px;
-			margin: 0 auto;
+			margin: 3rem auto 0;
 			box-sizing: border-box;
 		}
 		body.gk-account-login .gk-account-title {
@@ -370,7 +390,7 @@ function globalkeys_scripts() {
 			height: 44px;
 			background: #0e0d1e;
 			border: 1px solid rgba(180, 180, 190, 0.35);
-			border-radius: 8px;
+			border-radius: 5px;
 			min-width: 0;
 		}
 		body.gk-account-login .gk-divider-oder {
@@ -390,8 +410,12 @@ function globalkeys_scripts() {
 			font-size: 1rem;
 			white-space: nowrap;
 		}
+		body.gk-account-login .gk-divider-register {
+			margin-top: 2rem;
+			margin-bottom: 1.1rem;
+		}
 		body.gk-account-login .gk-login-box .gk-login-row {
-			margin-bottom: 0.7rem;
+			margin-bottom: 0.4rem;
 			width: 100%;
 		}
 		body.gk-account-login .gk-login-box .gk-login-row label {
@@ -407,22 +431,30 @@ function globalkeys_scripts() {
 			box-shadow: none !important;
 			color: #fff;
 			padding: 1.15rem 1.15rem;
-			border-radius: 8px;
+			border-radius: 5px;
 			width: 100%;
 			font-size: 1.05rem;
 			box-sizing: border-box;
 			min-height: 52px;
+			transition: border-color 0.2s ease;
 		}
 		body.gk-account-login .gk-login-box .gk-login-row .input-text::placeholder {
 			color: rgba(255,255,255,0.45);
 		}
 		body.gk-account-login .gk-login-box .gk-login-row .input-text:focus,
-		body.gk-account-login .gk-login-box .gk-login-row .input-text:hover,
 		body.gk-account-login .gk-login-box .gk-login-row .input-text:active,
 		body.gk-account-login .gk-login-box .gk-login-row .input-text:-webkit-autofill {
 			border: 1px solid rgba(180, 180, 190, 0.35) !important;
 			outline: none !important;
 			box-shadow: none !important;
+		}
+		body.gk-account-login .gk-login-box .gk-login-row .input-text:hover {
+			border-color: #04DA8D !important;
+			outline: none !important;
+			box-shadow: none !important;
+		}
+		body.gk-account-login .gk-login-box .gk-login-row .input-text:focus {
+			border-color: #04DA8D !important;
 		}
 		body.gk-account-login .gk-login-box .gk-password-input-wrap {
 			position: relative;
@@ -441,9 +473,10 @@ function globalkeys_scripts() {
 			cursor: pointer;
 			padding: 0.25rem;
 			color: rgba(255,255,255,0.6);
+			transition: color 0.2s ease;
 		}
 		body.gk-account-login .gk-login-box .gk-password-toggle:hover {
-			color: #fff;
+			color: #04DA8D;
 		}
 		body.gk-account-login .gk-login-box .gk-btn-login {
 			background: linear-gradient(90deg, #f59e0b, #dc2626) !important;
@@ -455,13 +488,24 @@ function globalkeys_scripts() {
 			font-weight: 600 !important;
 			font-size: 1.05rem !important;
 			line-height: 1.2 !important;
-			border-radius: 8px !important;
+			border-radius: 5px !important;
 			width: 100%;
 			box-sizing: border-box;
 			cursor: pointer;
+			transition: transform 0.2s ease;
 		}
-		body.gk-account-login .gk-login-box .gk-btn-login:hover {
-			opacity: 0.95;
+		body.gk-account-login .gk-login-box .gk-btn-login:hover:not(:disabled) {
+			transform: translateY(-2px);
+		}
+		body.gk-account-login .gk-login-box .gk-btn-login:disabled {
+			background: rgba(4, 218, 141, 0.18) !important;
+			border: none !important;
+			color: rgba(255, 255, 255, 0.85) !important;
+			cursor: not-allowed;
+		}
+		body.gk-account-login .gk-login-box .gk-btn-login:disabled:hover {
+			background: rgba(4, 218, 141, 0.18) !important;
+			border: none !important;
 		}
 		body.gk-account-login .gk-divider-line-only {
 			width: 100%;
@@ -470,10 +514,10 @@ function globalkeys_scripts() {
 			margin: 1.35rem 0 1.5rem;
 		}
 		body.gk-account-login .gk-login-box .gk-login-submit-row {
-			margin: 0 0 0.9rem;
+			margin: 0 0 0.4rem;
 		}
 		body.gk-account-login .gk-login-box .gk-register-btn-row {
-			margin: 3rem 0 0;
+			margin: 1rem 0 0;
 		}
 		body.gk-account-login .gk-login-box .gk-btn-register {
 			display: block;
@@ -483,16 +527,17 @@ function globalkeys_scripts() {
 			font-weight: 600 !important;
 			font-size: 1.05rem !important;
 			line-height: 1.2 !important;
-			border-radius: 8px !important;
+			border-radius: 5px !important;
 			text-align: center;
 			text-decoration: none !important;
 			background: linear-gradient(90deg, #f59e0b, #dc2626) !important;
 			color: #fff !important;
 			border: none;
 			cursor: pointer;
+			transition: transform 0.2s ease;
 		}
 		body.gk-account-login .gk-login-box .gk-btn-register:hover {
-			opacity: 0.95;
+			transform: translateY(-2px);
 			color: #fff !important;
 		}
 		body.gk-account-login .gk-login-box .gk-login-links-row {
@@ -506,11 +551,29 @@ function globalkeys_scripts() {
 			width: 100%;
 		}
 		body.gk-account-login .gk-login-box .gk-login-links-row a {
-			color: #fff;
+			position: relative;
+			color: rgba(255, 255, 255, 0.78);
 			text-decoration: none;
+			transition: color 0.2s ease;
+		}
+		body.gk-account-login .gk-login-box .gk-login-links-row a::after {
+			content: "";
+			position: absolute;
+			left: 0;
+			bottom: -0.2em;
+			width: 100%;
+			height: 1px;
+			background: #04DA8D;
+			border-radius: 7px;
+			transform: scaleX(0);
+			transform-origin: left;
+			transition: transform 0.25s ease;
 		}
 		body.gk-account-login .gk-login-box .gk-login-links-row a:hover {
-			text-decoration: underline;
+			color: #04DA8D;
+		}
+		body.gk-account-login .gk-login-box .gk-login-links-row a:hover::after {
+			transform: scaleX(1);
 		}
 		/* Register-Box: unverändert */
 		body.gk-account-login .gk-account-form-col label {
@@ -521,7 +584,7 @@ function globalkeys_scripts() {
 			border: 1px solid #404040;
 			color: #fff;
 			padding: 0.75rem 1rem;
-			border-radius: 6px;
+			border-radius: 5px;
 			width: 100%;
 		}
 		body.gk-account-login .gk-register-block .input-text::placeholder {
@@ -538,7 +601,7 @@ function globalkeys_scripts() {
 			border: none !important;
 			padding: 0.75rem 1.5rem !important;
 			font-weight: 600 !important;
-			border-radius: 6px !important;
+			border-radius: 5px !important;
 			width: 100%;
 			margin-top: 0.5rem;
 		}
@@ -605,6 +668,87 @@ function globalkeys_scripts() {
 				display: none;
 			}
 		}
+		/* Login-Fehlermeldung: Modal-Popup */
+		.gk-login-error-modal {
+			position: fixed;
+			inset: 0;
+			z-index: 99999;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			opacity: 0;
+			visibility: hidden;
+			transition: opacity 0.2s, visibility 0.2s;
+		}
+		.gk-login-error-modal--visible {
+			opacity: 1;
+			visibility: visible;
+		}
+		.gk-login-error-modal__backdrop {
+			position: absolute;
+			inset: 0;
+			background: rgba(0,0,0,0.5);
+			cursor: pointer;
+		}
+		.gk-login-error-modal__box {
+			position: relative;
+			background: linear-gradient(180deg, #2a264f 0%, #1e1b3d 100%);
+			border-radius: 8px;
+			padding: 2rem 2.5rem;
+			max-width: 360px;
+			width: 90%;
+			box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+			border: 1px solid rgba(255,255,255,0.08);
+		}
+		.gk-login-error-modal__close {
+			position: absolute;
+			top: 1rem;
+			right: 1rem;
+			background: none;
+			border: none;
+			color: rgba(255,255,255,0.7);
+			font-size: 1.5rem;
+			line-height: 1;
+			cursor: pointer;
+			padding: 0.25rem;
+		}
+		.gk-login-error-modal__close:hover {
+			color: #fff;
+		}
+		.gk-login-error-modal__icon {
+			display: flex;
+			justify-content: center;
+			margin-bottom: 1rem;
+		}
+		.gk-login-error-modal__icon svg {
+			width: 56px;
+			height: 56px;
+			color: #dc2626;
+			filter: drop-shadow(0 0 0 4px rgba(220,38,38,0.25));
+		}
+		.gk-login-error-modal__title {
+			color: #fff;
+			font-size: 1.1rem;
+			font-weight: 500;
+			text-align: center;
+			margin: 0 0 1.5rem;
+			line-height: 1.4;
+		}
+		.gk-login-error-modal__ok {
+			display: block;
+			width: 100%;
+			background: linear-gradient(90deg, #f59e0b, #dc2626) !important;
+			color: #fff !important;
+			border: none !important;
+			padding: 1rem 1.15rem !important;
+			font-weight: 600 !important;
+			font-size: 1.05rem !important;
+			border-radius: 5px !important;
+			cursor: pointer;
+		}
+		.gk-login-error-modal__ok:hover {
+			opacity: 0.95;
+		}
 	';
 	wp_add_inline_style( 'globalkeys-style', $account_css );
 
@@ -620,6 +764,7 @@ function globalkeys_scripts() {
 		wp_add_inline_style( 'woocommerce-general', $login_no_border );
 		wp_enqueue_script( 'globalkeys-account-toggle', get_template_directory_uri() . '/js/gk-account-toggle.js', array(), _S_VERSION, true );
 		wp_enqueue_script( 'globalkeys-gamertag-check', get_template_directory_uri() . '/js/gamertag-check.js', array(), _S_VERSION, true );
+		wp_enqueue_script( 'globalkeys-login-modal', get_template_directory_uri() . '/js/gk-login-modal.js', array(), _S_VERSION, true );
 		wp_localize_script(
 			'globalkeys-gamertag-check',
 			'globalkeysGamertagCheck',

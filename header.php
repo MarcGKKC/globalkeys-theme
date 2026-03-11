@@ -78,7 +78,7 @@ $account_url = class_exists( 'WooCommerce' ) ? wc_get_page_permalink( 'myaccount
 				<div id="gk-pill-search-overlay" class="header-pill-search-overlay" role="dialog" aria-label="<?php esc_attr_e( 'Suchen', 'globalkeys' ); ?>" hidden>
 					<form role="search" method="get" class="header-pill-search-form" action="<?php echo esc_url( home_url( '/' ) ); ?>">
 						<label for="gk-pill-search-input" class="screen-reader-text"><?php esc_html_e( 'Suchen', 'globalkeys' ); ?></label>
-						<input type="search" id="gk-pill-search-input" class="header-pill-search-input" placeholder="<?php esc_attr_e( 'Suchen...', 'globalkeys' ); ?>" value="<?php echo get_search_query(); ?>" name="s" autocomplete="off" />
+						<input type="search" id="gk-pill-search-input" class="header-pill-search-input" placeholder="PSN Cards, Multiplayer, ARC Raiders..." value="<?php echo get_search_query(); ?>" name="s" autocomplete="off" />
 						<button type="submit" class="header-pill-search-submit" aria-label="<?php esc_attr_e( 'Suchen', 'globalkeys' ); ?>">
 							<svg class="search-submit-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 								<circle cx="11" cy="11" r="8"></circle>

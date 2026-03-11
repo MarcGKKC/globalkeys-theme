@@ -11,7 +11,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-do_action( 'woocommerce_before_customer_login_form' ); ?>
+do_action( 'woocommerce_before_customer_login_form' );
+
+$gk_login_error = get_transient( 'gk_login_error' );
+if ( $gk_login_error ) {
+	delete_transient( 'gk_login_error' );
+}
+?>
 
 <div class="gk-account-split">
 
@@ -42,7 +48,7 @@ do_action( 'woocommerce_before_customer_login_form' ); ?>
 
 						<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide gk-login-row">
 							<label for="username"><?php esc_html_e( 'Gamertag oder E-Mail', 'globalkeys' ); ?></label>
-							<input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="username" id="username" autocomplete="username" placeholder="<?php esc_attr_e( 'Gamertag oder E-Mail', 'globalkeys' ); ?>" value="<?php echo ( ! empty( $_POST['username'] ) && is_string( $_POST['username'] ) ) ? esc_attr( wp_unslash( $_POST['username'] ) ) : ''; ?>" required aria-required="true" /><?php // phpcs:ignore WordPress.Security.NonceVerification.Missing ?>
+							<input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="username" id="username" autocomplete="nope" placeholder="globalkeys@games.co" value="" required aria-required="true" /><?php // phpcs:ignore WordPress.Security.NonceVerification.Missing ?>
 						</p>
 						<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide gk-login-row gk-password-wrap">
 							<label for="password"><?php esc_html_e( 'Password', 'woocommerce' ); ?></label>
@@ -62,12 +68,17 @@ do_action( 'woocommerce_before_customer_login_form' ); ?>
 						<p class="form-row gk-login-submit-row">
 							<?php wp_nonce_field( 'woocommerce-login', 'woocommerce-login-nonce' ); ?>
 							<input type="hidden" name="rememberme" value="forever" />
-							<button type="submit" class="woocommerce-button button woocommerce-form-login__submit gk-btn-login<?php echo esc_attr( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ); ?>" name="login" value="<?php esc_attr_e( 'Log in', 'woocommerce' ); ?>"><?php esc_html_e( 'Anmelden', 'globalkeys' ); ?></button>
+							<button type="submit" class="woocommerce-button button woocommerce-form-login__submit gk-btn-login<?php echo esc_attr( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ); ?>" name="login" value="<?php esc_attr_e( 'Log in', 'woocommerce' ); ?>" disabled><?php esc_html_e( 'Anmelden', 'globalkeys' ); ?></button>
 						</p>
 						<p class="gk-login-links-row">
 							<a href="<?php echo esc_url( wp_lostpassword_url() ); ?>" class="woocommerce-LostPassword lost_password"><?php esc_html_e( 'Passwort vergessen?', 'globalkeys' ); ?></a>
 						</p>
 						<?php if ( 'yes' === get_option( 'woocommerce_enable_myaccount_registration' ) ) : ?>
+						<div class="gk-divider-oder gk-divider-register">
+							<span class="gk-divider-line"></span>
+							<span class="gk-divider-text"><?php esc_html_e( 'Noch kein Konto?', 'globalkeys' ); ?></span>
+							<span class="gk-divider-line"></span>
+						</div>
 						<p class="form-row gk-register-btn-row">
 							<a href="#register" class="gk-btn-register gk-toggle-register" data-gk-view="register"><?php esc_html_e( 'Konto erstellen', 'globalkeys' ); ?></a>
 						</p>
@@ -132,5 +143,22 @@ do_action( 'woocommerce_before_customer_login_form' ); ?>
 	</div>
 
 </div><!-- .gk-account-split -->
+
+<?php
+if ( ! empty( $gk_login_error ) ) :
+	$gk_login_error_msg = is_string( $gk_login_error ) ? wp_strip_all_tags( $gk_login_error ) : __( 'Ungültige E-Mail oder Passwort.', 'globalkeys' );
+?>
+<div id="gk-login-error-modal" class="gk-login-error-modal gk-login-error-modal--visible" role="alertdialog" aria-modal="true" aria-labelledby="gk-login-error-title">
+	<div class="gk-login-error-modal__backdrop"></div>
+	<div class="gk-login-error-modal__box">
+		<button type="button" class="gk-login-error-modal__close" aria-label="<?php esc_attr_e( 'Schließen', 'globalkeys' ); ?>">&times;</button>
+		<div class="gk-login-error-modal__icon" aria-hidden="true">
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+		</div>
+		<h2 id="gk-login-error-title" class="gk-login-error-modal__title"><?php echo esc_html( $gk_login_error_msg ); ?></h2>
+		<button type="button" class="gk-login-error-modal__ok gk-btn-login"><?php esc_html_e( 'OK', 'globalkeys' ); ?></button>
+	</div>
+</div>
+<?php endif; ?>
 
 <?php do_action( 'woocommerce_after_customer_login_form' ); ?>

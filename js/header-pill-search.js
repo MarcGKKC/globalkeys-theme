@@ -14,26 +14,77 @@
 	const searchInput = overlay ? overlay.querySelector( '.header-pill-search-input' ) : null;
 	const closeBtn = overlay ? overlay.querySelector( '.header-pill-search-close' ) : null;
 
-	function openSearch() {
-		container.classList.add( 'is-search-open' );
-		if ( overlay ) {
-			overlay.removeAttribute( 'hidden' );
+	var closeFallbackTimeout = null;
+	var closeTransitionEndHandler = null;
+	var ANIMATION_MS = 750;
+
+	function cancelPendingClose() {
+		if ( closeFallbackTimeout ) {
+			clearTimeout( closeFallbackTimeout );
+			closeFallbackTimeout = null;
 		}
+		if ( overlay && closeTransitionEndHandler ) {
+			overlay.removeEventListener( 'transitionend', closeTransitionEndHandler );
+			closeTransitionEndHandler = null;
+		}
+	}
+
+	function openSearch() {
+		cancelPendingClose();
+		if ( overlay ) {
+			overlay.classList.remove( 'is-search-animating' );
+			overlay.classList.add( 'is-search-animating' );
+			overlay.removeAttribute( 'hidden' );
+			void overlay.offsetHeight;
+		}
+		requestAnimationFrame( function() {
+			container.classList.add( 'is-search-open' );
+		} );
 		if ( trigger ) {
 			trigger.setAttribute( 'aria-expanded', 'true' );
 		}
 		if ( searchInput ) {
-			searchInput.focus();
+			setTimeout( function() {
+				searchInput.focus();
+				if ( overlay ) {
+					overlay.classList.remove( 'is-search-animating' );
+				}
+			}, ANIMATION_MS );
+		} else if ( overlay ) {
+			setTimeout( function() {
+				overlay.classList.remove( 'is-search-animating' );
+			}, ANIMATION_MS );
 		}
 	}
 
 	function closeSearch() {
-		container.classList.remove( 'is-search-open' );
+		cancelPendingClose();
 		if ( overlay ) {
-			overlay.setAttribute( 'hidden', '' );
+			overlay.classList.add( 'is-search-animating' );
 		}
+		container.classList.remove( 'is-search-open' );
 		if ( trigger ) {
 			trigger.setAttribute( 'aria-expanded', 'false' );
+		}
+		if ( overlay ) {
+			closeFallbackTimeout = setTimeout( function() {
+				closeFallbackTimeout = null;
+				closeTransitionEndHandler = null;
+				overlay.setAttribute( 'hidden', '' );
+			}, ANIMATION_MS );
+			closeTransitionEndHandler = function onTransitionEnd( e ) {
+				if ( e.propertyName !== 'transform' ) {
+					return;
+				}
+				overlay.removeEventListener( 'transitionend', closeTransitionEndHandler );
+				closeTransitionEndHandler = null;
+				if ( closeFallbackTimeout ) {
+					clearTimeout( closeFallbackTimeout );
+					closeFallbackTimeout = null;
+				}
+				overlay.setAttribute( 'hidden', '' );
+			};
+			overlay.addEventListener( 'transitionend', closeTransitionEndHandler );
 		}
 	}
 
