@@ -340,7 +340,7 @@ function globalkeys_scripts() {
 		body.gk-account-login .gk-login-box form,
 		body.gk-account-login .gk-login-box form p,
 		body.gk-account-login .gk-login-box .woocommerce-form-login,
-		body.gk-account-login .gk-login-box input,
+		body.gk-account-login .gk-login-box input:not(.gk-terms-checkbox-input),
 		body.gk-account-login .gk-login-box button {
 			border: none !important;
 			border-width: 0 !important;
@@ -439,7 +439,8 @@ function globalkeys_scripts() {
 			transition: border-color 0.2s ease;
 		}
 		body.gk-account-login .gk-login-box .gk-login-row .input-text::placeholder {
-			color: rgba(255,255,255,0.45);
+			color: rgba(255, 255, 255, 0.7);
+			font-size: 1.1rem;
 		}
 		body.gk-account-login .gk-login-box .gk-login-row .input-text:focus,
 		body.gk-account-login .gk-login-box .gk-login-row .input-text:active,
@@ -468,15 +469,17 @@ function globalkeys_scripts() {
 			right: 0.85rem;
 			top: 50%;
 			transform: translateY(-50%);
-			background: none;
-			border: none;
+			background: #0e0d1e;
+			border: 1px solid rgba(180, 180, 190, 0.35);
+			border-radius: 3px;
 			cursor: pointer;
-			padding: 0.25rem;
+			padding: 0.35rem;
 			color: rgba(255,255,255,0.6);
-			transition: color 0.2s ease;
+			transition: color 0.2s ease, border-color 0.2s ease;
 		}
 		body.gk-account-login .gk-login-box .gk-password-toggle:hover {
 			color: #04DA8D;
+			border-color: #04DA8D;
 		}
 		body.gk-account-login .gk-login-box .gk-btn-login {
 			background: linear-gradient(90deg, #f59e0b, #dc2626) !important;
@@ -575,54 +578,94 @@ function globalkeys_scripts() {
 		body.gk-account-login .gk-login-box .gk-login-links-row a:hover::after {
 			transform: scaleX(1);
 		}
-		/* Register-Box: unverändert */
-		body.gk-account-login .gk-account-form-col label {
-			color: #d1d5db;
+		body.gk-account-login .gk-login-box .woocommerce-password-strength {
+			display: none !important;
 		}
-		body.gk-account-login .gk-register-block .input-text {
-			background: #2d2d2d;
-			border: 1px solid #404040;
-			color: #fff;
-			padding: 0.75rem 1rem;
-			border-radius: 5px;
-			width: 100%;
+		body.gk-account-login .gk-login-box .gk-password-hint {
+			display: block;
+			margin-top: 0.35rem;
+			color: rgba(255, 255, 255, 0.7);
+			font-size: 0.95rem;
+			opacity: 0;
+			max-height: 0;
+			overflow: hidden;
+			transition: opacity 0.2s ease, max-height 0.2s ease;
 		}
-		body.gk-account-login .gk-register-block .input-text::placeholder {
-			color: #9ca3af;
+		body.gk-account-login .gk-login-box .gk-password-wrap:focus-within .gk-password-hint {
+			opacity: 1;
+			max-height: 2em;
 		}
-		body.gk-account-login .gk-register-block .input-text:focus {
-			border-color: #6b7280;
-			outline: none;
-			box-shadow: 0 0 0 2px rgba(255,255,255,0.1);
+		/* Terms/Privacy-Checkbox Registrierung */
+		body.gk-account-login .gk-terms-checkbox-row {
+			margin: 1rem 0 1.25rem !important;
 		}
-		body.gk-account-login .gk-register-block .gk-btn-primary {
-			background: linear-gradient(90deg, #f59e0b, #dc2626) !important;
-			color: #fff !important;
-			border: none !important;
-			padding: 0.75rem 1.5rem !important;
-			font-weight: 600 !important;
-			border-radius: 5px !important;
-			width: 100%;
-			margin-top: 0.5rem;
+		body.gk-account-login .gk-terms-checkbox-label {
+			display: flex;
+			flex-direction: row;
+			flex-wrap: nowrap;
+			align-items: center;
+			gap: 0.75rem;
+			cursor: pointer;
+			color: rgba(255, 255, 255, 0.78);
+			font-size: 1rem;
+			line-height: 1.4;
+			position: relative;
 		}
-		body.gk-account-login .gk-register-block .gk-btn-primary:hover {
-			opacity: 0.95;
+		body.gk-account-login .gk-terms-checkbox-inner {
+			display: inline-flex;
+			align-items: center;
+			position: relative;
+			flex-shrink: 0;
 		}
-		body.gk-account-login .gk-register-meta a {
-			color: #9ca3af;
-			text-decoration: none;
-			font-size: 0.9rem;
+		body.gk-account-login .gk-terms-checkbox-input {
+			position: absolute;
+			left: 0;
+			top: 0;
+			width: 20px;
+			height: 20px;
+			margin: 0;
+			padding: 0;
+			opacity: 0;
+			cursor: pointer;
+			z-index: 2;
+			pointer-events: auto;
 		}
-		body.gk-account-login .gk-register-meta a:hover {
-			color: #fff;
+		body.gk-account-login .gk-terms-checkbox-box {
+			display: block;
+			width: 20px;
+			height: 20px;
+			background: #0e0d1e;
+			border: 1px solid transparent;
+			border-radius: 3px;
+			transition: border-color 0.2s ease;
+			flex-shrink: 0;
 		}
-		body.gk-account-login .gk-register-meta a {
-			color: #9ca3af;
-			text-decoration: none;
-			font-size: 0.9rem;
+		body.gk-account-login .gk-terms-checkbox-label:hover .gk-terms-checkbox-box,
+		body.gk-account-login .gk-terms-checkbox-inner:hover .gk-terms-checkbox-box,
+		body.gk-account-login .gk-terms-checkbox-input:hover + .gk-terms-checkbox-box,
+		body.gk-account-login .gk-terms-checkbox-input:focus + .gk-terms-checkbox-box {
+			border-color: #04DA8D;
 		}
-		body.gk-account-login .gk-register-meta a:hover {
-			color: #fff;
+		body.gk-account-login .gk-terms-checkbox-input:checked + .gk-terms-checkbox-box {
+			border-color: #04DA8D;
+			background-image: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%2304DA8D%22 stroke-width=%222.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpolyline points=%2220 6 9 17 4 12%22/%3E%3C/svg%3E");
+			background-size: 14px;
+			background-position: center;
+			background-repeat: no-repeat;
+		}
+		body.gk-account-login .gk-terms-checkbox-text {
+			display: inline-block;
+			line-height: 20px;
+			vertical-align: middle;
+			transform: translate(4px, -4px);
+		}
+		body.gk-account-login .gk-terms-checkbox-text .gk-terms-link {
+			color: #04DA8D;
+			text-decoration: underline;
+			text-underline-offset: 2px;
+		}
+		body.gk-account-login .gk-terms-checkbox-text .gk-terms-link:hover {
+			color: #05f0a0;
 		}
 		body.gk-account-login .gk-account-image-col {
 			background: #202020;
@@ -781,6 +824,16 @@ function globalkeys_scripts() {
 	}
 }
 add_action( 'wp_enqueue_scripts', 'globalkeys_scripts' );
+
+/**
+ * Passwort-Bewertung auf der Account-Seite entfernen.
+ */
+function globalkeys_dequeue_password_strength() {
+	if ( function_exists( 'is_account_page' ) && is_account_page() && ! is_user_logged_in() ) {
+		wp_dequeue_script( 'wc-password-strength-meter' );
+	}
+}
+add_action( 'wp_enqueue_scripts', 'globalkeys_dequeue_password_strength', 20 );
 
 /**
  * Front-page sections configuration.

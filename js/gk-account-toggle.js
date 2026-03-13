@@ -39,20 +39,20 @@
 	// Bei Hash-Änderung (z.B. Browser Zurück)
 	window.addEventListener('hashchange', initFromHash);
 
-	// Passwort ein-/ausblenden
-	var toggle = document.querySelector('.gk-password-toggle');
-	if (toggle) {
-		var input = document.getElementById(toggle.getAttribute('data-target'));
+	// Passwort ein-/ausblenden (Login + Register)
+	document.querySelectorAll('.gk-password-toggle').forEach(function(toggle) {
+		var targetId = toggle.getAttribute('data-target');
+		if (!targetId) return;
+		var input = document.getElementById(targetId);
 		var openIcon = toggle.querySelector('.gk-eye-open');
 		var closedIcon = toggle.querySelector('.gk-eye-closed');
 		if (input && openIcon && closedIcon) {
 			toggle.addEventListener('click', function() {
 				var isPass = input.type === 'password';
 				input.type = isPass ? 'text' : 'password';
-				// Passwort versteckt: durchgestrichenes Auge. Passwort sichtbar: offenes Auge.
 				openIcon.style.display = isPass ? 'block' : 'none';
 				closedIcon.style.display = isPass ? 'none' : 'block';
 			});
 		}
-	}
+	});
 })();

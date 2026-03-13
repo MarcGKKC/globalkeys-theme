@@ -1,6 +1,7 @@
 /**
  * Login-Fehlermodal: Schließen und Formular leeren.
  * Anmelden-Button: Aktivierung wenn E-Mail und Passwort ausgefüllt.
+ * Registrieren-Button: Aktivierung wenn Gamertag, E-Mail, Passwort und Terms-Checkbox ausgefüllt.
  */
 (function () {
 	'use strict';
@@ -18,6 +19,26 @@
 		var hasPassword = (passwordInput.value || '').trim().length > 0;
 
 		btn.disabled = !(hasUsername && hasPassword);
+	}
+
+	function updateRegisterButtonState() {
+		var form = document.querySelector('.woocommerce-form-register');
+		if (!form) return;
+
+		var btn = form.querySelector('.gk-btn-login.woocommerce-form-register__submit');
+		var gamertagInput = document.getElementById('reg_username');
+		var emailInput = document.getElementById('reg_email');
+		var passwordInput = document.getElementById('reg_password');
+		var termsCheckbox = document.getElementById('gk_agree_terms');
+
+		if (!btn) return;
+
+		var hasGamertag = gamertagInput && (gamertagInput.value || '').trim().length > 0;
+		var hasEmail = emailInput && (emailInput.value || '').trim().length > 0;
+		var hasPassword = !passwordInput || (passwordInput.value || '').trim().length > 0;
+		var hasTerms = !termsCheckbox || termsCheckbox.checked;
+
+		btn.disabled = !(hasGamertag && hasEmail && hasPassword && hasTerms);
 	}
 
 	function init() {
@@ -42,6 +63,19 @@
 		if (passwordInput) {
 			passwordInput.addEventListener('input', updateLoginButtonState);
 			passwordInput.addEventListener('change', updateLoginButtonState);
+		}
+
+		// Registrieren-Button: Aktivierung wenn alle Pflichtfelder ausgefüllt
+		var regForm = document.querySelector('.woocommerce-form-register');
+		if (regForm) {
+			updateRegisterButtonState();
+			['reg_username', 'reg_email', 'reg_password', 'gk_agree_terms'].forEach(function (id) {
+				var el = document.getElementById(id);
+				if (el) {
+					el.addEventListener('input', updateRegisterButtonState);
+					el.addEventListener('change', updateRegisterButtonState);
+				}
+			});
 		}
 
 		if (!modal) {

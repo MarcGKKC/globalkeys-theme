@@ -39,15 +39,54 @@ function globalkeys_gamertag_is_taken( $gamertag ) {
  */
 function globalkeys_register_form_gamertag() {
 	$gamertag = ! empty( $_POST['username'] ) ? wp_unslash( $_POST['username'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+	$placeholders = array( 'Globalkeys_Master', 'CryptoKing88', 'PixelHunter_', 'RealmRoyale99', 'SteelFist42' );
+	$placeholder  = $placeholders[ array_rand( $placeholders ) ];
 	?>
-	<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide gk-gamertag-row">
+	<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide gk-login-row gk-gamertag-row">
 		<span id="gk-gamertag-error" class="gk-gamertag-error" role="alert" aria-live="polite" style="display:none;"></span>
 		<label for="reg_username"><?php esc_html_e( 'Gamertag', 'globalkeys' ); ?>&nbsp;<span class="required" aria-hidden="true">*</span></label>
-		<input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="username" id="reg_username" autocomplete="username" value="<?php echo esc_attr( $gamertag ); ?>" required aria-required="true" />
+		<input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="username" id="reg_username" autocomplete="username" placeholder="<?php echo esc_attr( $placeholder ); ?>" value="<?php echo esc_attr( $gamertag ); ?>" required aria-required="true" />
 	</p>
 	<?php
 }
 add_action( 'woocommerce_register_form_start', 'globalkeys_register_form_gamertag', 5 );
+
+/**
+ * Standard-Privacy-Text entfernen, eigene Checkbox verwenden.
+ */
+add_action( 'init', function() {
+	remove_action( 'woocommerce_register_form', 'wc_registration_privacy_policy_text', 20 );
+}, 20 );
+
+/**
+ * Terms- und Privacy-Checkbox im Registrierungsformular.
+ */
+function globalkeys_register_form_terms_checkbox() {
+	$privacy_page_id = function_exists( 'wc_privacy_policy_page_id' ) ? wc_privacy_policy_page_id() : 0;
+	$terms_page_id   = function_exists( 'wc_terms_and_conditions_page_id' ) ? wc_terms_and_conditions_page_id() : 0;
+
+	$privacy_link = $privacy_page_id ? '<a href="' . esc_url( get_permalink( $privacy_page_id ) ) . '" class="gk-terms-link" target="_blank" rel="noopener">' . esc_html__( 'Privacy Policy', 'globalkeys' ) . '</a>' : esc_html__( 'Privacy Policy', 'globalkeys' );
+	$terms_link   = $terms_page_id ? '<a href="' . esc_url( get_permalink( $terms_page_id ) ) . '" class="gk-terms-link" target="_blank" rel="noopener">' . esc_html__( 'Terms', 'globalkeys' ) . '</a>' : esc_html__( 'Terms', 'globalkeys' );
+
+	$label = sprintf(
+		/* translators: 1: Terms link, 2: Privacy Policy link */
+		__( 'Ich stimme den %1$s und %2$s zu', 'globalkeys' ),
+		$terms_link,
+		$privacy_link
+	);
+	?>
+	<p class="form-row gk-terms-checkbox-row">
+		<label class="gk-terms-checkbox-label">
+			<span class="gk-terms-checkbox-inner">
+				<input type="checkbox" name="gk_agree_terms" id="gk_agree_terms" value="1" required aria-required="true" class="gk-terms-checkbox-input" />
+				<span class="gk-terms-checkbox-box" aria-hidden="true"></span>
+			</span>
+			<span class="gk-terms-checkbox-text"><?php echo wp_kses( $label, array( 'a' => array( 'href' => array(), 'class' => array(), 'target' => array(), 'rel' => array() ) ) ); ?></span>
+		</label>
+	</p>
+	<?php
+}
+add_action( 'woocommerce_register_form', 'globalkeys_register_form_terms_checkbox', 15 );
 
 /**
  * AJAX: Gamertag-Verfügbarkeit prüfen.
@@ -95,6 +134,9 @@ add_action( 'wp_ajax_nopriv_globalkeys_check_email', 'globalkeys_ajax_check_emai
  * @return WP_Error
  */
 function globalkeys_validate_registration_gamertag( $validation_error, $username, $password, $email ) {
+	if ( empty( $_POST['gk_agree_terms'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$validation_error->add( 'terms_required', __( 'Bitte stimme den Nutzungsbedingungen und der Datenschutzerklärung zu.', 'globalkeys' ) );
+	}
 	if ( empty( $username ) || '' === trim( $username ) ) {
 		$validation_error->add( 'missing_gamertag', __( 'Bitte gib deinen Gamertag ein.', 'globalkeys' ) );
 	} elseif ( globalkeys_gamertag_is_taken( $username ) ) {
