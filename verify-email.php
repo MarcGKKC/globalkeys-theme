@@ -53,14 +53,17 @@ get_header();
 				<?php wp_nonce_field( 'gk_email_verify', 'gk_verify_submit' ); ?>
 				<input type="hidden" name="gk_verify_token" value="<?php echo esc_attr( $gk_verify_token ); ?>" />
 
+				<label class="gk-verify-code-label" for="gk-verify-digit-0"><?php esc_html_e( '6-stelliger Code', 'globalkeys' ); ?></label>
+				<div class="gk-verify-code-wrap">
 				<div class="gk-verify-code-inputs" role="group" aria-label="<?php esc_attr_e( '6-stelliger Bestätigungscode', 'globalkeys' ); ?>">
-					<input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="gk-verify-digit" data-index="0" autocomplete="one-time-code" aria-label="<?php esc_attr_e( 'Ziffer 1', 'globalkeys' ); ?>" />
+					<input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="gk-verify-digit" id="gk-verify-digit-0" data-index="0" autocomplete="one-time-code" aria-label="<?php esc_attr_e( 'Ziffer 1', 'globalkeys' ); ?>" />
 					<input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="gk-verify-digit" data-index="1" aria-label="<?php esc_attr_e( 'Ziffer 2', 'globalkeys' ); ?>" />
 					<input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="gk-verify-digit" data-index="2" aria-label="<?php esc_attr_e( 'Ziffer 3', 'globalkeys' ); ?>" />
 					<span class="gk-verify-digit-sep" aria-hidden="true"></span>
 					<input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="gk-verify-digit" data-index="3" aria-label="<?php esc_attr_e( 'Ziffer 4', 'globalkeys' ); ?>" />
 					<input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="gk-verify-digit" data-index="4" aria-label="<?php esc_attr_e( 'Ziffer 5', 'globalkeys' ); ?>" />
 					<input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="gk-verify-digit" data-index="5" aria-label="<?php esc_attr_e( 'Ziffer 6', 'globalkeys' ); ?>" />
+				</div>
 				</div>
 				<input type="hidden" name="gk_verify_code" id="gk-verify-code-full" value="" />
 
@@ -69,9 +72,11 @@ get_header();
 				</p>
 			</form>
 
-			<p class="gk-verify-resend">
+			<div class="gk-verify-resend-wrap">
 				<a href="<?php echo esc_url( add_query_arg( array( 'token' => $gk_verify_token, 'gk_resend' => '1' ), home_url( '/verify-email/' ) ) ); ?>" class="gk-verify-later-link"><?php esc_html_e( 'Code erneut senden', 'globalkeys' ); ?></a>
-			</p>
+				<span class="gk-verify-resend-sep" aria-hidden="true"></span>
+				<a href="<?php echo esc_url( function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'myaccount' ) . '#register' : home_url( '/my-account/#register' ) ); ?>" class="gk-verify-later-link"><?php esc_html_e( 'E-Mail ändern', 'globalkeys' ); ?></a>
+			</div>
 			<div class="gk-divider-line-only"></div>
 			<p class="gk-verify-later">
 				<a href="<?php echo esc_url( add_query_arg( array( 'token' => $gk_verify_token, 'gk_skip' => '1' ), home_url( '/verify-email/' ) ) ); ?>" class="gk-verify-later-link"><?php esc_html_e( 'Konto später erstellen', 'globalkeys' ); ?></a>

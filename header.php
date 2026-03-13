@@ -64,9 +64,9 @@ $account_url = class_exists( 'WooCommerce' ) ? wc_get_page_permalink( 'myaccount
 								<img src="<?php echo esc_url( $pictures_uri . 'xbox-logo-gk (1).svg' ); ?>" alt="" class="platform-filter-icon" width="30" height="30" aria-hidden="true" />
 								<span class="platform-filter-label">Xbox</span>
 							</a>
-							<a href="<?php echo esc_url( home_url( '/' ) ); ?>?platform=nintendo" class="platform-filter" data-platform="nintendo" aria-label="<?php esc_attr_e( 'Coming Soon', 'globalkeys' ); ?>">
-								<img src="<?php echo esc_url( $pictures_uri . 'Switch-gk (1).svg' ); ?>" alt="" class="platform-filter-icon" width="30" height="30" aria-hidden="true" />
-								<span class="platform-filter-label"><?php esc_html_e( 'Coming Soon...', 'globalkeys' ); ?></span>
+<a href="<?php echo esc_url( home_url( '/' ) ); ?>?platform=nintendo" class="platform-filter" data-platform="nintendo" aria-label="<?php esc_attr_e( 'Nintendo', 'globalkeys' ); ?>">
+							<img src="<?php echo esc_url( $pictures_uri . 'Switch-gk (1).svg' ); ?>" alt="" class="platform-filter-icon" width="30" height="30" aria-hidden="true" />
+							<span class="platform-filter-label"><?php esc_html_e( 'Nintendo', 'globalkeys' ); ?></span>
 							</a>
 						</div>
 						<button type="button" class="header-pill-search-trigger header-pill-search-submit" aria-label="<?php esc_attr_e( 'Suchen öffnen', 'globalkeys' ); ?>" aria-expanded="false" aria-controls="gk-pill-search-overlay">
@@ -95,30 +95,25 @@ $account_url = class_exists( 'WooCommerce' ) ? wc_get_page_permalink( 'myaccount
 			</div>
 			</div>
 
-			<!-- Rechts: Warenkorb + Konto / Sign in (Icons per Mask mit Farbe #04DA8D beim Hover) -->
+			<!-- Rechts: Warenkorb + Konto / Sign in (SVG als <img> + CSS-Filter, scharf in Firefox) -->
 			<?php
 			$cart_icon_url      = esc_url( get_template_directory_uri() . '/Pictures/cart.g.svg' );
 			$signin_icon_url    = esc_url( get_template_directory_uri() . '/Pictures/sign-in-button.svg' );
-			$favorite_icon_url  = esc_url( get_template_directory_uri() . '/Pictures/heart1-gk.svg' );
+			$favorite_icon_url  = esc_url( get_template_directory_uri() . '/Pictures/heart2-gk.svg' );
 			$favorites_url      = esc_url( home_url( '/favorites/' ) );
 			?>
-			<style>
-			.header-icon-cart { -webkit-mask-image: url('<?php echo $cart_icon_url; ?>'); mask-image: url('<?php echo $cart_icon_url; ?>'); }
-			.header-icon-account { -webkit-mask-image: url('<?php echo $signin_icon_url; ?>'); mask-image: url('<?php echo $signin_icon_url; ?>'); }
-			.header-icon-favorite { -webkit-mask-image: url('<?php echo $favorite_icon_url; ?>'); mask-image: url('<?php echo $favorite_icon_url; ?>'); }
-			</style>
 			<div class="site-header-actions">
 				<a href="<?php echo esc_url( $favorites_url ); ?>" class="header-icon-link header-favorites-link" aria-label="<?php esc_attr_e( 'Favoriten', 'globalkeys' ); ?>">
-					<span class="header-icon header-icon-favorite" aria-hidden="true"></span>
+					<img src="<?php echo $favorite_icon_url; ?>" alt="" class="header-icon header-icon-favorite" width="30" height="30" aria-hidden="true" fetchpriority="low">
 				</a>
 				<a href="<?php echo esc_url( $cart_url ); ?>" class="header-icon-link header-cart-link" aria-label="<?php esc_attr_e( 'Warenkorb', 'globalkeys' ); ?>">
-					<span class="header-icon header-icon-cart" aria-hidden="true"></span>
+					<img src="<?php echo $cart_icon_url; ?>" alt="" class="header-icon header-icon-cart" width="30" height="30" aria-hidden="true" fetchpriority="low">
 					<?php if ( class_exists( 'WooCommerce' ) && WC()->cart && WC()->cart->get_cart_contents_count() > 0 ) : ?>
 						<span class="header-cart-count"><?php echo absint( WC()->cart->get_cart_contents_count() ); ?></span>
 					<?php endif; ?>
 				</a>
 				<a href="<?php echo esc_url( $account_url ); ?>" class="header-icon-link header-account-link" aria-label="<?php echo esc_attr( is_user_logged_in() ? __( 'Mein Konto', 'globalkeys' ) : __( 'Anmelden', 'globalkeys' ) ); ?>">
-					<span class="header-icon header-icon-account" aria-hidden="true"></span>
+					<img src="<?php echo $signin_icon_url; ?>" alt="" class="header-icon header-icon-account" width="30" height="30" aria-hidden="true" fetchpriority="low">
 				</a>
 			</div>
 		</div>

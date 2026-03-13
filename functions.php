@@ -917,7 +917,7 @@ function globalkeys_scripts() {
 		}
 		body.gk-verify-page .gk-verify-centering {
 			width: 100%;
-			max-width: 420px;
+			max-width: 460px;
 		}
 		body.gk-verify-page .gk-verify-box {
 			width: 100%;
@@ -931,55 +931,80 @@ function globalkeys_scripts() {
 		}
 		body.gk-verify-page .gk-verify-intro {
 			color: rgba(255,255,255,0.75);
-			font-size: 1rem;
+			font-size: calc(1rem + 0.5px);
 			line-height: 1.5;
 			margin: 0 0 1.75rem;
 		}
 		body.gk-verify-page .gk-verify-error {
 			color: #dc2626;
-			font-size: 0.95rem;
+			font-size: calc(1rem + 0.5px);
 			margin: 0 0 1rem;
 			padding: 0.5rem 0;
 		}
 		body.gk-verify-page .gk-verify-success {
 			color: #04DA8D;
-			font-size: 0.95rem;
+			font-size: calc(0.95rem + 0.5px);
 			margin: 0 0 1rem;
 			padding: 0.5rem 0;
+		}
+		body.gk-verify-page .gk-verify-code-label {
+			display: block;
+			color: rgba(255,255,255,0.6);
+			font-size: calc(0.9rem + 0.5px);
+			font-weight: 500;
+			margin: 0 0 0.75rem;
+			letter-spacing: 0.02em;
+		}
+		body.gk-verify-page .gk-verify-code-wrap {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.5rem;
+			padding: 1.25rem 1.5rem;
+			background: rgba(0,0,0,0.2);
+			border-radius: 12px;
+			border: 1px solid rgba(255,255,255,0.08);
+			margin-bottom: 1.75rem;
 		}
 		body.gk-verify-page .gk-verify-code-inputs {
 			display: flex;
 			align-items: center;
 			justify-content: center;
 			gap: 0.5rem;
-			margin: 0 0 1.75rem;
-			flex-wrap: wrap;
+			margin: 0;
+			flex-wrap: nowrap;
 		}
 		body.gk-verify-page .gk-verify-digit {
 			width: 3.25rem;
 			height: 4rem;
+			flex-shrink: 0;
 			text-align: center;
-			font-size: 1.6rem;
+			font-size: calc(1.6rem + 0.5px);
 			font-weight: 600;
 			background: #0e0d1e !important;
 			border: 1px solid rgba(180, 180, 190, 0.35) !important;
-			border-radius: 5px;
+			border-radius: 8px;
 			color: #fff;
-			transition: border-color 0.2s;
+			transition: border-color 0.2s, box-shadow 0.2s;
 		}
 		body.gk-verify-page .gk-verify-digit:hover {
-			border-color: #04DA8D !important;
+			border-color: rgba(4, 218, 141, 0.5) !important;
 		}
 		body.gk-verify-page .gk-verify-digit:focus {
 			outline: none;
 			border-color: #04DA8D !important;
+			box-shadow: 0 0 0 2px rgba(4, 218, 141, 0.2);
+		}
+		body.gk-verify-page .gk-verify-digit::placeholder {
+			color: rgba(255,255,255,0.15);
 		}
 		body.gk-verify-page .gk-verify-digit-sep {
 			width: 1rem;
+			min-width: 1rem;
 			height: 2px;
-			background: rgba(180, 180, 190, 0.55);
-			margin: 0 0.65rem;
+			background: rgba(180, 180, 190, 0.4);
+			margin: 0 0.25rem;
 			flex-shrink: 0;
+			border-radius: 1px;
 		}
 		body.gk-verify-page .gk-login-submit-row {
 			margin: 0 0 1rem;
@@ -1004,13 +1029,30 @@ function globalkeys_scripts() {
 			background: rgba(4, 218, 141, 0.25) !important;
 			cursor: not-allowed;
 		}
-		body.gk-verify-page .gk-verify-resend {
-			margin: 0 0 1rem;
+		body.gk-verify-page .gk-verify-resend-wrap {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 0.75rem;
+			margin: 0 auto 1rem;
+			padding: 0;
+			width: fit-content;
+			max-width: 100%;
+			transform: translateX(-1.3rem);
+		}
+		body.gk-verify-page .gk-verify-resend-wrap .gk-verify-later-link {
+			font-size: calc(1rem + 0.5px);
+		}
+		body.gk-verify-page .gk-verify-resend-sep {
+			width: 1px;
+			height: 1.1rem;
+			background: rgba(255,255,255,0.3);
+			flex-shrink: 0;
 		}
 		body.gk-verify-page .gk-divider-line-only {
 			width: 100%;
 			max-width: 200px;
-			margin: 1rem auto;
+			margin: 2.25rem auto 2rem;
 			height: 1px;
 			background: rgba(255,255,255,0.2);
 		}
@@ -1022,12 +1064,21 @@ function globalkeys_scripts() {
 			text-decoration: none;
 			transition: color 0.2s;
 		}
+		body.gk-verify-page .gk-verify-later .gk-verify-later-link {
+			font-size: calc(1rem + 0.5px);
+			text-decoration: underline;
+			text-underline-offset: 0.2em;
+			text-decoration-color: rgba(4, 218, 141, 0.5);
+		}
+		body.gk-verify-page .gk-verify-later .gk-verify-later-link:hover {
+			text-decoration-color: #05f0a0;
+		}
 		body.gk-verify-page .gk-verify-later-link:hover {
 			color: #05f0a0;
 		}
 		body.gk-verify-page .gk-verify-later-hint {
 			color: rgba(255,255,255,0.45);
-			font-size: 0.9rem;
+			font-size: calc(1rem + 0.5px);
 			margin: 0;
 		}
 	';
