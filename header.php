@@ -45,6 +45,7 @@ $account_url = class_exists( 'WooCommerce' ) ? wc_get_page_permalink( 'myaccount
 					<a href="<?php echo esc_url( home_url( '/activation/' ) ); ?>"><?php esc_html_e( 'Activation', 'globalkeys' ); ?></a>
 					<a href="<?php echo esc_url( home_url( '/support/' ) ); ?>"><?php esc_html_e( '24/7 Support', 'globalkeys' ); ?></a>
 				</nav>
+			<div class="header-pill-search-wrapper">
 			<div class="header-pill-container">
 				<div class="header-pill">
 					<?php
@@ -86,8 +87,9 @@ $account_url = class_exists( 'WooCommerce' ) ? wc_get_page_permalink( 'myaccount
 							</svg>
 						</button>
 					</form>
-					<button type="button" class="header-pill-search-close" aria-label="<?php esc_attr_e( 'Suche schließen', 'globalkeys' ); ?>">&times;</button>
 				</div>
+				<button type="button" class="header-pill-search-close" aria-label="<?php esc_attr_e( 'Suche schließen', 'globalkeys' ); ?>" aria-hidden="true">&times;</button>
+			</div>
 			</div>
 			</div>
 

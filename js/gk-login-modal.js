@@ -22,23 +22,26 @@
 	}
 
 	function updateRegisterButtonState() {
-		var form = document.querySelector('.woocommerce-form-register');
-		if (!form) return;
+		var btn = document.getElementById('gk-register-submit');
+		if (!btn) return;
 
-		var btn = form.querySelector('.gk-btn-login.woocommerce-form-register__submit');
 		var gamertagInput = document.getElementById('reg_username');
 		var emailInput = document.getElementById('reg_email');
 		var passwordInput = document.getElementById('reg_password');
 		var termsCheckbox = document.getElementById('gk_agree_terms');
-
-		if (!btn) return;
 
 		var hasGamertag = gamertagInput && (gamertagInput.value || '').trim().length > 0;
 		var hasEmail = emailInput && (emailInput.value || '').trim().length > 0;
 		var hasPassword = !passwordInput || (passwordInput.value || '').trim().length > 0;
 		var hasTerms = !termsCheckbox || termsCheckbox.checked;
 
-		btn.disabled = !(hasGamertag && hasEmail && hasPassword && hasTerms);
+		var shouldEnable = hasGamertag && hasEmail && hasPassword && hasTerms;
+		if (shouldEnable) {
+			btn.removeAttribute('disabled');
+			btn.disabled = false;
+		} else {
+			btn.disabled = true;
+		}
 	}
 
 	function init() {
@@ -46,12 +49,15 @@
 		var usernameInput = document.getElementById('username');
 		var passwordInput = document.getElementById('password');
 
-		// Formularfelder bei jedem Laden leeren (z.B. nach Refresh)
-		if (usernameInput) {
-			usernameInput.value = '';
-		}
+		// Login-Fehler: nur Passwort leeren (Username kommt von PHP/Transient wie beim Register)
+		var isRegisterError = (typeof gkAccountError !== 'undefined' && gkAccountError.type === 'register') ||
+			(modal && modal.getAttribute('data-gk-error-type') === 'register');
+
 		if (passwordInput) {
 			passwordInput.value = '';
+		}
+		if (usernameInput && isRegisterError) {
+			usernameInput.value = '';
 		}
 
 		// Anmelden-Button: Aktivierung bei Eingabe
@@ -65,18 +71,9 @@
 			passwordInput.addEventListener('change', updateLoginButtonState);
 		}
 
-		// Registrieren-Button: Aktivierung wenn alle Pflichtfelder ausgefüllt
-		var regForm = document.querySelector('.woocommerce-form-register');
-		if (regForm) {
-			updateRegisterButtonState();
-			['reg_username', 'reg_email', 'reg_password', 'gk_agree_terms'].forEach(function (id) {
-				var el = document.getElementById(id);
-				if (el) {
-					el.addEventListener('input', updateRegisterButtonState);
-					el.addEventListener('change', updateRegisterButtonState);
-				}
-			});
-		}
+			// Registrieren-Button: alle 200ms prüfen – garantiert Aktivierung
+		updateRegisterButtonState();
+		setInterval(updateRegisterButtonState, 200);
 
 		if (!modal) {
 			return;

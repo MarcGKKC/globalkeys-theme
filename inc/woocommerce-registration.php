@@ -39,6 +39,13 @@ function globalkeys_gamertag_is_taken( $gamertag ) {
  */
 function globalkeys_register_form_gamertag() {
 	$gamertag = ! empty( $_POST['username'] ) ? wp_unslash( $_POST['username'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+	if ( '' === $gamertag ) {
+		$kept = get_transient( 'gk_register_keep_username' );
+		if ( false !== $kept ) {
+			$gamertag = $kept;
+			delete_transient( 'gk_register_keep_username' );
+		}
+	}
 	$placeholders = array( 'Globalkeys_Master', 'CryptoKing88', 'PixelHunter_', 'RealmRoyale99', 'SteelFist42' );
 	$placeholder  = $placeholders[ array_rand( $placeholders ) ];
 	?>

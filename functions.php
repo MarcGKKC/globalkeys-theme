@@ -216,7 +216,7 @@ add_action( 'init', 'globalkeys_enable_customer_registration', 1 );
 require get_template_directory() . '/inc/woocommerce-registration.php';
 
 /**
- * Bei Login-Fehler: Redirect mit Transient, damit Formular leer geladen wird und eigene Fehlermeldung als Modal.
+ * Bei Login-Fehler: Redirect + Transient (gleicher Ansatz wie Register-Block).
  */
 function globalkeys_login_failed_redirect() {
 	if ( ! function_exists( 'wc_get_notices' ) || ! function_exists( 'wc_clear_notices' ) ) {
@@ -229,11 +229,56 @@ function globalkeys_login_failed_redirect() {
 		$msg  = isset( $last['notice'] ) ? wp_strip_all_tags( $last['notice'] ) : $msg;
 	}
 	set_transient( 'gk_login_error', $msg, 60 );
+	if ( ! empty( $_POST['username'] ) ) {
+		set_transient( 'gk_login_keep_username', sanitize_text_field( wp_unslash( $_POST['username'] ) ), 60 );
+	}
 	wc_clear_notices();
 	wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
 	exit;
 }
 add_action( 'woocommerce_login_failed', 'globalkeys_login_failed_redirect', 5 );
+
+/**
+ * Bei Registrierungs-Fehler: Redirect mit Transient für Custom-Modal.
+ * Bei reinen Passwort-Fehlern: Gamertag und E-Mail beibehalten (nur Passwort leeren).
+ */
+function globalkeys_register_failed_redirect() {
+	if ( ! function_exists( 'wc_get_notices' ) || ! function_exists( 'wc_clear_notices' ) ) {
+		return;
+	}
+	if ( ! is_account_page() || is_user_logged_in() ) {
+		return;
+	}
+	// Nur nach Registrierungs-POST mit Fehlern
+	if ( empty( $_POST['register'] ) || empty( $_POST['email'] ) ) {
+		return;
+	}
+	$notices = wc_get_notices( 'error' );
+	if ( empty( $notices ) ) {
+		return;
+	}
+	$last    = end( $notices );
+	$msg     = isset( $last['notice'] ) ? wp_strip_all_tags( $last['notice'] ) : __( 'Bei der Registrierung ist ein Fehler aufgetreten.', 'globalkeys' );
+	$is_pw   = ( false !== stripos( $msg, 'passwort' ) || false !== stripos( $msg, 'password' ) );
+	$is_tag  = ( false !== stripos( $msg, 'Gamertag' ) || false !== stripos( $msg, 'gamertag' ) );
+	$is_mail = ( false !== stripos( $msg, 'E-Mail' ) || false !== stripos( $msg, 'E-Mail-Adresse' ) );
+	$is_terms = ( false !== stripos( $msg, 'Nutzungsbedingungen' ) || false !== stripos( $msg, 'Datenschutz' ) || false !== stripos( $msg, 'stimme' ) );
+
+	set_transient( 'gk_register_error', $msg, 60 );
+	// Passwort/Terms: alles behalten. Gamertag-Fehler: nur E-Mail. E-Mail-Fehler: nur Gamertag.
+	$keep_user = $is_pw || $is_mail || $is_terms;
+	$keep_mail = $is_pw || $is_tag || $is_terms;
+	if ( $keep_user && ! empty( $_POST['username'] ) ) {
+		set_transient( 'gk_register_keep_username', sanitize_text_field( wp_unslash( $_POST['username'] ) ), 60 );
+	}
+	if ( $keep_mail && ! empty( $_POST['email'] ) ) {
+		set_transient( 'gk_register_keep_email', sanitize_email( wp_unslash( $_POST['email'] ) ), 60 );
+	}
+	wc_clear_notices();
+	wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) . '#register' );
+	exit;
+}
+add_action( 'template_redirect', 'globalkeys_register_failed_redirect', 5 );
 
 /**
  * Enqueue scripts and styles.
@@ -315,6 +360,8 @@ function globalkeys_scripts() {
 			max-width: 480px;
 			margin: 3rem auto 0;
 			box-sizing: border-box;
+			position: relative;
+			z-index: 5;
 		}
 		body.gk-account-login .gk-account-title {
 			color: #fff;
@@ -327,6 +374,10 @@ function globalkeys_scripts() {
 			margin-bottom: 0;
 		}
 		/* Nur ein Kasten sichtbar: Standard = Login */
+		body.gk-account-login .gk-login-block {
+			position: relative;
+			z-index: 2;
+		}
 		body.gk-account-login .gk-register-block {
 			display: none;
 		}
@@ -335,6 +386,8 @@ function globalkeys_scripts() {
 		}
 		body.gk-account-login .gk-account-blocks.gk-show-register .gk-register-block {
 			display: block;
+			position: relative;
+			z-index: 2;
 		}
 		/* Login-Box: Rahmen nur außen, innen keine Borders */
 		body.gk-account-login .gk-login-box form,
@@ -424,6 +477,9 @@ function globalkeys_scripts() {
 			font-size: 1rem;
 			margin-bottom: 0.3rem;
 		}
+		body.gk-account-login .gk-login-box .gk-login-row label .required {
+			color: #04DA8D !important;
+		}
 		body.gk-account-login .gk-login-box .gk-login-row .input-text {
 			background: #0e0d1e !important;
 			border: 1px solid rgba(180, 180, 190, 0.35) !important;
@@ -433,21 +489,29 @@ function globalkeys_scripts() {
 			padding: 1.15rem 1.15rem;
 			border-radius: 5px;
 			width: 100%;
-			font-size: 1.05rem;
+			font-size: 1.15rem;
 			box-sizing: border-box;
 			min-height: 52px;
 			transition: border-color 0.2s ease;
 		}
 		body.gk-account-login .gk-login-box .gk-login-row .input-text::placeholder {
-			color: rgba(255, 255, 255, 0.7);
+			color: rgba(255, 255, 255, 0.25);
 			font-size: 1.1rem;
 		}
 		body.gk-account-login .gk-login-box .gk-login-row .input-text:focus,
-		body.gk-account-login .gk-login-box .gk-login-row .input-text:active,
-		body.gk-account-login .gk-login-box .gk-login-row .input-text:-webkit-autofill {
+		body.gk-account-login .gk-login-box .gk-login-row .input-text:active {
 			border: 1px solid rgba(180, 180, 190, 0.35) !important;
 			outline: none !important;
 			box-shadow: none !important;
+		}
+		body.gk-account-login .gk-login-box .gk-login-row .input-text:-webkit-autofill,
+		body.gk-account-login .gk-login-box .gk-login-row .input-text:-webkit-autofill:hover,
+		body.gk-account-login .gk-login-box .gk-login-row .input-text:-webkit-autofill:focus,
+		body.gk-account-login .gk-login-box .gk-login-row .input-text:-webkit-autofill:active {
+			-webkit-box-shadow: 0 0 0 1000px #0e0d1e inset !important;
+			box-shadow: 0 0 0 1000px #0e0d1e inset !important;
+			-webkit-text-fill-color: #fff !important;
+			caret-color: #fff;
 		}
 		body.gk-account-login .gk-login-box .gk-login-row .input-text:hover {
 			border-color: #04DA8D !important;
@@ -476,13 +540,17 @@ function globalkeys_scripts() {
 			padding: 0.35rem;
 			color: rgba(255,255,255,0.6);
 			transition: color 0.2s ease, border-color 0.2s ease;
+			z-index: 20;
+			pointer-events: auto !important;
+			min-width: 36px;
+			min-height: 36px;
 		}
 		body.gk-account-login .gk-login-box .gk-password-toggle:hover {
 			color: #04DA8D;
 			border-color: #04DA8D;
 		}
 		body.gk-account-login .gk-login-box .gk-btn-login {
-			background: linear-gradient(90deg, #f59e0b, #dc2626) !important;
+			background: linear-gradient(90deg, #04DA8D 0%, #028a5a 100%) !important;
 			color: #fff !important;
 			border: none !important;
 			outline: none !important;
@@ -533,7 +601,7 @@ function globalkeys_scripts() {
 			border-radius: 5px !important;
 			text-align: center;
 			text-decoration: none !important;
-			background: linear-gradient(90deg, #f59e0b, #dc2626) !important;
+			background: linear-gradient(90deg, #04DA8D 0%, #028a5a 100%) !important;
 			color: #fff !important;
 			border: none;
 			cursor: pointer;
@@ -780,7 +848,7 @@ function globalkeys_scripts() {
 		.gk-login-error-modal__ok {
 			display: block;
 			width: 100%;
-			background: linear-gradient(90deg, #f59e0b, #dc2626) !important;
+			background: linear-gradient(90deg, #04DA8D 0%, #028a5a 100%) !important;
 			color: #fff !important;
 			border: none !important;
 			padding: 1rem 1.15rem !important;
@@ -808,6 +876,10 @@ function globalkeys_scripts() {
 		wp_enqueue_script( 'globalkeys-account-toggle', get_template_directory_uri() . '/js/gk-account-toggle.js', array(), _S_VERSION, true );
 		wp_enqueue_script( 'globalkeys-gamertag-check', get_template_directory_uri() . '/js/gamertag-check.js', array(), _S_VERSION, true );
 		wp_enqueue_script( 'globalkeys-login-modal', get_template_directory_uri() . '/js/gk-login-modal.js', array(), _S_VERSION, true );
+		$gk_err = get_transient( 'gk_login_error' );
+		$gk_reg = get_transient( 'gk_register_error' );
+		$gk_err_type = ! empty( $gk_reg ) ? 'register' : ( ! empty( $gk_err ) ? 'login' : '' );
+		wp_localize_script( 'globalkeys-login-modal', 'gkAccountError', array( 'type' => $gk_err_type ) );
 		wp_localize_script(
 			'globalkeys-gamertag-check',
 			'globalkeysGamertagCheck',

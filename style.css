@@ -755,13 +755,19 @@ textarea {
 	background: rgba(255, 255, 255, 0.08);
 }
 
+/* Wrapper für Pill-Container + Schließen-Button (X rechts außen) */
+.header-pill-search-wrapper {
+	position: relative;
+	display: inline-block;
+}
+
 /* Container für Pill + Such-Overlay (Animation) */
 .header-pill-container {
 	--gk-pill-height: 3.5rem;
 	position: relative;
 	display: inline-flex;
 	overflow: hidden;
-	border-radius: 9999px;
+	border-radius: 10px;
 	max-width: 40rem;
 }
 
@@ -774,7 +780,7 @@ textarea {
 	box-sizing: border-box;
 	padding: 0 0 0 1.35rem;
 	background: rgba(50, 50, 55, 0.85);
-	border-radius: 9999px;
+	border-radius: 10px;
 	max-width: 40rem;
 }
 
@@ -787,9 +793,9 @@ textarea {
 	bottom: 0;
 	display: flex;
 	align-items: center;
-	padding: 0 3rem 0 1.35rem;
+	padding: 0 1.35rem 0 1.35rem;
 	background: #04DA8D;
-	border-radius: 9999px;
+	border-radius: 10px;
 	transform: translateX(100%);
 	transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 	z-index: 2;
@@ -828,7 +834,7 @@ textarea {
 	padding: 0.4rem 0.6rem;
 	font-size: 0.9375rem;
 	border: none;
-	border-radius: 6px;
+	border-radius: 10px;
 	background: #04DA8D;
 	color: #fff;
 	caret-color: #fff;
@@ -844,10 +850,11 @@ textarea {
 	color: #fff;
 }
 
+/* X-Button rechts außen von der Pill, nur sichtbar wenn Suche offen */
 .header-pill-search-close {
 	position: absolute;
 	top: 50%;
-	right: 0.65rem;
+	right: -2.5rem;
 	transform: translateY(-50%);
 	width: 2rem;
 	height: 2rem;
@@ -860,6 +867,14 @@ textarea {
 	cursor: pointer;
 	border-radius: 4px;
 	transition: color 0.2s, background 0.2s;
+	visibility: hidden;
+	pointer-events: none;
+	z-index: 3;
+}
+
+.header-pill-container.is-search-open ~ .header-pill-search-close {
+	visibility: visible;
+	pointer-events: auto;
 }
 
 .header-pill-search-close:hover {
@@ -929,7 +944,7 @@ textarea {
 	height: 2.15rem;
 	padding: 0;
 	border: none;
-	border-radius: 50%;
+	border-radius: 10px;
 	background: #04DA8D;
 	color: #fff;
 	cursor: pointer;

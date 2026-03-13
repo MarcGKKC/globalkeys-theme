@@ -12,7 +12,7 @@
 	const trigger = container.querySelector( '.header-pill-search-trigger' );
 	const overlay = document.getElementById( 'gk-pill-search-overlay' );
 	const searchInput = overlay ? overlay.querySelector( '.header-pill-search-input' ) : null;
-	const closeBtn = overlay ? overlay.querySelector( '.header-pill-search-close' ) : null;
+	const closeBtn = container.parentNode ? container.parentNode.querySelector( '.header-pill-search-close' ) : null;
 
 	var closeFallbackTimeout = null;
 	var closeTransitionEndHandler = null;
@@ -41,6 +41,9 @@
 		if ( trigger ) {
 			trigger.setAttribute( 'aria-expanded', 'true' );
 		}
+		if ( closeBtn ) {
+			closeBtn.setAttribute( 'aria-hidden', 'false' );
+		}
 		if ( searchInput ) {
 			setTimeout( function() {
 				searchInput.focus();
@@ -53,6 +56,9 @@
 		container.classList.remove( 'is-search-open' );
 		if ( trigger ) {
 			trigger.setAttribute( 'aria-expanded', 'false' );
+		}
+		if ( closeBtn ) {
+			closeBtn.setAttribute( 'aria-hidden', 'true' );
 		}
 		if ( overlay ) {
 			closeFallbackTimeout = setTimeout( function() {
@@ -99,6 +105,9 @@
 
 	document.addEventListener( 'click', function( e ) {
 		if ( ! container.classList.contains( 'is-search-open' ) ) {
+			return;
+		}
+		if ( closeBtn && closeBtn.contains( e.target ) ) {
 			return;
 		}
 		if ( ! container.contains( e.target ) ) {
