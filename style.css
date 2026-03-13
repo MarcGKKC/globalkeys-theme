@@ -1001,7 +1001,6 @@ textarea {
 }
 
 .header-icon-link {
-	position: relative;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -1017,22 +1016,31 @@ textarea {
 	opacity: 0.85;
 }
 
-/* SVG als <img>: in Firefox vektorisch scharf. Farbe per Filter: Weiß → Hover #04DA8D */
 .header-icon {
-	display: block;
 	width: 1.875rem;
 	height: 1.875rem;
 	flex-shrink: 0;
-	/* Aus dunklem Icon Weiß machen */
-	filter: brightness(0) invert(1);
-	transition: filter 0.2s;
+}
+
+/* Cart-, Favoriten- und Login-Icons per CSS-Mask: Weiß, Hover exakt #04DA8D */
+.header-icon-cart,
+.header-icon-account,
+.header-icon-favorite {
+	display: inline-block;
+	-webkit-mask-size: contain;
+	mask-size: contain;
+	-webkit-mask-repeat: no-repeat;
+	mask-repeat: no-repeat;
+	-webkit-mask-position: center;
+	mask-position: center;
+	background-color: #fff;
+	transition: background-color 0.2s;
 }
 
 .header-icon-link:hover .header-icon-cart,
 .header-icon-link:hover .header-icon-account,
 .header-icon-link:hover .header-icon-favorite {
-	/* Schwarz → #04DA8D (angepasst für Filter-Kette) */
-	filter: brightness(0) saturate(100%) invert(68%) sepia(79%) saturate(500%) hue-rotate(115deg);
+	background-color: #04DA8D;
 }
 
 .header-cart-link .header-cart-count {

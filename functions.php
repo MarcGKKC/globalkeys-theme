@@ -947,6 +947,12 @@ function globalkeys_scripts() {
 			margin: 0 0 1rem;
 			padding: 0.5rem 0;
 		}
+		body.gk-verify-page .gk-verify-email-display {
+			color: rgba(255,255,255,0.85);
+			font-size: calc(1rem + 1px);
+			margin: 0 0 1.5rem;
+			font-weight: 500;
+		}
 		body.gk-verify-page .gk-verify-code-label {
 			display: block;
 			color: rgba(255,255,255,0.6);
@@ -1042,6 +1048,10 @@ function globalkeys_scripts() {
 		}
 		body.gk-verify-page .gk-verify-resend-wrap .gk-verify-later-link {
 			font-size: calc(1rem + 0.5px);
+			transition: color 0.2s, transform 0.2s;
+		}
+		body.gk-verify-page .gk-verify-resend-wrap .gk-verify-later-link:hover {
+			transform: translateY(-2px);
 		}
 		body.gk-verify-page .gk-verify-resend-sep {
 			width: 1px;

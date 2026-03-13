@@ -49,6 +49,12 @@ get_header();
 				<p class="gk-verify-success" role="status"><?php esc_html_e( 'Wir haben dir einen neuen Code per E-Mail gesendet. Bitte prüfe auch deinen Spam-Ordner.', 'globalkeys' ); ?></p>
 			<?php endif; ?>
 
+			<?php
+			$gk_verify_email = isset( $gk_verify_data['email'] ) ? sanitize_email( $gk_verify_data['email'] ) : '';
+			if ( $gk_verify_email ) : ?>
+				<p class="gk-verify-email-display"><?php echo esc_html( $gk_verify_email ); ?></p>
+			<?php endif; ?>
+
 			<form method="post" class="gk-verify-form" id="gk-verify-form">
 				<?php wp_nonce_field( 'gk_email_verify', 'gk_verify_submit' ); ?>
 				<input type="hidden" name="gk_verify_token" value="<?php echo esc_attr( $gk_verify_token ); ?>" />
