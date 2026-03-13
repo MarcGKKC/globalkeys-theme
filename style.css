@@ -676,6 +676,7 @@ textarea {
 	margin: 0;
 	padding: 0.75rem 1.25rem;
 	min-height: 4rem;
+	overflow: visible;
 }
 
 .site-header-inner .site-branding {
@@ -730,6 +731,7 @@ textarea {
 	padding: 0 0.75rem;
 	justify-self: center;
 	min-width: 0;
+	overflow: visible;
 }
 
 /* Menü über der Pill */
@@ -755,10 +757,29 @@ textarea {
 	background: rgba(255, 255, 255, 0.08);
 }
 
-/* Wrapper für Pill-Container + Schließen-Button (X rechts außen) */
-.header-pill-search-wrapper {
+/* Äußerer Bereich: Pill + X-Bereich (X nur bei offener Suche sichtbar, absolut positioniert) */
+.header-pill-search-outer {
 	position: relative;
 	display: inline-block;
+}
+
+/* Eigenes Bereich für das X – bei geschlossener Suche kein Platz, bei offener Suche absolut rechts daneben */
+.header-pill-search-close-area {
+	display: none;
+	width: 2.5rem;
+	height: 3.5rem;
+	align-items: center;
+	justify-content: center;
+}
+
+.header-pill-search-outer.is-search-open .header-pill-search-close-area {
+	display: flex;
+	position: absolute;
+	left: 100%;
+	top: 50%;
+	transform: translateY(-50%);
+	margin-left: 0.5rem;
+	pointer-events: auto;
 }
 
 /* Container für Pill + Such-Overlay (Animation) */
@@ -850,36 +871,28 @@ textarea {
 	color: #fff;
 }
 
-/* X-Button rechts außen von der Pill, nur sichtbar wenn Suche offen */
+/* X-Button im eigenen Bereich rechts von der Pill */
 .header-pill-search-close {
-	position: absolute;
-	top: 50%;
-	right: -2.5rem;
-	transform: translateY(-50%);
-	width: 2rem;
-	height: 2rem;
+	width: 2.25rem;
+	height: 2.25rem;
+	margin: 0;
 	padding: 0;
 	border: none;
-	background: transparent;
-	color: rgba(255, 255, 255, 0.8);
-	font-size: 1.5rem;
+	background: none;
+	color: #fff;
+	font-size: 2rem;
 	line-height: 1;
 	cursor: pointer;
 	border-radius: 4px;
-	transition: color 0.2s, background 0.2s;
-	visibility: hidden;
-	pointer-events: none;
-	z-index: 3;
-}
-
-.header-pill-container.is-search-open ~ .header-pill-search-close {
-	visibility: visible;
-	pointer-events: auto;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: color 0.2s;
 }
 
 .header-pill-search-close:hover {
-	color: #fff;
-	background: rgba(255, 255, 255, 0.1);
+	color: #04DA8D;
+	background: none;
 }
 
 .header-pill-platforms {

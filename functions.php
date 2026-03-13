@@ -864,7 +864,8 @@ function globalkeys_scripts() {
 	wp_add_inline_style( 'globalkeys-style', $account_css );
 
 	wp_enqueue_script( 'globalkeys-navigation', get_template_directory_uri() . '/js/navigation.js', array(), _S_VERSION, true );
-	wp_enqueue_script( 'globalkeys-header-pill-search', get_template_directory_uri() . '/js/header-pill-search.js', array(), _S_VERSION, true );
+	$gk_pill_search_ver = (string) filemtime( get_template_directory() . '/js/header-pill-search.js' );
+	wp_enqueue_script( 'globalkeys-header-pill-search', get_template_directory_uri() . '/js/header-pill-search.js', array(), $gk_pill_search_ver, true );
 
 	if ( function_exists( 'is_account_page' ) && is_account_page() && ! is_user_logged_in() ) {
 		$login_no_border = '

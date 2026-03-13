@@ -45,51 +45,53 @@ $account_url = class_exists( 'WooCommerce' ) ? wc_get_page_permalink( 'myaccount
 					<a href="<?php echo esc_url( home_url( '/activation/' ) ); ?>"><?php esc_html_e( 'Activation', 'globalkeys' ); ?></a>
 					<a href="<?php echo esc_url( home_url( '/support/' ) ); ?>"><?php esc_html_e( '24/7 Support', 'globalkeys' ); ?></a>
 				</nav>
-			<div class="header-pill-search-wrapper">
-			<div class="header-pill-container">
-				<div class="header-pill">
-					<?php
-					$pictures_uri = get_template_directory_uri() . '/Pictures/';
-					?>
-					<div class="header-pill-platforms">
-						<a href="<?php echo esc_url( home_url( '/' ) ); ?>?platform=pc" class="platform-filter" data-platform="pc" aria-label="PC">
-							<img src="<?php echo esc_url( $pictures_uri . 'PC-gk (1).svg' ); ?>" alt="" class="platform-filter-icon" width="30" height="30" aria-hidden="true" />
-							<span class="platform-filter-label">PC</span>
-						</a>
-						<a href="<?php echo esc_url( home_url( '/' ) ); ?>?platform=playstation" class="platform-filter" data-platform="playstation" aria-label="PlayStation">
-							<img src="<?php echo esc_url( $pictures_uri . 'playstation-logo-gk (1).svg' ); ?>" alt="" class="platform-filter-icon" width="30" height="30" aria-hidden="true" />
-							<span class="platform-filter-label">PlayStation</span>
-						</a>
-						<a href="<?php echo esc_url( home_url( '/' ) ); ?>?platform=xbox" class="platform-filter" data-platform="xbox" aria-label="Xbox">
-							<img src="<?php echo esc_url( $pictures_uri . 'xbox-logo-gk (1).svg' ); ?>" alt="" class="platform-filter-icon" width="30" height="30" aria-hidden="true" />
-							<span class="platform-filter-label">Xbox</span>
-						</a>
-						<a href="<?php echo esc_url( home_url( '/' ) ); ?>?platform=nintendo" class="platform-filter" data-platform="nintendo" aria-label="<?php esc_attr_e( 'Coming Soon', 'globalkeys' ); ?>">
-							<img src="<?php echo esc_url( $pictures_uri . 'Switch-gk (1).svg' ); ?>" alt="" class="platform-filter-icon" width="30" height="30" aria-hidden="true" />
-							<span class="platform-filter-label"><?php esc_html_e( 'Coming Soon...', 'globalkeys' ); ?></span>
-						</a>
-					</div>
-					<button type="button" class="header-pill-search-trigger header-pill-search-submit" aria-label="<?php esc_attr_e( 'Suchen öffnen', 'globalkeys' ); ?>" aria-expanded="false" aria-controls="gk-pill-search-overlay">
-						<svg class="search-submit-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-							<circle cx="11" cy="11" r="8"></circle>
-							<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-						</svg>
-					</button>
-				</div>
-				<div id="gk-pill-search-overlay" class="header-pill-search-overlay" role="dialog" aria-label="<?php esc_attr_e( 'Suchen', 'globalkeys' ); ?>" hidden>
-					<form role="search" method="get" class="header-pill-search-form" action="<?php echo esc_url( home_url( '/' ) ); ?>">
-						<label for="gk-pill-search-input" class="screen-reader-text"><?php esc_html_e( 'Suchen', 'globalkeys' ); ?></label>
-						<input type="search" id="gk-pill-search-input" class="header-pill-search-input" placeholder="PSN Cards, Multiplayer, ARC Raiders..." value="<?php echo get_search_query(); ?>" name="s" autocomplete="off" />
-						<button type="submit" class="header-pill-search-submit" aria-label="<?php esc_attr_e( 'Suchen', 'globalkeys' ); ?>">
+			<div class="header-pill-search-outer">
+				<div class="header-pill-container">
+					<div class="header-pill">
+						<?php
+						$pictures_uri = get_template_directory_uri() . '/Pictures/';
+						?>
+						<div class="header-pill-platforms">
+							<a href="<?php echo esc_url( home_url( '/' ) ); ?>?platform=pc" class="platform-filter" data-platform="pc" aria-label="PC">
+								<img src="<?php echo esc_url( $pictures_uri . 'PC-gk (1).svg' ); ?>" alt="" class="platform-filter-icon" width="30" height="30" aria-hidden="true" />
+								<span class="platform-filter-label">PC</span>
+							</a>
+							<a href="<?php echo esc_url( home_url( '/' ) ); ?>?platform=playstation" class="platform-filter" data-platform="playstation" aria-label="PlayStation">
+								<img src="<?php echo esc_url( $pictures_uri . 'playstation-logo-gk (1).svg' ); ?>" alt="" class="platform-filter-icon" width="30" height="30" aria-hidden="true" />
+								<span class="platform-filter-label">PlayStation</span>
+							</a>
+							<a href="<?php echo esc_url( home_url( '/' ) ); ?>?platform=xbox" class="platform-filter" data-platform="xbox" aria-label="Xbox">
+								<img src="<?php echo esc_url( $pictures_uri . 'xbox-logo-gk (1).svg' ); ?>" alt="" class="platform-filter-icon" width="30" height="30" aria-hidden="true" />
+								<span class="platform-filter-label">Xbox</span>
+							</a>
+							<a href="<?php echo esc_url( home_url( '/' ) ); ?>?platform=nintendo" class="platform-filter" data-platform="nintendo" aria-label="<?php esc_attr_e( 'Coming Soon', 'globalkeys' ); ?>">
+								<img src="<?php echo esc_url( $pictures_uri . 'Switch-gk (1).svg' ); ?>" alt="" class="platform-filter-icon" width="30" height="30" aria-hidden="true" />
+								<span class="platform-filter-label"><?php esc_html_e( 'Coming Soon...', 'globalkeys' ); ?></span>
+							</a>
+						</div>
+						<button type="button" class="header-pill-search-trigger header-pill-search-submit" aria-label="<?php esc_attr_e( 'Suchen öffnen', 'globalkeys' ); ?>" aria-expanded="false" aria-controls="gk-pill-search-overlay">
 							<svg class="search-submit-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 								<circle cx="11" cy="11" r="8"></circle>
 								<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
 							</svg>
 						</button>
-					</form>
+					</div>
+					<div id="gk-pill-search-overlay" class="header-pill-search-overlay" role="dialog" aria-label="<?php esc_attr_e( 'Suchen', 'globalkeys' ); ?>" hidden>
+						<form role="search" method="get" class="header-pill-search-form" action="<?php echo esc_url( home_url( '/' ) ); ?>">
+							<label for="gk-pill-search-input" class="screen-reader-text"><?php esc_html_e( 'Suchen', 'globalkeys' ); ?></label>
+							<input type="search" id="gk-pill-search-input" class="header-pill-search-input" placeholder="PSN Cards, Multiplayer, ARC Raiders..." value="<?php echo get_search_query(); ?>" name="s" autocomplete="off" />
+							<button type="submit" class="header-pill-search-submit" aria-label="<?php esc_attr_e( 'Suchen', 'globalkeys' ); ?>">
+								<svg class="search-submit-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+									<circle cx="11" cy="11" r="8"></circle>
+									<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+								</svg>
+							</button>
+						</form>
+					</div>
 				</div>
-				<button type="button" class="header-pill-search-close" aria-label="<?php esc_attr_e( 'Suche schließen', 'globalkeys' ); ?>" aria-hidden="true">&times;</button>
-			</div>
+				<div class="header-pill-search-close-area" aria-hidden="true">
+					<button type="button" class="header-pill-search-close" aria-label="<?php esc_attr_e( 'Suche schließen', 'globalkeys' ); ?>">&times;</button>
+				</div>
 			</div>
 			</div>
 
