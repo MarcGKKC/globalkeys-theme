@@ -214,6 +214,7 @@ add_action( 'init', 'globalkeys_enable_customer_registration', 1 );
  * WooCommerce-Registrierung: Vorname und Nachname.
  */
 require get_template_directory() . '/inc/woocommerce-registration.php';
+require get_template_directory() . '/inc/email-verification.php';
 
 /**
  * Bei Login-Fehler: Redirect + Transient (gleicher Ansatz wie Register-Block).
@@ -859,6 +860,72 @@ function globalkeys_scripts() {
 		}
 		.gk-login-error-modal__ok:hover {
 			opacity: 0.95;
+		}
+		/* E-Mail-Verifizierungsseite */
+		body.gk-verify-email .gk-verify-box {
+			width: 100%;
+			max-width: 480px;
+			margin: 0 auto;
+		}
+		body.gk-verify-email .gk-verify-intro {
+			color: rgba(255,255,255,0.85);
+			font-size: 1rem;
+			line-height: 1.5;
+			margin: 0 0 1.5rem;
+		}
+		body.gk-verify-email .gk-verify-error {
+			color: #dc2626;
+			font-size: 0.95rem;
+			margin: 0 0 1rem;
+			padding: 0.5rem 0;
+		}
+		body.gk-verify-email .gk-verify-success {
+			color: #04DA8D;
+			font-size: 0.95rem;
+			margin: 0 0 1rem;
+			padding: 0.5rem 0;
+		}
+		body.gk-verify-email .gk-verify-resend {
+			margin: 0 0 1rem;
+		}
+		body.gk-verify-email .gk-verify-code-inputs {
+			display: flex;
+			gap: 0.5rem;
+			justify-content: center;
+			margin: 0 0 1.5rem;
+		}
+		body.gk-verify-email .gk-verify-digit {
+			width: 3rem;
+			height: 3.5rem;
+			text-align: center;
+			font-size: 1.5rem;
+			font-weight: 600;
+			border: 1px solid rgba(255,255,255,0.3);
+			border-radius: 6px;
+			background: rgba(255,255,255,0.08);
+			color: #fff;
+			transition: border-color 0.2s, background 0.2s;
+		}
+		body.gk-verify-email .gk-verify-digit:focus {
+			outline: none;
+			border-color: #04DA8D;
+			background: rgba(4,218,141,0.08);
+		}
+		body.gk-verify-email .gk-verify-later {
+			margin: 0 0 0.25rem;
+		}
+		body.gk-verify-email .gk-verify-later-link {
+			color: #04DA8D;
+			text-decoration: none;
+			transition: color 0.2s;
+		}
+		body.gk-verify-email .gk-verify-later-link:hover {
+			color: #05f0a0;
+		}
+		body.gk-verify-email .gk-verify-later-hint {
+			color: rgba(255,255,255,0.5);
+			font-size: 0.9rem;
+			margin: 0;
 		}
 	';
 	wp_add_inline_style( 'globalkeys-style', $account_css );

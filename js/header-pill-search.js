@@ -23,7 +23,7 @@
 
 		var closeFallbackTimeout = null;
 		var closeTransitionEndHandler = null;
-		var ANIMATION_MS = 520;
+		var ANIMATION_MS = 260;
 
 		function cancelPendingClose() {
 			if ( closeFallbackTimeout ) {

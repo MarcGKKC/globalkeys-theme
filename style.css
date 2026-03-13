@@ -805,7 +805,7 @@ textarea {
 	max-width: 40rem;
 }
 
-/* Such-Overlay: Öffnen von rechts nach links, Schließen von links nach rechts */
+/* Such-Overlay: Verlauf beim Öffnen/Offen; rechts (ab Mitte) helles Grün, beim Zuklappen kein Verlauf sichtbar */
 .header-pill-search-overlay {
 	position: absolute;
 	top: 0;
@@ -815,10 +815,10 @@ textarea {
 	display: flex;
 	align-items: center;
 	padding: 0 1.35rem 0 1.35rem;
-	background: #04DA8D;
+	background: linear-gradient(to left, #04DA8D 0%, #04DA8D 50%, #03b870 65%, #029a5e 80%, #027a54 100%);
 	border-radius: 10px;
 	transform: translateX(100%);
-	transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+	transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 	z-index: 2;
 }
 
@@ -856,18 +856,19 @@ textarea {
 	font-size: 0.9375rem;
 	border: none;
 	border-radius: 10px;
-	background: #04DA8D;
+	background: transparent;
 	color: #fff;
 	caret-color: #fff;
 }
 
 .header-pill-search-form .header-pill-search-input::placeholder {
-	color: #fff;
+	color: #027a54;
+	font-weight: 700;
 }
 
 .header-pill-search-form .header-pill-search-input:focus {
 	outline: none;
-	background: #04DA8D;
+	background: transparent;
 	color: #fff;
 }
 
@@ -958,7 +959,7 @@ textarea {
 	padding: 0;
 	border: none;
 	border-radius: 10px;
-	background: #04DA8D;
+	background: linear-gradient(to left, #04DA8D 0%, #03b870 40%, #029a5e 70%, #027a54 100%);
 	color: #fff;
 	cursor: pointer;
 	transition: opacity 0.2s;

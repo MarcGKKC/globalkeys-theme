@@ -31,6 +31,11 @@ function globalkeys_body_classes( $classes ) {
 	if ( function_exists( 'is_account_page' ) && is_account_page() && ! is_user_logged_in() ) {
 		$classes[] = 'gk-account-login';
 	}
+	// E-Mail-Verifizierungsseite: gleiches Layout wie Account.
+	if ( get_query_var( 'gk_verify' ) ) {
+		$classes[] = 'gk-account-login';
+		$classes[] = 'gk-verify-email';
+	}
 
 	return $classes;
 }
