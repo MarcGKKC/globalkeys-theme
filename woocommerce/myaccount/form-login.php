@@ -28,10 +28,6 @@ if ( $gk_register_error ) {
 	delete_transient( 'gk_register_error' );
 }
 ?>
-<script>
-window.gkTogglePassword=function(id){var i=document.getElementById(id);if(!i)return;var w=i.closest('.gk-password-input-wrap');if(!w)return;var t=w.querySelector('.gk-password-toggle'),o=t&&t.querySelector('.gk-eye-open'),c=t&&t.querySelector('.gk-eye-closed');if(!t||!o||!c)return;var p=i.type==='password';i.type=p?'text':'password';o.style.display=p?'block':'none';c.style.display=p?'none':'block';};
-document.addEventListener('click',function(e){var b=e.target.closest('.gk-password-toggle');if(!b)return;var id=b.getAttribute('data-target');if(id&&window.gkTogglePassword){e.preventDefault();e.stopPropagation();window.gkTogglePassword(id);}},true);
-</script>
 <div class="gk-account-split">
 
 	<div class="gk-account-form-col">
@@ -67,10 +63,6 @@ document.addEventListener('click',function(e){var b=e.target.closest('.gk-passwo
 							<label for="password"><?php esc_html_e( 'Password', 'woocommerce' ); ?></label>
 							<span class="gk-password-input-wrap">
 								<input class="woocommerce-Input woocommerce-Input--text input-text" type="password" name="password" id="password" autocomplete="current-password" placeholder="********" required aria-required="true" />
-								<button type="button" class="gk-password-toggle" aria-label="<?php esc_attr_e( 'Passwort ein-/ausblenden', 'globalkeys' ); ?>" data-target="password">
-									<svg class="gk-eye-open" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="display:none;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-									<svg class="gk-eye-closed" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-								</button>
 							</span>
 							<small class="gk-password-hint" aria-live="polite"><?php echo esc_html( wp_get_password_hint() ?: __( 'Mindestens 8 Zeichen, eine Zahl und ein Großbuchstabe.', 'globalkeys' ) ); ?></small>
 						</p>
@@ -139,10 +131,6 @@ document.addEventListener('click',function(e){var b=e.target.closest('.gk-passwo
 							<label for="reg_password"><?php esc_html_e( 'Passwort', 'woocommerce' ); ?>&nbsp;<span class="required" aria-hidden="true">*</span></label>
 							<span class="gk-password-input-wrap">
 								<input class="woocommerce-Input woocommerce-Input--text input-text" type="password" name="password" id="reg_password" autocomplete="new-password" placeholder="********" required aria-required="true" />
-								<button type="button" class="gk-password-toggle" aria-label="<?php esc_attr_e( 'Passwort ein-/ausblenden', 'globalkeys' ); ?>" data-target="reg_password">
-									<svg class="gk-eye-open" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="display:none;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-									<svg class="gk-eye-closed" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-								</button>
 							</span>
 							<small class="gk-password-hint" aria-live="polite"><?php echo esc_html( wp_get_password_hint() ?: __( 'Mindestens 8 Zeichen, eine Zahl und ein Großbuchstabe.', 'globalkeys' ) ); ?></small>
 						</p>

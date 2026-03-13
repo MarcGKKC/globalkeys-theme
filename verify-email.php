@@ -23,9 +23,21 @@ $gk_verify_resent  = isset( $_GET['gk_resent'] ) && '1' === $_GET['gk_resent'];
 
 get_header();
 ?>
-<main id="primary" class="site-main">
-<div class="gk-account-split gk-verify-email-page">
-	<div class="gk-account-form-col">
+<div class="gk-verify-logo" aria-hidden="true">
+	<?php
+	$logo_url = '';
+	if ( has_custom_logo() ) {
+		$logo_src = wp_get_attachment_image_src( get_theme_mod( 'custom_logo' ), 'full' );
+		$logo_url = is_array( $logo_src ) && ! empty( $logo_src[0] ) ? $logo_src[0] : '';
+	}
+	if ( $logo_url ) : ?>
+		<img src="<?php echo esc_url( $logo_url ); ?>" alt="" class="gk-verify-logo-img" width="180" height="36" />
+	<?php else : ?>
+		<img src="<?php echo esc_url( get_template_directory_uri() . '/Pictures/GlobalKeysOriginalLogo-gk.svg' ); ?>" alt="" class="gk-verify-logo-img" width="180" height="36" />
+	<?php endif; ?>
+</div>
+<main id="primary" class="site-main gk-verify-main">
+	<div class="gk-verify-centering">
 		<div class="gk-verify-box">
 			<h2 class="gk-login-box-title"><?php esc_html_e( 'Verifiziere deine E-Mail', 'globalkeys' ); ?></h2>
 			<p class="gk-verify-intro"><?php esc_html_e( 'Gib den 6-stelligen Code ein, den wir an deine E-Mail-Adresse gesendet haben, um dein Konto zu aktivieren.', 'globalkeys' ); ?></p>
@@ -45,6 +57,7 @@ get_header();
 					<input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="gk-verify-digit" data-index="0" autocomplete="one-time-code" aria-label="<?php esc_attr_e( 'Ziffer 1', 'globalkeys' ); ?>" />
 					<input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="gk-verify-digit" data-index="1" aria-label="<?php esc_attr_e( 'Ziffer 2', 'globalkeys' ); ?>" />
 					<input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="gk-verify-digit" data-index="2" aria-label="<?php esc_attr_e( 'Ziffer 3', 'globalkeys' ); ?>" />
+					<span class="gk-verify-digit-sep" aria-hidden="true"></span>
 					<input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="gk-verify-digit" data-index="3" aria-label="<?php esc_attr_e( 'Ziffer 4', 'globalkeys' ); ?>" />
 					<input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="gk-verify-digit" data-index="4" aria-label="<?php esc_attr_e( 'Ziffer 5', 'globalkeys' ); ?>" />
 					<input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="gk-verify-digit" data-index="5" aria-label="<?php esc_attr_e( 'Ziffer 6', 'globalkeys' ); ?>" />
@@ -66,10 +79,7 @@ get_header();
 			<p class="gk-verify-later-hint"><?php esc_html_e( 'Du wirst zur Startseite weitergeleitet.', 'globalkeys' ); ?></p>
 		</div>
 	</div>
-	<div class="gk-account-image-col">
-		<div class="gk-account-image-placeholder" role="img" aria-label="<?php esc_attr_e( 'Decorative', 'globalkeys' ); ?>"></div>
-	</div>
-</div>
+</main>
 
 <script>
 (function(){
@@ -116,6 +126,5 @@ get_header();
 	updateCode();
 })();
 </script>
-</main>
 <?php
 get_footer();

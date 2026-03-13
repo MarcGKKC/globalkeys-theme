@@ -36,7 +36,7 @@ $account_url = class_exists( 'WooCommerce' ) ? wc_get_page_permalink( 'myaccount
 				<?php endif; ?>
 			</div>
 
-			<!-- Mitte: Menü über der Pill, darunter Pill (Plattformen + Suche) – zentriert -->
+			<!-- Mitte: 5 Menüpunkte über der Pill, darunter Pill (Plattformen + Suche) – zentriert -->
 			<div class="header-pill-wrapper">
 				<nav class="header-nav-above" aria-label="<?php esc_attr_e( 'Hauptmenü', 'globalkeys' ); ?>">
 					<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Trending Games', 'globalkeys' ); ?></a>
@@ -97,14 +97,20 @@ $account_url = class_exists( 'WooCommerce' ) ? wc_get_page_permalink( 'myaccount
 
 			<!-- Rechts: Warenkorb + Konto / Sign in (Icons per Mask mit Farbe #04DA8D beim Hover) -->
 			<?php
-			$cart_icon_url    = esc_url( get_template_directory_uri() . '/Pictures/cart.g.svg' );
-			$signin_icon_url  = esc_url( get_template_directory_uri() . '/Pictures/sign-in-button.svg' );
+			$cart_icon_url      = esc_url( get_template_directory_uri() . '/Pictures/cart.g.svg' );
+			$signin_icon_url    = esc_url( get_template_directory_uri() . '/Pictures/sign-in-button.svg' );
+			$favorite_icon_url  = esc_url( get_template_directory_uri() . '/Pictures/heart1-gk.svg' );
+			$favorites_url      = esc_url( home_url( '/favorites/' ) );
 			?>
 			<style>
 			.header-icon-cart { -webkit-mask-image: url('<?php echo $cart_icon_url; ?>'); mask-image: url('<?php echo $cart_icon_url; ?>'); }
 			.header-icon-account { -webkit-mask-image: url('<?php echo $signin_icon_url; ?>'); mask-image: url('<?php echo $signin_icon_url; ?>'); }
+			.header-icon-favorite { -webkit-mask-image: url('<?php echo $favorite_icon_url; ?>'); mask-image: url('<?php echo $favorite_icon_url; ?>'); }
 			</style>
 			<div class="site-header-actions">
+				<a href="<?php echo esc_url( $favorites_url ); ?>" class="header-icon-link header-favorites-link" aria-label="<?php esc_attr_e( 'Favoriten', 'globalkeys' ); ?>">
+					<span class="header-icon header-icon-favorite" aria-hidden="true"></span>
+				</a>
 				<a href="<?php echo esc_url( $cart_url ); ?>" class="header-icon-link header-cart-link" aria-label="<?php esc_attr_e( 'Warenkorb', 'globalkeys' ); ?>">
 					<span class="header-icon header-icon-cart" aria-hidden="true"></span>
 					<?php if ( class_exists( 'WooCommerce' ) && WC()->cart && WC()->cart->get_cart_contents_count() > 0 ) : ?>

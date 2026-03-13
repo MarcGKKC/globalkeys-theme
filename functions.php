@@ -217,6 +217,47 @@ require get_template_directory() . '/inc/woocommerce-registration.php';
 require get_template_directory() . '/inc/email-verification.php';
 
 /**
+ * HTTPS erzwingen für Account- und Verifizierungsseiten.
+ * Bitdefender und andere Security-Tools blockieren Login-Formulare über HTTP
+ * („PasswordStealer“-Warnung). Mit HTTPS verschwindet die Meldung.
+ */
+function globalkeys_force_https_account_pages() {
+	if ( is_admin() ) {
+		return;
+	}
+	$site_url = get_option( 'siteurl' );
+	if ( strpos( $site_url, 'https://' ) !== 0 ) {
+		return;
+	}
+	$is_https = ( ! empty( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] !== 'off' )
+		|| ( ! empty( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https' );
+	if ( ! $is_https ) {
+		$is_account = function_exists( 'is_account_page' ) && is_account_page();
+		$is_verify  = get_query_var( 'gk_verify' );
+		if ( $is_account || $is_verify ) {
+			$redirect = 'https://' . ( isset( $_SERVER['HTTP_HOST'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) : '' ) . ( isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '' );
+			wp_safe_redirect( $redirect, 301 );
+			exit;
+		}
+	}
+}
+add_action( 'template_redirect', 'globalkeys_force_https_account_pages', 1 );
+
+/**
+ * Security-Header für Login/Account-Seiten – reduziert False-Positives bei AV-Scannern.
+ */
+function globalkeys_account_security_headers() {
+	$is_account = function_exists( 'is_account_page' ) && is_account_page() && ! is_user_logged_in();
+	$is_verify  = get_query_var( 'gk_verify' );
+	if ( $is_account || $is_verify ) {
+		header( 'X-Content-Type-Options: nosniff' );
+		header( 'X-Frame-Options: SAMEORIGIN' );
+		header( 'Referrer-Policy: strict-origin-when-cross-origin' );
+	}
+}
+add_action( 'send_headers', 'globalkeys_account_security_headers' );
+
+/**
  * Bei Login-Fehler: Redirect + Transient (gleicher Ansatz wie Register-Block).
  */
 function globalkeys_login_failed_redirect() {
@@ -525,30 +566,6 @@ function globalkeys_scripts() {
 		body.gk-account-login .gk-login-box .gk-password-input-wrap {
 			position: relative;
 			display: block;
-		}
-		body.gk-account-login .gk-login-box .gk-password-input-wrap .input-text {
-			padding-right: 3rem;
-		}
-		body.gk-account-login .gk-login-box .gk-password-toggle {
-			position: absolute;
-			right: 0.85rem;
-			top: 50%;
-			transform: translateY(-50%);
-			background: #0e0d1e;
-			border: 1px solid rgba(180, 180, 190, 0.35);
-			border-radius: 3px;
-			cursor: pointer;
-			padding: 0.35rem;
-			color: rgba(255,255,255,0.6);
-			transition: color 0.2s ease, border-color 0.2s ease;
-			z-index: 20;
-			pointer-events: auto !important;
-			min-width: 36px;
-			min-height: 36px;
-		}
-		body.gk-account-login .gk-login-box .gk-password-toggle:hover {
-			color: #04DA8D;
-			border-color: #04DA8D;
 		}
 		body.gk-account-login .gk-login-box .gk-btn-login {
 			background: linear-gradient(90deg, #04DA8D 0%, #028a5a 100%) !important;
@@ -861,69 +878,155 @@ function globalkeys_scripts() {
 		.gk-login-error-modal__ok:hover {
 			opacity: 0.95;
 		}
-		/* E-Mail-Verifizierungsseite */
-		body.gk-verify-email .gk-verify-box {
-			width: 100%;
-			max-width: 480px;
-			margin: 0 auto;
+		/* E-Mail-Verifizierungsseite: Clean, Header/Footer aus, Inhalt zentriert */
+		body.gk-verify-page #masthead,
+		body.gk-verify-page #secondary,
+		body.gk-verify-page #colophon {
+			display: none !important;
 		}
-		body.gk-verify-email .gk-verify-intro {
-			color: rgba(255,255,255,0.85);
+		body.gk-verify-page {
+			background: #1a193f;
+			min-height: 100vh;
+		}
+		body.gk-verify-page .gk-verify-logo {
+			position: fixed;
+			top: 1.1rem;
+			left: 1.25rem;
+			z-index: 100;
+			pointer-events: none;
+		}
+		body.gk-verify-page .gk-verify-logo-img {
+			display: block;
+			max-height: 2.5rem;
+			width: auto;
+			height: auto;
+		}
+		body.gk-verify-page #page {
+			min-height: 100vh;
+			display: flex;
+			flex-direction: column;
+		}
+		body.gk-verify-page .site-main.gk-verify-main {
+			flex: 1;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 2rem;
+			margin: 0;
+			min-height: 0;
+		}
+		body.gk-verify-page .gk-verify-centering {
+			width: 100%;
+			max-width: 420px;
+		}
+		body.gk-verify-page .gk-verify-box {
+			width: 100%;
+			text-align: center;
+		}
+		body.gk-verify-page .gk-login-box-title {
+			color: #fff;
+			font-size: 1.5rem;
+			font-weight: 600;
+			margin: 0 0 0.75rem;
+		}
+		body.gk-verify-page .gk-verify-intro {
+			color: rgba(255,255,255,0.75);
 			font-size: 1rem;
 			line-height: 1.5;
-			margin: 0 0 1.5rem;
+			margin: 0 0 1.75rem;
 		}
-		body.gk-verify-email .gk-verify-error {
+		body.gk-verify-page .gk-verify-error {
 			color: #dc2626;
 			font-size: 0.95rem;
 			margin: 0 0 1rem;
 			padding: 0.5rem 0;
 		}
-		body.gk-verify-email .gk-verify-success {
+		body.gk-verify-page .gk-verify-success {
 			color: #04DA8D;
 			font-size: 0.95rem;
 			margin: 0 0 1rem;
 			padding: 0.5rem 0;
 		}
-		body.gk-verify-email .gk-verify-resend {
+		body.gk-verify-page .gk-verify-code-inputs {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 0.5rem;
+			margin: 0 0 1.75rem;
+			flex-wrap: wrap;
+		}
+		body.gk-verify-page .gk-verify-digit {
+			width: 3.25rem;
+			height: 4rem;
+			text-align: center;
+			font-size: 1.6rem;
+			font-weight: 600;
+			background: #0e0d1e !important;
+			border: 1px solid rgba(180, 180, 190, 0.35) !important;
+			border-radius: 5px;
+			color: #fff;
+			transition: border-color 0.2s;
+		}
+		body.gk-verify-page .gk-verify-digit:hover {
+			border-color: #04DA8D !important;
+		}
+		body.gk-verify-page .gk-verify-digit:focus {
+			outline: none;
+			border-color: #04DA8D !important;
+		}
+		body.gk-verify-page .gk-verify-digit-sep {
+			width: 1rem;
+			height: 2px;
+			background: rgba(180, 180, 190, 0.55);
+			margin: 0 0.65rem;
+			flex-shrink: 0;
+		}
+		body.gk-verify-page .gk-login-submit-row {
 			margin: 0 0 1rem;
 		}
-		body.gk-verify-email .gk-verify-code-inputs {
-			display: flex;
-			gap: 0.5rem;
-			justify-content: center;
-			margin: 0 0 1.5rem;
+		body.gk-verify-page .gk-btn-login {
+			display: block;
+			width: 100%;
+			background: linear-gradient(90deg, #04DA8D 0%, #028a5a 100%) !important;
+			color: #fff !important;
+			border: none !important;
+			padding: 1rem 1.15rem !important;
+			font-weight: 600 !important;
+			font-size: 1.05rem !important;
+			border-radius: 6px !important;
+			cursor: pointer;
+			transition: transform 0.2s ease;
 		}
-		body.gk-verify-email .gk-verify-digit {
-			width: 3rem;
-			height: 3.5rem;
-			text-align: center;
-			font-size: 1.5rem;
-			font-weight: 600;
-			border: 1px solid rgba(255,255,255,0.3);
-			border-radius: 6px;
-			background: rgba(255,255,255,0.08);
-			color: #fff;
-			transition: border-color 0.2s, background 0.2s;
+		body.gk-verify-page .gk-btn-login:hover:not(:disabled) {
+			transform: translateY(-2px);
 		}
-		body.gk-verify-email .gk-verify-digit:focus {
-			outline: none;
-			border-color: #04DA8D;
-			background: rgba(4,218,141,0.08);
+		body.gk-verify-page .gk-btn-login:disabled {
+			background: rgba(4, 218, 141, 0.25) !important;
+			cursor: not-allowed;
 		}
-		body.gk-verify-email .gk-verify-later {
+		body.gk-verify-page .gk-verify-resend {
+			margin: 0 0 1rem;
+		}
+		body.gk-verify-page .gk-divider-line-only {
+			width: 100%;
+			max-width: 200px;
+			margin: 1rem auto;
+			height: 1px;
+			background: rgba(255,255,255,0.2);
+		}
+		body.gk-verify-page .gk-verify-later {
 			margin: 0 0 0.25rem;
 		}
-		body.gk-verify-email .gk-verify-later-link {
+		body.gk-verify-page .gk-verify-later-link {
 			color: #04DA8D;
 			text-decoration: none;
 			transition: color 0.2s;
 		}
-		body.gk-verify-email .gk-verify-later-link:hover {
+		body.gk-verify-page .gk-verify-later-link:hover {
 			color: #05f0a0;
 		}
-		body.gk-verify-email .gk-verify-later-hint {
-			color: rgba(255,255,255,0.5);
+		body.gk-verify-page .gk-verify-later-hint {
+			color: rgba(255,255,255,0.45);
 			font-size: 0.9rem;
 			margin: 0;
 		}

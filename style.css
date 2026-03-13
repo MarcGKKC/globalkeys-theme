@@ -805,7 +805,7 @@ textarea {
 	max-width: 40rem;
 }
 
-/* Such-Overlay: Verlauf beim Öffnen/Offen; rechts (ab Mitte) helles Grün, beim Zuklappen kein Verlauf sichtbar */
+/* Such-Overlay: Verlauf setzt am Button an (rechts #027a54) und wird nach links fortgeführt – kein eigener Verlauf */
 .header-pill-search-overlay {
 	position: absolute;
 	top: 0;
@@ -815,7 +815,7 @@ textarea {
 	display: flex;
 	align-items: center;
 	padding: 0 1.35rem 0 1.35rem;
-	background: linear-gradient(to left, #04DA8D 0%, #04DA8D 50%, #03b870 65%, #029a5e 80%, #027a54 100%);
+	background: linear-gradient(to left, #04DA8D 0%, #04DA8D 25%, #03c47a 50%, #03b870 78%, #029a5e 100%);
 	border-radius: 10px;
 	transform: translateX(100%);
 	transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -853,7 +853,8 @@ textarea {
 	flex: 1;
 	min-width: 0;
 	padding: 0.4rem 0.6rem;
-	font-size: 0.9375rem;
+	font-size: 1rem;
+	font-weight: 700;
 	border: none;
 	border-radius: 10px;
 	background: transparent;
@@ -862,7 +863,8 @@ textarea {
 }
 
 .header-pill-search-form .header-pill-search-input::placeholder {
-	color: #027a54;
+	color: rgba(255, 255, 255, 0.82);
+	font-size: 0.9375rem;
 	font-weight: 700;
 }
 
@@ -959,7 +961,7 @@ textarea {
 	padding: 0;
 	border: none;
 	border-radius: 10px;
-	background: linear-gradient(to left, #04DA8D 0%, #03b870 40%, #029a5e 70%, #027a54 100%);
+	background: linear-gradient(to left, #04DA8D 0%, #04DA8D 65%, #03c47a 100%);
 	color: #fff;
 	cursor: pointer;
 	transition: opacity 0.2s;
@@ -1021,9 +1023,10 @@ textarea {
 	flex-shrink: 0;
 }
 
-/* Cart- und Login-Icons per CSS-Mask: Weiß, Hover exakt #04DA8D */
+/* Cart-, Favoriten- und Login-Icons per CSS-Mask: Weiß, Hover exakt #04DA8D */
 .header-icon-cart,
-.header-icon-account {
+.header-icon-account,
+.header-icon-favorite {
 	display: inline-block;
 	-webkit-mask-size: contain;
 	mask-size: contain;
@@ -1036,7 +1039,8 @@ textarea {
 }
 
 .header-icon-link:hover .header-icon-cart,
-.header-icon-link:hover .header-icon-account {
+.header-icon-link:hover .header-icon-account,
+.header-icon-link:hover .header-icon-favorite {
 	background-color: #04DA8D;
 }
 
