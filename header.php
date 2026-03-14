@@ -149,7 +149,17 @@ if ( ! $gk_account_login ) {
 					<?php endif; ?>
 				</a>
 				<a href="<?php echo esc_url( $account_url ); ?>" class="header-icon-link header-account-link" aria-label="<?php echo esc_attr( is_user_logged_in() ? __( 'Mein Konto', 'globalkeys' ) : __( 'Anmelden', 'globalkeys' ) ); ?>">
-					<span class="header-icon header-icon-account" aria-hidden="true"></span>
+					<?php if ( is_user_logged_in() ) : ?>
+						<?php
+						$current_user_id = get_current_user_id();
+						$header_avatar   = get_avatar_url( $current_user_id, array( 'size' => 120 ) );
+						?>
+						<span class="header-account-avatar-wrap">
+							<img src="<?php echo esc_url( $header_avatar ); ?>" alt="" class="header-account-avatar" width="54" height="54" loading="eager" style="object-position: center bottom;">
+						</span>
+					<?php else : ?>
+						<span class="header-icon header-icon-account" aria-hidden="true"></span>
+					<?php endif; ?>
 				</a>
 			</div>
 		</div>

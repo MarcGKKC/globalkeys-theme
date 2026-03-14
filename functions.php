@@ -226,6 +226,8 @@ add_action( 'init', 'globalkeys_enable_customer_registration', 1 );
  * WooCommerce-Registrierung: Vorname und Nachname.
  */
 require get_template_directory() . '/inc/woocommerce-registration.php';
+require get_template_directory() . '/inc/woocommerce-account-endpoints.php';
+require get_template_directory() . '/inc/profile-avatar.php';
 require get_template_directory() . '/inc/email-verification.php';
 
 /**
@@ -1274,6 +1276,18 @@ function globalkeys_scripts() {
 				filemtime( $dashboard_css )
 			);
 		}
+		$avatar_js = get_template_directory() . '/js/gk-avatar-upload.js';
+		wp_enqueue_script(
+			'globalkeys-avatar-upload',
+			get_template_directory_uri() . '/js/gk-avatar-upload.js',
+			array( 'jquery' ),
+			file_exists( $avatar_js ) ? filemtime( $avatar_js ) : _S_VERSION,
+			true
+		);
+		wp_localize_script( 'globalkeys-avatar-upload', 'gkAvatarUpload', array(
+			'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+			'nonce'   => wp_create_nonce( 'gk_upload_avatar' ),
+		) );
 	}
 
 	if ( function_exists( 'is_account_page' ) && is_account_page() && ! is_user_logged_in() ) {
