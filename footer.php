@@ -28,6 +28,11 @@
 	</footer><!-- #colophon -->
 </div><!-- #page -->
 
+<?php
+if ( function_exists( 'is_account_page' ) && is_account_page() && ! is_user_logged_in() ) {
+	wp_body_open();
+}
+?>
 <?php wp_footer(); ?>
 
 </body>

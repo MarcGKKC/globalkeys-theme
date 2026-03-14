@@ -69,6 +69,8 @@ Nicolas Gallagher and Jonathan Neal https://necolas.github.io/normalize.css/
 html {
 	line-height: 1.15;
 	-webkit-text-size-adjust: 100%;
+	margin: 0;
+	padding: 0;
 }
 
 /* Sections
@@ -79,6 +81,7 @@ html {
  */
 body {
 	margin: 0;
+	padding: 0;
 }
 
 /**
@@ -480,6 +483,14 @@ body {
 	background: var(--gk-bg-color);
 }
 
+/* Kein Spalt links: Seite und Inhalt bündig bis zum Rand */
+#page.site {
+	margin: 0;
+	padding: 0;
+	overflow-x: hidden;
+	width: 100%;
+}
+
 hr {
 	background-color: #ccc;
 	border: 0;
@@ -746,7 +757,7 @@ textarea {
 .header-nav-above a {
 	color: rgba(255, 255, 255, 0.92);
 	text-decoration: none;
-	font-size: 0.9rem;
+	font-size: 15px;
 	padding: 0.2rem 0.4rem;
 	border-radius: 4px;
 	transition: color 0.2s, background 0.2s;
@@ -862,6 +873,21 @@ textarea {
 	caret-color: #fff;
 }
 
+/* Standard-X (Clear-Button) der Suchleiste ausblenden */
+.header-pill-search-form .header-pill-search-input::-webkit-search-cancel-button,
+.header-pill-search-form .header-pill-search-input::-webkit-search-decoration {
+	-webkit-appearance: none;
+	appearance: none;
+}
+
+.header-pill-search-form .header-pill-search-input::-ms-clear {
+	display: none;
+}
+
+.header-pill-search-form .header-pill-search-input::-moz-search-cancel-button {
+	display: none;
+}
+
 .header-pill-search-form .header-pill-search-input::placeholder {
 	color: rgba(255, 255, 255, 0.82);
 	font-size: 0.9375rem;
@@ -871,6 +897,29 @@ textarea {
 .header-pill-search-form .header-pill-search-input:focus {
 	outline: none;
 	background: transparent;
+	color: #fff;
+}
+
+/* „Browse all Games“ rechts in der Pill – immer weiß (überschreibt globale Link-Farbe) */
+.header-pill-search-overlay .header-pill-browse-link,
+.header-pill-search-overlay .header-pill-browse-link:link,
+.header-pill-search-overlay .header-pill-browse-link:visited {
+	color: #fff;
+}
+
+.header-pill-browse-link {
+	flex-shrink: 0;
+	margin-left: auto;
+	font-size: 0.9375rem;
+	font-weight: 400;
+	text-decoration: none;
+	padding: 0.4rem 0;
+	white-space: nowrap;
+	transition: opacity 0.2s;
+}
+
+.header-pill-browse-link:hover {
+	opacity: 0.9;
 	color: #fff;
 }
 
@@ -992,12 +1041,82 @@ textarea {
 	transform: scale(1.15);
 }
 
-/* Rechts: Warenkorb + Konto – direkt am rechten Rand */
+/* Rechts: Rewards | Strich | Favoriten | Warenkorb | Konto */
 .site-header-actions {
 	flex: 0 0 auto;
 	display: flex;
 	align-items: center;
 	gap: 0.25rem;
+}
+
+.header-rewards-link {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 0.2rem;
+	flex-shrink: 0;
+	width: 88px;
+	max-width: 88px;
+	min-width: 88px;
+	color: #fff;
+	text-decoration: none;
+	font-size: 0.8125rem;
+	line-height: 1.2;
+	text-align: center;
+	padding: 0.35rem 0.4rem;
+	border-radius: 4px;
+	transition: color 0.2s, opacity 0.2s;
+}
+
+.header-rewards-link:hover {
+	color: #04DA8D;
+	opacity: 0.9;
+}
+
+/* Einheitliche feste Größe auf allen Seiten (auch Cart) */
+.header-rewards-logo {
+	display: block;
+	width: 88px;
+	max-width: 88px;
+	height: auto;
+	object-fit: contain;
+}
+
+.header-rewards-icon {
+	display: block;
+	width: 88px;
+	max-width: 88px;
+	height: auto;
+	max-height: 23px;
+	object-fit: contain;
+}
+
+/* Auf Cart/WooCommerce-Seiten: gleiche Rewards-Größe erzwingen (überschreibt andere Styles) */
+#masthead .site-header-actions .header-rewards-link {
+	width: 88px !important;
+	min-width: 88px !important;
+	max-width: 88px !important;
+}
+
+#masthead .site-header-actions .header-rewards-logo {
+	width: 88px !important;
+	max-width: 88px !important;
+}
+
+#masthead .site-header-actions .header-rewards-icon {
+	width: 88px !important;
+	max-width: 88px !important;
+	max-height: 23px !important;
+}
+
+/* Dünner vertikaler Strich links von Favorites */
+.header-actions-divider {
+	width: 1px;
+	height: 2.25rem;
+	background: #fff;
+	flex-shrink: 0;
+	margin: 0 0.75rem;
 }
 
 .header-icon-link {
@@ -1403,7 +1522,6 @@ textarea {
 .gk-section {
 	padding: 2rem 1rem;
 	margin-bottom: 1rem;
-	border-left: 4px solid #0073aa;
 }
 
 .gk-section-inner {
@@ -1427,9 +1545,9 @@ textarea {
 	background-position: center top;
 	background-repeat: no-repeat;
 	padding-top: 8rem;
-	padding-bottom: 8rem;
+	padding-bottom: 0;
+	margin-bottom: 0;
 	min-height: 38rem;
-	border-left-color: transparent;
 	/* Schatten beginnt unterhalb des Headers – Logo, Pill und Icons bleiben unberührt */
 	box-shadow: inset 0 9rem 64px -12px rgba(0, 0, 0, 0.38);
 }
@@ -1443,14 +1561,55 @@ textarea {
 	color: #fff;
 }
 
+/* Infobar direkt unter dem Hero-Bild drangeknöpft (kein Abstand) */
+.gk-hero-stats-bar {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: 0 3rem;
+	padding: 1.5rem 1.25rem;
+	margin: 0;
+	background: #13122a;
+	color: #fff;
+}
+
+.gk-hero-stat {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	gap: 0.25rem;
+}
+
+.gk-hero-stat-number {
+	font-size: 2.25rem;
+	font-weight: 700;
+	line-height: 1.2;
+	color: #fff;
+}
+
+.gk-hero-stat-label {
+	font-size: 0.875rem;
+	font-weight: 400;
+	line-height: 1.3;
+	color: #fff;
+	opacity: 0.95;
+}
+
+.gk-hero-stat-divider {
+	width: 1px;
+	height: 3rem;
+	background: rgba(255, 255, 255, 0.4);
+	flex-shrink: 0;
+}
+
 .gk-section-intro {
 	background: #f5f5f5;
-	border-left-color: #46b450;
 }
 
 .gk-section-cta {
 	background: #f8f0e8;
-	border-left-color: #d47500;
 }
 
 /* Section-Navigation im Header

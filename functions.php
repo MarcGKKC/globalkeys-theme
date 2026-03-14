@@ -176,6 +176,18 @@ function globalkeys_hide_myaccount_menu_class( $classes, $item ) {
 add_filter( 'nav_menu_css_class', 'globalkeys_hide_myaccount_menu_class', 10, 2 );
 
 /**
+ * Admin-Bar auf Login/Register-Seite ausblenden.
+ * wp_body_open wird für Login-Seite ans Seitenende verschoben (header.php/footer.php),
+ * damit eingespritzte Inhalte (z. B. Store Notice) nicht oben als Balken erscheinen.
+ */
+function globalkeys_hide_admin_bar_on_account_login() {
+	if ( function_exists( 'is_account_page' ) && is_account_page() && ! is_user_logged_in() ) {
+		add_filter( 'show_admin_bar', '__return_false' );
+	}
+}
+add_action( 'wp', 'globalkeys_hide_admin_bar_on_account_login', 1 );
+
+/**
  * Registrierung für neue Kunden aktivieren (Online-Shop).
  *
  * Aktiviert WordPress-Registrierung und WooCommerce-Registrierung auf der
@@ -355,14 +367,102 @@ function globalkeys_scripts() {
 			border-color: #b32d2e;
 			box-shadow: 0 0 0 1px #b32d2e;
 		}
-		/* My Account Login/Register: Sidebar und Footer ausblenden */
+		/* My Account (Login + Dashboard): Sidebar und Footer ausblenden */
 		body.gk-account-login #secondary,
-		body.gk-account-login #colophon {
+		body.gk-account-login #colophon,
+		body.woocommerce-account #secondary,
+		body.woocommerce-account #colophon {
 			display: none !important;
+		}
+		html.gk-account-login-page {
+			margin: 0 !important;
+			padding: 0 !important;
+			background: #1a193f;
+			border: none !important;
+			outline: none !important;
+			box-shadow: none !important;
+		}
+		html.gk-account-login-page.admin-bar {
+			margin-top: 0 !important;
+		}
+		html.gk-account-login-page.admin-bar #wpadminbar {
+			display: none !important;
+		}
+		html.gk-account-login-page,
+		body.gk-account-login {
+			overflow: hidden !important;
+			height: 100vh;
+			margin: 0 !important;
+			padding: 0 !important;
+		}
+		html.gk-account-login-page::-webkit-scrollbar,
+		body.gk-account-login::-webkit-scrollbar {
+			display: none;
+		}
+		html.gk-account-login-page,
+		body.gk-account-login {
+			-ms-overflow-style: none;
+			scrollbar-width: none;
+		}
+		body.gk-account-login .gk-account-logo-header,
+		body.gk-account-login .gk-account-logo-header .site-header-inner {
+			border: none !important;
+			box-shadow: none !important;
+		}
+		body.gk-account-login .gk-account-logo-header .site-header-inner {
+			padding-top: 1.5rem;
+			padding-left: 1.75rem;
+			padding-right: 1.75rem;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+		}
+		body.gk-account-login .skip-link {
+			display: none !important;
+		}
+		body.gk-account-login .gk-account-close {
+			position: relative;
+			top: auto;
+			right: auto;
+			left: auto;
+			z-index: 10;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			width: 2rem;
+			height: 2rem;
+			color: #fff;
+			text-decoration: none;
+			transition: color 0.2s ease;
+			flex-shrink: 0;
+			cursor: pointer;
+		}
+		body.gk-account-login .gk-account-close:hover {
+			color: #04DA8D;
+		}
+		body.gk-account-login .gk-account-close svg {
+			width: 32px;
+			height: 32px;
+		}
+		body.gk-account-login .woocommerce-store-notice,
+		body.gk-account-login p.demo_store {
+			display: none !important;
+		}
+		body.gk-account-login {
+			background: #1a193f;
+			border: none !important;
+			outline: none !important;
+		}
+		body.gk-account-login #page,
+		body.gk-account-login .site-main,
+		body.gk-account-login .woocommerce {
+			margin: 0 !important;
+			padding: 0 !important;
+			border: none !important;
+			box-shadow: none !important;
 		}
 		/* My Account Login: 2-Spalten-Layout (Form links, Bild rechts) */
 		body.gk-account-login .site-main {
-			padding: 0;
 			max-width: none;
 		}
 		body.gk-account-login .entry-header,
@@ -384,11 +484,22 @@ function globalkeys_scripts() {
 		body.gk-account-login .gk-account-split {
 			display: grid;
 			grid-template-columns: 1fr 1fr;
-			min-height: calc(100vh - 80px);
+			position: fixed;
+			inset: 0;
+			width: 100%;
+			height: 100%;
+			min-height: 100vh;
 			overflow: hidden;
+			margin: 0;
+			align-items: stretch;
+			border: none !important;
+			box-shadow: none !important;
+			z-index: 0;
 		}
 		body.gk-account-login .gk-account-form-col {
 			background: #1a193f;
+			border: none !important;
+			box-shadow: none !important;
 			display: flex;
 			align-items: center;
 			justify-content: center;
@@ -396,6 +507,11 @@ function globalkeys_scripts() {
 			clip-path: polygon(0 0, 100% 0, 89% 100%, 0 100%);
 			position: relative;
 			z-index: 2;
+			min-height: 100%;
+		}
+		body.gk-account-login .gk-account-form-col,
+		body.gk-account-login .gk-account-image-col {
+			align-self: stretch;
 		}
 		body.gk-account-login .gk-account-blocks {
 			width: 100%;
@@ -430,6 +546,7 @@ function globalkeys_scripts() {
 			display: block;
 			position: relative;
 			z-index: 2;
+			margin-top: 0.5rem;
 		}
 		/* Login-Box: Rahmen nur außen, innen keine Borders */
 		body.gk-account-login .gk-login-box form,
@@ -506,7 +623,7 @@ function globalkeys_scripts() {
 			white-space: nowrap;
 		}
 		body.gk-account-login .gk-divider-register {
-			margin-top: 2rem;
+			margin-top: 1.25rem;
 			margin-bottom: 1.1rem;
 		}
 		body.gk-account-login .gk-login-box .gk-login-row {
@@ -567,6 +684,30 @@ function globalkeys_scripts() {
 			position: relative;
 			display: block;
 		}
+		body.gk-account-login .gk-login-box .gk-password-input-wrap .input-text {
+			padding-right: 3rem !important;
+		}
+		body.gk-account-login .gk-login-box .gk-password-toggle {
+			position: absolute;
+			right: 0.85rem;
+			top: 50%;
+			transform: translateY(-50%);
+			background: #0e0d1e;
+			border: 1px solid rgba(180, 180, 190, 0.35);
+			border-radius: 3px;
+			cursor: pointer;
+			padding: 0.35rem;
+			color: rgba(255,255,255,0.6);
+			transition: color 0.2s ease, border-color 0.2s ease;
+			z-index: 20;
+			pointer-events: auto !important;
+			min-width: 36px;
+			min-height: 36px;
+		}
+		body.gk-account-login .gk-login-box .gk-password-toggle:hover {
+			color: #04DA8D;
+			border-color: #04DA8D;
+		}
 		body.gk-account-login .gk-login-box .gk-btn-login {
 			background: linear-gradient(90deg, #04DA8D 0%, #028a5a 100%) !important;
 			color: #fff !important;
@@ -601,6 +742,22 @@ function globalkeys_scripts() {
 			height: 1px;
 			background: rgba(180, 180, 190, 0.35);
 			margin: 1.35rem 0 1.5rem;
+		}
+		body.gk-account-login .gk-login-block .gk-divider-line-only {
+			margin-top: 0.85rem;
+		}
+		body.gk-account-login .gk-register-block .gk-divider-line-only {
+			margin-top: 0.85rem;
+		}
+		body.gk-account-login .gk-register-block .gk-divider-register {
+			margin-top: 1.5rem;
+			margin-bottom: 0.5rem;
+		}
+		body.gk-account-login .gk-register-block .gk-register-btn-row {
+			margin: 0.5rem 0 0;
+		}
+		body.gk-account-login .gk-register-block .gk-terms-checkbox-row {
+			margin-top: 0.4rem !important;
 		}
 		body.gk-account-login .gk-login-box .gk-login-submit-row {
 			margin: 0 0 0.4rem;
@@ -755,7 +912,7 @@ function globalkeys_scripts() {
 		}
 		body.gk-account-login .gk-account-image-col {
 			background: #202020;
-			min-height: 400px;
+			min-height: 100%;
 			position: relative;
 			clip-path: polygon(11% 0, 100% 0, 100% 100%, 0 100%);
 			margin-left: -5%;
@@ -767,12 +924,20 @@ function globalkeys_scripts() {
 			left: 10.5%;
 			top: 0;
 			bottom: 0;
-			width: 34px;
-			background: #1a193f;
+			width: 2px;
+			background: rgba(255, 255, 255, 0.26);
 			transform: skewX(-6.3deg);
 			transform-origin: center;
 			pointer-events: none;
 			z-index: 2;
+		}
+		body.gk-account-login .gk-account-login-video {
+			position: absolute;
+			inset: 0;
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			z-index: 1;
 		}
 		body.gk-account-login .gk-account-image-placeholder {
 			position: absolute;
@@ -780,6 +945,7 @@ function globalkeys_scripts() {
 			background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 50%, #0d0d0d 100%);
 			background-size: cover;
 			background-position: center;
+			z-index: 0;
 		}
 		@media (max-width: 768px) {
 			body.gk-account-login .gk-account-split {
@@ -1097,6 +1263,18 @@ function globalkeys_scripts() {
 	wp_enqueue_script( 'globalkeys-navigation', get_template_directory_uri() . '/js/navigation.js', array(), _S_VERSION, true );
 	$gk_pill_search_ver = (string) filemtime( get_template_directory() . '/js/header-pill-search.js' );
 	wp_enqueue_script( 'globalkeys-header-pill-search', get_template_directory_uri() . '/js/header-pill-search.js', array(), $gk_pill_search_ver, true );
+
+	if ( function_exists( 'is_account_page' ) && is_account_page() && is_user_logged_in() ) {
+		$dashboard_css = get_template_directory() . '/assets/css/account-dashboard.css';
+		if ( file_exists( $dashboard_css ) ) {
+			wp_enqueue_style(
+				'globalkeys-account-dashboard',
+				get_template_directory_uri() . '/assets/css/account-dashboard.css',
+				array( 'globalkeys-style' ),
+				filemtime( $dashboard_css )
+			);
+		}
+	}
 
 	if ( function_exists( 'is_account_page' ) && is_account_page() && ! is_user_logged_in() ) {
 		$login_no_border = '

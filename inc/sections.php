@@ -50,3 +50,22 @@ function globalkeys_get_front_page_sections() {
 function globalkeys_has_front_page_sections() {
 	return is_front_page() && ( is_home() || is_page() );
 }
+
+/**
+ * Formatiert eine Zahl für die Hero-Statistik: Tausend = K, Million = M.
+ *
+ * @param int|float $num Zahl
+ * @return string z.B. 12.5K, 2M, 50
+ */
+function globalkeys_format_stat_number( $num ) {
+	$num = (float) $num;
+	if ( $num >= 1000000 ) {
+		$n = $num / 1000000;
+		return ( $n === floor( $n ) ? (int) $n : round( $n, 1 ) ) . 'M';
+	}
+	if ( $num >= 1000 ) {
+		$n = $num / 1000;
+		return ( $n === floor( $n ) ? (int) $n : round( $n, 1 ) ) . 'K';
+	}
+	return (string) (int) $num;
+}

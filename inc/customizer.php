@@ -15,6 +15,31 @@ function globalkeys_customize_register( $wp_customize ) {
 	$wp_customize->get_setting( 'blogdescription' )->transport  = 'postMessage';
 	$wp_customize->get_setting( 'header_textcolor' )->transport = 'postMessage';
 
+	// Login-Seite: Hintergrund-Video im dunklen Bereich
+	$wp_customize->add_section(
+		'gk_login_video',
+		array(
+			'title'    => __( 'Login-Seite: Hintergrund-Video', 'globalkeys' ),
+			'priority' => 130,
+		)
+	);
+	$wp_customize->add_setting(
+		'gk_login_video_url',
+		array(
+			'default'           => '',
+			'sanitize_callback' => 'esc_url_raw',
+		)
+	);
+	$wp_customize->add_control(
+		'gk_login_video_url',
+		array(
+			'label'       => __( 'Video-URL (MP4)', 'globalkeys' ),
+			'description' => __( 'URL zum MP4-Video für den dunklen Bereich rechts. Leer lassen für den Standard-Hintergrund.', 'globalkeys' ),
+			'section'     => 'gk_login_video',
+			'type'        => 'url',
+		)
+	);
+
 	if ( isset( $wp_customize->selective_refresh ) ) {
 		$wp_customize->selective_refresh->add_partial(
 			'blogname',

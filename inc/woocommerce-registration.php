@@ -208,6 +208,56 @@ function globalkeys_save_registration_gamertag( $customer_id, $customer_data, $p
 add_action( 'woocommerce_created_customer', 'globalkeys_save_registration_gamertag', 10, 3 );
 
 /**
+ * Gibt eine zufällige 7-stellige Anzeige-Customer-ID zurück (nicht die WordPress User-ID).
+ * Wird pro User einmal generiert und in user_meta gespeichert.
+ *
+ * @param int $user_id WordPress-Benutzer-ID.
+ * @return string 7-stellige Zahl (z.B. "3847291").
+ */
+function globalkeys_get_display_customer_id( $user_id ) {
+	$user_id = (int) $user_id;
+	if ( $user_id <= 0 ) {
+		return '0000000';
+	}
+	$stored = get_user_meta( $user_id, 'display_customer_id', true );
+	if ( '' !== $stored && preg_match( '/^\d{7}$/', $stored ) ) {
+		return $stored;
+	}
+	$max_attempts = 10;
+	for ( $i = 0; $i < $max_attempts; $i++ ) {
+		$id = (string) wp_rand( 1000000, 9999999 );
+		$existing = get_users(
+			array(
+				'meta_key'   => 'display_customer_id',
+				'meta_value' => $id,
+				'exclude'    => array( $user_id ),
+				'number'     => 1,
+				'fields'     => 'ID',
+			)
+		);
+		if ( empty( $existing ) ) {
+			update_user_meta( $user_id, 'display_customer_id', $id );
+			return $id;
+		}
+	}
+	// Fallback: aus User-ID ableiten, falls alle Zufallszahlen kollidieren
+	$fallback = 1000000 + ( absint( crc32( 'gk_cid_' . $user_id ) ) % 9000000 );
+	update_user_meta( $user_id, 'display_customer_id', (string) $fallback );
+	return (string) $fallback;
+}
+
+add_action( 'woocommerce_created_customer', 'globalkeys_set_display_customer_id_on_registration', 10, 1 );
+
+/**
+ * Setzt die 7-stellige Display-Customer-ID bei neuer Registrierung.
+ *
+ * @param int $customer_id WordPress-Benutzer-ID.
+ */
+function globalkeys_set_display_customer_id_on_registration( $customer_id ) {
+	globalkeys_get_display_customer_id( $customer_id );
+}
+
+/**
  * Login per Gamertag ermöglichen (wenn Gamertag in user_meta gespeichert ist).
  *
  * @param null|WP_User $user     Benutzer oder null.

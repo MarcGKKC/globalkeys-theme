@@ -5,11 +5,12 @@
  * @package globalkeys
  */
 
-$cart_url    = class_exists( 'WooCommerce' ) ? wc_get_page_permalink( 'cart' ) : '#';
-$account_url = class_exists( 'WooCommerce' ) ? wc_get_page_permalink( 'myaccount' ) : wp_login_url();
+$cart_url        = class_exists( 'WooCommerce' ) ? wc_get_page_permalink( 'cart' ) : '#';
+$account_url     = class_exists( 'WooCommerce' ) ? wc_get_page_permalink( 'myaccount' ) : wp_login_url();
+$gk_account_login = function_exists( 'is_account_page' ) && is_account_page() && ! is_user_logged_in();
 ?>
 <!doctype html>
-<html <?php language_attributes(); ?>>
+<html <?php language_attributes(); ?><?php echo $gk_account_login ? ' class="gk-account-login-page"' : ''; ?>>
 <head>
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
@@ -19,10 +20,34 @@ $account_url = class_exists( 'WooCommerce' ) ? wc_get_page_permalink( 'myaccount
 </head>
 
 <body <?php body_class(); ?>>
-<?php wp_body_open(); ?>
+<?php
+if ( ! $gk_account_login ) {
+	wp_body_open();
+}
+?>
 <div id="page" class="site">
 	<a class="skip-link screen-reader-text" href="#primary"><?php esc_html_e( 'Skip to content', 'globalkeys' ); ?></a>
 
+	<?php if ( $gk_account_login ) : ?>
+		<header id="masthead" class="site-header site-header--transparent gk-account-logo-header">
+			<div class="site-header-inner">
+				<div class="site-branding">
+					<?php if ( has_custom_logo() ) : ?>
+						<?php the_custom_logo(); ?>
+					<?php else : ?>
+						<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="site-logo-link site-logo-link--svg" rel="home">
+							<img src="<?php echo esc_url( get_template_directory_uri() . '/Pictures/GlobalKeysOriginalLogo-gk.svg' ); ?>" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>" class="site-logo-img" width="180" height="36" />
+						</a>
+					<?php endif; ?>
+				</div>
+				<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="gk-account-close" id="gk-account-close-btn" aria-label="<?php esc_attr_e( 'Schließen', 'globalkeys' ); ?>">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+				</a>
+			</div>
+		</header>
+	<?php endif; ?>
+
+	<?php if ( ! $gk_account_login ) : ?>
 	<header id="masthead" class="site-header site-header--transparent">
 		<div class="site-header-inner">
 			<!-- Links: Logo -->
@@ -80,6 +105,7 @@ $account_url = class_exists( 'WooCommerce' ) ? wc_get_page_permalink( 'myaccount
 						<form role="search" method="get" class="header-pill-search-form" action="<?php echo esc_url( home_url( '/' ) ); ?>">
 							<label for="gk-pill-search-input" class="screen-reader-text"><?php esc_html_e( 'Suchen', 'globalkeys' ); ?></label>
 							<input type="search" id="gk-pill-search-input" class="header-pill-search-input" placeholder="PSN Cards, Multiplayer, ARC Raiders..." value="<?php echo get_search_query(); ?>" name="s" autocomplete="off" />
+							<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="header-pill-browse-link"><?php esc_html_e( 'Browse all Games', 'globalkeys' ); ?></a>
 							<button type="submit" class="header-pill-search-submit" aria-label="<?php esc_attr_e( 'Suchen', 'globalkeys' ); ?>">
 								<svg class="search-submit-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 									<circle cx="11" cy="11" r="8"></circle>
@@ -108,6 +134,11 @@ $account_url = class_exists( 'WooCommerce' ) ? wc_get_page_permalink( 'myaccount
 			.header-icon-favorite { -webkit-mask-image: url('<?php echo $favorite_icon_url; ?>'); mask-image: url('<?php echo $favorite_icon_url; ?>'); }
 			</style>
 			<div class="site-header-actions">
+				<a href="<?php echo esc_url( home_url( '/rewards/' ) ); ?>" class="header-rewards-link" aria-label="<?php esc_attr_e( 'Rewards', 'globalkeys' ); ?>">
+					<img src="<?php echo esc_url( get_template_directory_uri() . '/Pictures/GlobalKeysOriginalLogo-gk.svg' ); ?>" alt="" class="header-rewards-logo" width="88" height="18">
+					<img src="<?php echo esc_url( get_template_directory_uri() . '/Pictures/Rewards-gk.svg' ); ?>" alt="" class="header-rewards-icon" width="88" height="23">
+				</a>
+				<span class="header-actions-divider" aria-hidden="true"></span>
 				<a href="<?php echo esc_url( $favorites_url ); ?>" class="header-icon-link header-favorites-link" aria-label="<?php esc_attr_e( 'Favoriten', 'globalkeys' ); ?>">
 					<span class="header-icon header-icon-favorite" aria-hidden="true"></span>
 				</a>
@@ -123,3 +154,4 @@ $account_url = class_exists( 'WooCommerce' ) ? wc_get_page_permalink( 'myaccount
 			</div>
 		</div>
 	</header><!-- #masthead -->
+	<?php endif; ?>
