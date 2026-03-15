@@ -1573,7 +1573,7 @@ textarea {
 	padding-top: 8rem;
 	padding-bottom: 0;
 	margin-bottom: 0;
-	min-height: 38rem;
+	min-height: 41rem;
 	/* Schatten beginnt unterhalb des Headers – Logo, Pill und Icons bleiben unberührt */
 	box-shadow: inset 0 9rem 64px -12px rgba(0, 0, 0, 0.38);
 }
@@ -1593,7 +1593,7 @@ textarea {
 	align-items: center;
 	justify-content: center;
 	flex-wrap: wrap;
-	gap: 0 3rem;
+	gap: 0 4rem;
 	padding: 1.5rem 1.25rem;
 	margin: 0;
 	background: #13122a;
@@ -1636,6 +1636,157 @@ textarea {
 
 .gk-section-cta {
 	background: #f8f0e8;
+}
+
+/* Featured Products (unter der Hero-Stats-Bar) – Design wie Referenz */
+.gk-section-featured {
+	background: var(--gk-bg-color);
+	padding-top: 2.5rem;
+	padding-bottom: 2.5rem;
+}
+
+.gk-section-featured-inner {
+	max-width: 72rem;
+	margin-left: auto;
+	margin-right: auto;
+	padding-left: 1.5rem;
+	padding-right: 1.5rem;
+}
+
+.gk-featured-heading-wrap {
+	display: inline-block;
+	transform: translateX(-2.75rem);
+	margin-bottom: 1.5rem;
+}
+
+.gk-featured-heading-text-wrap {
+	position: relative;
+	display: inline-block;
+	padding-bottom: 0.5rem;
+}
+
+.gk-featured-heading {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	color: #fff;
+	font-size: 2.75rem;
+	font-weight: 700;
+	margin: 0;
+	text-align: left;
+	line-height: 1.2;
+}
+
+.gk-featured-heading-arrow {
+	display: inline-block;
+	width: 0;
+	height: 0;
+	border-top: 0.18em solid transparent;
+	border-bottom: 0.18em solid transparent;
+	border-left: 0.22em solid #00e599;
+	vertical-align: middle;
+	margin-left: 0.1rem;
+	transform: translateY(-0.02em);
+	transition: transform 0.2s ease;
+}
+
+.gk-featured-heading-wrap:hover .gk-featured-heading-arrow {
+	transform: translateY(-0.02em) translateX(0.25rem);
+}
+
+.gk-featured-title-underline {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 35%;
+	height: 4px;
+	background: #00e599;
+	border-radius: 0;
+	transition: width 0.25s ease;
+}
+
+.gk-featured-heading-wrap:hover .gk-featured-title-underline {
+	width: 100%;
+}
+
+.gk-featured-products {
+	display: grid;
+	grid-template-columns: repeat( 3, 1fr );
+	gap: 1.25rem;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.gk-featured-product {
+	margin: 0;
+}
+
+.gk-featured-product-link {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	text-decoration: none;
+	color: #fff;
+	background: rgba(255, 255, 255, 0.06);
+	border-radius: 10px;
+	padding: 1rem;
+	transition: background 0.2s;
+}
+
+.gk-featured-product-link:hover {
+	background: rgba(255, 255, 255, 0.12);
+	color: #fff;
+}
+
+.gk-featured-product-image {
+	display: block;
+	width: 100%;
+	aspect-ratio: 1;
+	overflow: hidden;
+	border-radius: 6px;
+	margin-bottom: 0.75rem;
+}
+
+.gk-featured-product-image img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+.gk-featured-product-title {
+	font-size: 0.9375rem;
+	font-weight: 600;
+	line-height: 1.3;
+	margin-bottom: 0.35rem;
+}
+
+.gk-featured-product-price {
+	font-size: 0.875rem;
+	opacity: 0.9;
+}
+
+.gk-featured-product-price del {
+	opacity: 0.7;
+}
+
+.gk-featured-empty {
+	color: rgba(255, 255, 255, 0.8);
+	text-align: center;
+}
+
+@media screen and (max-width: 767px) {
+	.gk-featured-products {
+		grid-template-columns: repeat( 2, 1fr );
+	}
+}
+
+@media screen and (max-width: 479px) {
+	.gk-featured-products {
+		grid-template-columns: 1fr;
+	}
 }
 
 /* Section-Navigation im Header

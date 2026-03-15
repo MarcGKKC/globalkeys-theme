@@ -40,17 +40,7 @@ if ( function_exists( 'wc_get_orders' ) ) {
 
 		<!-- HERO -->
 		<div class="gk-accdash__hero">
-			<div class="gk-accdash__heroTopLeft">
-				<div class="gk-accdash__heroAvatarSmall" aria-hidden="true">
-					<?php if ( $avatar_url ) : ?>
-						<img class="gk-accdash__heroAvatarImg" src="<?php echo esc_url( $avatar_url ); ?>" alt="" width="32" height="32" style="object-position: center bottom;">
-					<?php else : ?>
-						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-							<path d="M12 12c2.761 0 5-2.239 5-5S14.761 2 12 2 7 4.239 7 7s2.239 5 5 5Z"/>
-							<path d="M4 22c0-4.418 3.582-8 8-8s8 3.582 8 8"/>
-						</svg>
-					<?php endif; ?>
-				</div>
+			<div class="gk-accdash__heroTopLeft gk-accdash__heroTopLeft--hidden">
 				<?php esc_html_e( 'Customer ID:', 'globalkeys' ); ?> <span><?php echo esc_html( $display_cid ); ?></span>
 			</div>
 
@@ -82,13 +72,18 @@ if ( function_exists( 'wc_get_orders' ) ) {
 					</div>
 				</div>
 				<?php if ( $member_since ) : ?>
-					<div class="gk-accdash__meta"><?php printf( esc_html__( 'Member since %s', 'globalkeys' ), esc_html( $member_since ) ); ?></div>
+					<div class="gk-accdash__meta"><?php printf( esc_html__( 'Registriert seit: %s', 'globalkeys' ), esc_html( $member_since ) ); ?></div>
 				<?php endif; ?>
+				<div class="gk-accdash__socials" aria-hidden="true">
+					<span class="gk-accdash__socialIcon gk-accdash__socialIcon--steam" title="Steam"></span>
+					<span class="gk-accdash__socialIcon gk-accdash__socialIcon--ubisoft" title="Ubisoft"></span>
+					<span class="gk-accdash__socialIcon gk-accdash__socialIcon--ea" title="EA"></span>
+					<span class="gk-accdash__socialIcon gk-accdash__socialIcon--youtube" title="YouTube"></span>
+					<span class="gk-accdash__socialIcon gk-accdash__socialIcon--twitch" title="Twitch"></span>
+					<span class="gk-accdash__socialIcon gk-accdash__socialIcon--discord" title="Discord"></span>
+				</div>
 			</div>
 
-			<div class="gk-accdash__heroBottomRight">
-				<?php esc_html_e( 'Socials to connect', 'globalkeys' ); ?>
-			</div>
 		</div>
 
 		<?php

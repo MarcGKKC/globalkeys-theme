@@ -26,6 +26,12 @@ function globalkeys_get_front_page_sections() {
 			'aria_label' => __( 'Willkommensbereich', 'globalkeys' ),
 		),
 		array(
+			'id'        => 'section-featured',
+			'slug'      => 'featured',
+			'label'     => __( 'Featured Products', 'globalkeys' ),
+			'aria_label' => __( 'Empfohlene Produkte', 'globalkeys' ),
+		),
+		array(
 			'id'        => 'section-intro',
 			'slug'      => 'intro',
 			'label'     => __( 'Intro', 'globalkeys' ),
