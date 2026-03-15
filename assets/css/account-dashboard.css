@@ -413,6 +413,27 @@
   background: #ff3b3b;
 }
 
+/* Zwei untere Boxen (links schmal, rechts breiter wie damals) */
+.gk-accdash__bottomRow {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 37px;
+  margin-top: 40px;
+}
+
+.gk-accdash__bottomBox {
+  background: #13122a;
+  border-radius: 6px;
+}
+
+.gk-accdash__bottomBox:first-child {
+  min-height: 645px;
+}
+
+.gk-accdash__bottomBox:last-child {
+  min-height: 620px;
+}
+
 /* MAIN GRID */
 .gk-accdash__mainGrid {
   display: grid;
@@ -769,6 +790,10 @@ body.woocommerce-account.logged-in .site-main {
   }
 
   .gk-dashboard__row2 {
+    grid-template-columns: 1fr;
+  }
+
+  .gk-accdash__bottomRow {
     grid-template-columns: 1fr;
   }
 }

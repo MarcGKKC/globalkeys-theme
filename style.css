@@ -481,13 +481,13 @@ big {
 
 body {
 	background: var(--gk-bg-color);
+	transition: padding-bottom 0.4s ease-out;
 }
 
 /* Kein Spalt links: Seite und Inhalt bündig bis zum Rand */
 #page.site {
 	margin: 0;
 	padding: 0;
-	overflow-x: hidden;
 	width: 100%;
 }
 
@@ -664,17 +664,32 @@ textarea {
 /* Site Header (transparent über Hero) – eine Zeile: Logo | Pill | Warenkorb + Konto
 --------------------------------------------- */
 .site-header {
-	position: absolute;
+	position: sticky;
 	top: 0;
 	left: 0;
 	right: 0;
 	z-index: 100;
 	width: 100%;
+	background: transparent;
+	transition: background 0.3s ease, backdrop-filter 0.3s ease, -webkit-backdrop-filter 0.3s ease;
 }
 
 .site-header--transparent {
 	background: transparent;
 	color: #fff;
+}
+
+/* Beim Scrollen: Header mit Frosted-Glass-Blur; Pill ohne eigenen Blur/Hintergrund = sieht exakt wie der Header aus */
+body.gk-header-scrolled .site-header {
+	background: rgba(50, 50, 55, 0.5);
+	-webkit-backdrop-filter: blur(12px);
+	backdrop-filter: blur(12px);
+}
+
+body.gk-header-scrolled .header-pill {
+	background: transparent;
+	-webkit-backdrop-filter: none;
+	backdrop-filter: none;
 }
 
 .site-header-inner {
@@ -688,6 +703,7 @@ textarea {
 	padding: 0.75rem 1.25rem;
 	min-height: 4rem;
 	overflow: visible;
+	background: transparent;
 }
 
 .site-header-inner .site-branding {
@@ -1188,6 +1204,124 @@ textarea {
 	display: block;
 }
 
+/* Account-Drawer (Profil-Klick): Hintergrund wie erste Pill, Trennlinien */
+.header-account-drawer-wrap {
+	position: relative;
+	z-index: 1;
+}
+
+/* Overlay hinter Header, damit Hover „wo anders“ den Drawer schließt */
+body.gk-drawer-open #masthead {
+	position: relative;
+	z-index: 10001;
+}
+
+.gk-account-drawer-overlay {
+	position: fixed;
+	/* top/left/right/bottom per JS unterhalb des Headers gesetzt */
+	z-index: 10000;
+	pointer-events: auto;
+}
+
+.header-account-trigger {
+	background: none;
+	border: none;
+	padding: 0;
+	cursor: pointer;
+	font: inherit;
+	color: inherit;
+}
+
+.gk-account-drawer {
+	position: absolute;
+	top: calc(100% + 8px);
+	right: 0;
+	min-width: 220px;
+	background: rgba(50, 50, 55, 0.5);
+	-webkit-backdrop-filter: blur(12px);
+	backdrop-filter: blur(12px);
+	border-radius: 10px;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+	padding: 12px 0;
+	z-index: 10000;
+}
+
+.gk-account-drawer[hidden] {
+	display: none !important;
+}
+
+/* Neues Panel (an body, Schließen per Koordinaten-Check) */
+.gk-account-drawer-panel {
+	position: fixed;
+	min-width: 220px;
+	background: rgba(50, 50, 55, 0.5);
+	-webkit-backdrop-filter: blur(12px);
+	backdrop-filter: blur(12px);
+	border-radius: 10px;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+	padding: 12px 0;
+	z-index: 10002;
+}
+
+.gk-account-drawer__nav {
+	display: flex;
+	flex-direction: column;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.gk-account-drawer__nav a {
+	list-style: none;
+	list-style-type: none;
+	outline-offset: 2px;
+	color: #fff !important;
+}
+
+.gk-account-drawer__nav a:visited {
+	color: #fff !important;
+}
+
+.gk-account-drawer__item {
+	display: block;
+	padding: 10px 20px;
+	color: #fff !important;
+	text-decoration: none;
+	font-size: 16px;
+	font-weight: 500;
+	transition: background 0.2s ease;
+	list-style: none;
+	list-style-type: none;
+	outline: none !important;
+}
+
+.gk-account-drawer__item:focus {
+	outline: 2px solid rgba(255, 255, 255, 0.6) !important;
+	outline-offset: 2px;
+}
+
+.gk-account-drawer__item:visited {
+	color: #fff !important;
+}
+
+.gk-account-drawer__item:hover {
+	background: rgba(255, 255, 255, 0.15);
+}
+
+.gk-account-drawer__item--pill {
+	background: rgba(255, 255, 255, 0.2);
+	border-radius: 999px;
+	margin: 2px 12px;
+	padding: 10px 16px;
+}
+
+.gk-account-drawer__divider {
+	display: block;
+	height: 1px;
+	background: rgba(255, 255, 255, 0.25);
+	margin: 8px 16px;
+}
+
 .header-cart-link .header-cart-count {
 	position: absolute;
 	top: 2px;
@@ -1564,13 +1698,14 @@ textarea {
 	margin: 0;
 }
 
-/* Hero: Hintergrund reicht bis oben (transparenter Header darüber); Inhalt unter dem Header */
+/* Hero: Hintergrund reicht bis oben und unter den Header (keine sichtbare Bar); Inhalt unter dem Header */
 .gk-section-hero {
 	background-color: #2a2a2a;
 	background-size: cover;
 	background-position: center top;
 	background-repeat: no-repeat;
-	padding-top: 8rem;
+	margin-top: -7.5rem;
+	padding-top: calc(8rem + 7.5rem);
 	padding-bottom: 0;
 	margin-bottom: 0;
 	min-height: 41rem;
@@ -1587,7 +1722,19 @@ textarea {
 	color: #fff;
 }
 
-/* Infobar direkt unter dem Hero-Bild drangeknöpft (kein Abstand) */
+/* Infobar: oben unter Hero, beim Scrollen nach oben wegrücken, unten fest erscheinen – Seitenlänge gleich */
+.gk-hero-stats-bar-wrapper {
+	overflow: hidden;
+	max-height: 12rem;
+	transition: max-height 0.4s ease-out, margin 0.4s ease-out, padding 0.4s ease-out;
+}
+
+body.gk-stats-bar-pinned-bottom .gk-hero-stats-bar-wrapper {
+	max-height: 0;
+	margin: 0;
+	padding: 0;
+}
+
 .gk-hero-stats-bar {
 	display: flex;
 	align-items: center;
@@ -1598,6 +1745,22 @@ textarea {
 	margin: 0;
 	background: #13122a;
 	color: #fff;
+	transition: transform 0.4s ease-out, opacity 0.3s ease-out;
+}
+
+body.gk-stats-bar-pinned-bottom .gk-hero-stats-bar {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	z-index: 100;
+	transform: none;
+	box-sizing: border-box;
+}
+
+body.gk-stats-bar-pinned-bottom {
+	padding-bottom: 5.5rem;
+	box-sizing: border-box;
 }
 
 .gk-hero-stat {
@@ -1613,6 +1776,10 @@ textarea {
 	font-weight: 700;
 	line-height: 1.2;
 	color: #fff;
+	font-variant-numeric: tabular-nums;
+	min-width: 5.5ch;
+	display: inline-block;
+	text-align: center;
 }
 
 .gk-hero-stat-label {

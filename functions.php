@@ -1265,6 +1265,13 @@ function globalkeys_scripts() {
 	wp_enqueue_script( 'globalkeys-navigation', get_template_directory_uri() . '/js/navigation.js', array(), _S_VERSION, true );
 	$gk_pill_search_ver = (string) filemtime( get_template_directory() . '/js/header-pill-search.js' );
 	wp_enqueue_script( 'globalkeys-header-pill-search', get_template_directory_uri() . '/js/header-pill-search.js', array(), $gk_pill_search_ver, true );
+	wp_enqueue_script( 'globalkeys-account-drawer', get_template_directory_uri() . '/js/gk-account-drawer.js', array(), _S_VERSION, true );
+	wp_enqueue_script( 'globalkeys-header-scroll-blur', get_template_directory_uri() . '/js/header-scroll-blur.js', array(), _S_VERSION, true );
+
+	if ( function_exists( 'globalkeys_has_front_page_sections' ) && globalkeys_has_front_page_sections() ) {
+		wp_enqueue_script( 'globalkeys-hero-stats-count', get_template_directory_uri() . '/js/hero-stats-count.js', array(), _S_VERSION, true );
+		wp_enqueue_script( 'globalkeys-hero-stats-bar-scroll', get_template_directory_uri() . '/js/hero-stats-bar-scroll.js', array(), _S_VERSION, true );
+	}
 
 	if ( function_exists( 'is_account_page' ) && is_account_page() && is_user_logged_in() ) {
 		$dashboard_css = get_template_directory() . '/assets/css/account-dashboard.css';

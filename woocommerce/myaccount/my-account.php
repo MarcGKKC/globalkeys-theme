@@ -112,5 +112,11 @@ if ( function_exists( 'wc_get_orders' ) ) {
 			<?php endforeach; ?>
 		</nav>
 		<?php endif; ?>
+
+		<!-- Zwei untere Boxen (ohne Inhalt) -->
+		<div class="gk-accdash__bottomRow">
+			<div class="gk-accdash__bottomBox"></div>
+			<div class="gk-accdash__bottomBox"></div>
+		</div>
 	</div>
 </section>

@@ -148,19 +148,42 @@ if ( ! $gk_account_login ) {
 						<span class="header-cart-count"><?php echo absint( WC()->cart->get_cart_contents_count() ); ?></span>
 					<?php endif; ?>
 				</a>
-				<a href="<?php echo esc_url( $account_url ); ?>" class="header-icon-link header-account-link" aria-label="<?php echo esc_attr( is_user_logged_in() ? __( 'Mein Konto', 'globalkeys' ) : __( 'Anmelden', 'globalkeys' ) ); ?>">
-					<?php if ( is_user_logged_in() ) : ?>
-						<?php
-						$current_user_id = get_current_user_id();
-						$header_avatar   = get_avatar_url( $current_user_id, array( 'size' => 120 ) );
-						?>
-						<span class="header-account-avatar-wrap">
-							<img src="<?php echo esc_url( $header_avatar ); ?>" alt="" class="header-account-avatar" width="54" height="54" loading="eager" style="object-position: center bottom;">
-						</span>
-					<?php else : ?>
-						<span class="header-icon header-icon-account" aria-hidden="true"></span>
-					<?php endif; ?>
+				<?php if ( is_user_logged_in() ) : ?>
+					<?php
+					$current_user_id = get_current_user_id();
+					$header_avatar   = function_exists( 'globalkeys_get_user_avatar_url' ) ? globalkeys_get_user_avatar_url( $current_user_id, 120 ) : get_avatar_url( $current_user_id, array( 'size' => 120 ) );
+					$myaccount_url   = class_exists( 'WooCommerce' ) ? wc_get_page_permalink( 'myaccount' ) : $account_url;
+					$orders_url      = function_exists( 'wc_get_account_endpoint_url' ) ? wc_get_account_endpoint_url( 'orders', '', $myaccount_url ) : $myaccount_url;
+					$wunschliste_url = function_exists( 'wc_get_account_endpoint_url' ) ? wc_get_account_endpoint_url( 'wunschliste', '', $myaccount_url ) : $myaccount_url;
+					$affiliate_url   = function_exists( 'wc_get_account_endpoint_url' ) ? wc_get_account_endpoint_url( 'affiliate', '', $myaccount_url ) : $myaccount_url;
+					$edit_account_url = function_exists( 'wc_get_account_endpoint_url' ) ? wc_get_account_endpoint_url( 'edit-account', '', $myaccount_url ) : $myaccount_url;
+					$logout_url      = function_exists( 'wc_logout_url' ) ? wc_logout_url() : wp_logout_url( home_url( '/' ) );
+					?>
+					<div class="header-account-drawer-wrap">
+						<button type="button" class="header-icon-link header-account-link header-account-trigger" aria-label="<?php esc_attr_e( 'Mein Konto', 'globalkeys' ); ?>" aria-expanded="false" aria-controls="gk-account-drawer" id="gk-account-drawer-trigger">
+							<span class="header-account-avatar-wrap">
+								<img src="<?php echo esc_url( $header_avatar ); ?>" alt="" class="header-account-avatar" width="54" height="54" loading="eager" style="object-position: center bottom;">
+							</span>
+						</button>
+						<div id="gk-account-drawer" class="gk-account-drawer" role="dialog" aria-label="<?php esc_attr_e( 'Konto-Menü', 'globalkeys' ); ?>" hidden>
+							<nav class="gk-account-drawer__nav">
+								<a href="<?php echo esc_url( home_url( '/support/' ) ); ?>" class="gk-account-drawer__item"><?php esc_html_e( 'Support 24/7', 'globalkeys' ); ?></a>
+								<span class="gk-account-drawer__divider" aria-hidden="true"></span>
+								<a href="<?php echo esc_url( $myaccount_url ); ?>" class="gk-account-drawer__item gk-account-drawer__item--pill"><?php esc_html_e( 'Dashboard', 'globalkeys' ); ?></a>
+								<a href="<?php echo esc_url( $orders_url ); ?>" class="gk-account-drawer__item"><?php esc_html_e( 'Meine Einkäufe', 'globalkeys' ); ?></a>
+								<a href="<?php echo esc_url( $wunschliste_url ); ?>" class="gk-account-drawer__item"><?php esc_html_e( 'Wunschliste', 'globalkeys' ); ?></a>
+								<a href="<?php echo esc_url( $affiliate_url ); ?>" class="gk-account-drawer__item"><?php esc_html_e( 'Partnerschaft', 'globalkeys' ); ?></a>
+								<a href="<?php echo esc_url( $edit_account_url ); ?>" class="gk-account-drawer__item"><?php esc_html_e( 'Einstellungen', 'globalkeys' ); ?></a>
+								<span class="gk-account-drawer__divider" aria-hidden="true"></span>
+								<a href="<?php echo esc_url( $logout_url ); ?>" class="gk-account-drawer__item"><?php esc_html_e( 'Abmelden', 'globalkeys' ); ?></a>
+							</nav>
+						</div>
+					</div>
+				<?php else : ?>
+				<a href="<?php echo esc_url( $account_url ); ?>" class="header-icon-link header-account-link" aria-label="<?php esc_attr_e( 'Anmelden', 'globalkeys' ); ?>">
+					<span class="header-icon header-icon-account" aria-hidden="true"></span>
 				</a>
+				<?php endif; ?>
 			</div>
 		</div>
 	</header><!-- #masthead -->

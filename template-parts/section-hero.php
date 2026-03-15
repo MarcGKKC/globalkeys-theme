@@ -24,12 +24,14 @@ $gk_hero_stats = array(
 	array( 'number' => 42500,   'label' => __( 'Rewards Claimed', 'globalkeys' ) ),
 );
 ?>
-<div class="gk-hero-stats-bar" role="region" aria-label="<?php esc_attr_e( 'Statistics', 'globalkeys' ); ?>">
-	<?php foreach ( $gk_hero_stats as $i => $stat ) : ?>
-		<?php if ( $i > 0 ) : ?><span class="gk-hero-stat-divider" aria-hidden="true"></span><?php endif; ?>
-		<div class="gk-hero-stat">
-			<span class="gk-hero-stat-number"><?php echo esc_html( globalkeys_format_stat_number( $stat['number'] ) ); ?></span>
-			<span class="gk-hero-stat-label"><?php echo esc_html( $stat['label'] ); ?></span>
-		</div>
-	<?php endforeach; ?>
+<div class="gk-hero-stats-bar-wrapper">
+	<div class="gk-hero-stats-bar" role="region" aria-label="<?php esc_attr_e( 'Statistics', 'globalkeys' ); ?>">
+		<?php foreach ( $gk_hero_stats as $i => $stat ) : ?>
+			<?php if ( $i > 0 ) : ?><span class="gk-hero-stat-divider" aria-hidden="true"></span><?php endif; ?>
+			<div class="gk-hero-stat">
+				<span class="gk-hero-stat-number" data-end="<?php echo (int) $stat['number']; ?>"><?php echo esc_html( globalkeys_format_stat_number( $stat['number'] ) ); ?></span>
+				<span class="gk-hero-stat-label"><?php echo esc_html( $stat['label'] ); ?></span>
+			</div>
+		<?php endforeach; ?>
+	</div>
 </div>
