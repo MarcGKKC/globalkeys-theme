@@ -1259,14 +1259,41 @@ function globalkeys_scripts() {
 			font-size: calc(1rem + 0.5px);
 			margin: 0;
 		}
+		/* Menü über der Pill: kleiner Hover in Grün */
+		#masthead .header-nav-above a {
+			padding: 0.15rem 0.3rem !important;
+		}
+		#masthead .header-nav-above a:hover {
+			color: #fff !important;
+			background: rgba(90, 90, 95, 0.5) !important;
+		}
+		#masthead .header-nav-above a.current,
+		#masthead .header-nav-above .current-menu-item a {
+			color: #fff !important;
+			background: rgba(90, 90, 95, 0.6) !important;
+		}
+		/* Pill-Plattform-Filter (PC, PlayStation…): Hover und aktiv in Grau, kein Grün */
+		#masthead .header-pill .platform-filter {
+			padding: 0.4rem 0.65rem !important;
+		}
+		#masthead .header-pill .platform-filter:hover {
+			background: rgba(90, 90, 95, 0.5) !important;
+			color: #fff !important;
+		}
+		#masthead .header-pill .platform-filter.active {
+			color: #fff !important;
+			background: rgba(90, 90, 95, 0.6) !important;
+		}
 	';
 	wp_add_inline_style( 'globalkeys-style', $account_css );
 
 	wp_enqueue_script( 'globalkeys-navigation', get_template_directory_uri() . '/js/navigation.js', array(), _S_VERSION, true );
 	$gk_pill_search_ver = (string) filemtime( get_template_directory() . '/js/header-pill-search.js' );
 	wp_enqueue_script( 'globalkeys-header-pill-search', get_template_directory_uri() . '/js/header-pill-search.js', array(), $gk_pill_search_ver, true );
-	wp_enqueue_script( 'globalkeys-account-drawer', get_template_directory_uri() . '/js/gk-account-drawer.js', array(), _S_VERSION, true );
-	wp_enqueue_script( 'globalkeys-header-scroll-blur', get_template_directory_uri() . '/js/header-scroll-blur.js', array(), _S_VERSION, true );
+	$gk_drawer_ver = (string) filemtime( get_template_directory() . '/js/gk-account-drawer.js' );
+	wp_enqueue_script( 'globalkeys-account-drawer', get_template_directory_uri() . '/js/gk-account-drawer.js', array(), $gk_drawer_ver, true );
+	$gk_header_scroll_ver = (string) filemtime( get_template_directory() . '/js/header-scroll-blur.js' );
+	wp_enqueue_script( 'globalkeys-header-scroll-blur', get_template_directory_uri() . '/js/header-scroll-blur.js', array(), $gk_header_scroll_ver, true );
 
 	if ( function_exists( 'globalkeys_has_front_page_sections' ) && globalkeys_has_front_page_sections() ) {
 		wp_enqueue_script( 'globalkeys-hero-stats-count', get_template_directory_uri() . '/js/hero-stats-count.js', array(), _S_VERSION, true );

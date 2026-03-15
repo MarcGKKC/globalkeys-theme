@@ -56,3 +56,5 @@ if ( function_exists( 'wc_get_products' ) ) {
 		<?php endif; ?>
 	</div>
 </section>
+<?php /* Vorübergehend: lange Section für längere Scrollbar – später entfernen */ ?>
+<section class="gk-section" aria-hidden="true" style="min-height: 2800px; background: transparent; pointer-events: none;"></section>

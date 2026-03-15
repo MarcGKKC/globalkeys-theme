@@ -150,30 +150,57 @@ if ( ! $gk_account_login ) {
 				</a>
 				<?php if ( is_user_logged_in() ) : ?>
 					<?php
-					$current_user_id = get_current_user_id();
-					$header_avatar   = function_exists( 'globalkeys_get_user_avatar_url' ) ? globalkeys_get_user_avatar_url( $current_user_id, 120 ) : get_avatar_url( $current_user_id, array( 'size' => 120 ) );
-					$myaccount_url   = class_exists( 'WooCommerce' ) ? wc_get_page_permalink( 'myaccount' ) : $account_url;
-					$orders_url      = function_exists( 'wc_get_account_endpoint_url' ) ? wc_get_account_endpoint_url( 'orders', '', $myaccount_url ) : $myaccount_url;
-					$wunschliste_url = function_exists( 'wc_get_account_endpoint_url' ) ? wc_get_account_endpoint_url( 'wunschliste', '', $myaccount_url ) : $myaccount_url;
-					$affiliate_url   = function_exists( 'wc_get_account_endpoint_url' ) ? wc_get_account_endpoint_url( 'affiliate', '', $myaccount_url ) : $myaccount_url;
+					$current_user_id  = get_current_user_id();
+					$header_avatar    = function_exists( 'globalkeys_get_user_avatar_url' ) ? globalkeys_get_user_avatar_url( $current_user_id, 120 ) : get_avatar_url( $current_user_id, array( 'size' => 120 ) );
+					$myaccount_url    = class_exists( 'WooCommerce' ) ? wc_get_page_permalink( 'myaccount' ) : $account_url;
+					$orders_url       = function_exists( 'wc_get_account_endpoint_url' ) ? wc_get_account_endpoint_url( 'orders', '', $myaccount_url ) : $myaccount_url;
+					$wunschliste_url  = function_exists( 'wc_get_account_endpoint_url' ) ? wc_get_account_endpoint_url( 'wunschliste', '', $myaccount_url ) : $myaccount_url;
+					$affiliate_url    = function_exists( 'wc_get_account_endpoint_url' ) ? wc_get_account_endpoint_url( 'affiliate', '', $myaccount_url ) : $myaccount_url;
 					$edit_account_url = function_exists( 'wc_get_account_endpoint_url' ) ? wc_get_account_endpoint_url( 'edit-account', '', $myaccount_url ) : $myaccount_url;
-					$logout_url      = function_exists( 'wc_logout_url' ) ? wc_logout_url() : wp_logout_url( home_url( '/' ) );
+					$logout_url       = function_exists( 'wc_logout_url' ) ? wc_logout_url() : wp_logout_url( home_url( '/' ) );
+					$gk_drawer_current_url = '';
+					if ( isset( $_SERVER['HTTP_HOST'] ) && isset( $_SERVER['REQUEST_URI'] ) ) {
+						$gk_drawer_current_url = set_url_scheme( ( is_ssl() ? 'https://' : 'http://' ) . wp_unslash( $_SERVER['HTTP_HOST'] ) . wp_unslash( $_SERVER['REQUEST_URI'] ) );
+						$gk_drawer_current_url = trailingslashit( strtok( $gk_drawer_current_url, '?' ) );
+					}
+					$gk_drawer_class = function( $url ) use ( $gk_drawer_current_url, $myaccount_url ) {
+						$c = 'gk-account-drawer__item';
+						if ( $gk_drawer_current_url && $url ) {
+							$norm = trailingslashit( strtok( $url, '?' ) );
+							$is_current = ( $norm === $gk_drawer_current_url );
+							if ( ! $is_current && $norm !== trailingslashit( strtok( $myaccount_url, '?' ) ) && strpos( $gk_drawer_current_url, $norm ) === 0 ) {
+								$is_current = true;
+							}
+							if ( $is_current ) {
+								$c .= ' gk-account-drawer__item--current';
+							}
+						}
+						return $c;
+					};
 					?>
-					<div class="header-account-drawer-wrap">
-						<button type="button" class="header-icon-link header-account-link header-account-trigger" aria-label="<?php esc_attr_e( 'Mein Konto', 'globalkeys' ); ?>" aria-expanded="false" aria-controls="gk-account-drawer" id="gk-account-drawer-trigger">
+					<div class="header-account-drawer-wrap" id="gk-account-drawer-wrap">
+						<button type="button" class="header-icon-link header-account-link header-account-trigger" id="gk-account-drawer-trigger" aria-label="<?php esc_attr_e( 'Mein Konto', 'globalkeys' ); ?>" aria-expanded="false" aria-controls="gk-account-drawer">
 							<span class="header-account-avatar-wrap">
 								<img src="<?php echo esc_url( $header_avatar ); ?>" alt="" class="header-account-avatar" width="54" height="54" loading="eager" style="object-position: center bottom;">
 							</span>
 						</button>
-						<div id="gk-account-drawer" class="gk-account-drawer" role="dialog" aria-label="<?php esc_attr_e( 'Konto-Menü', 'globalkeys' ); ?>" hidden>
+						<div class="gk-account-drawer" id="gk-account-drawer" hidden aria-hidden="true" role="dialog" aria-label="<?php esc_attr_e( 'Konto-Menü', 'globalkeys' ); ?>">
 							<nav class="gk-account-drawer__nav">
-								<a href="<?php echo esc_url( home_url( '/support/' ) ); ?>" class="gk-account-drawer__item"><?php esc_html_e( 'Support 24/7', 'globalkeys' ); ?></a>
+								<a href="<?php echo esc_url( home_url( '/support/' ) ); ?>" class="<?php echo esc_attr( $gk_drawer_class( home_url( '/support/' ) ) ); ?>"><?php esc_html_e( 'Support 24/7', 'globalkeys' ); ?></a>
 								<span class="gk-account-drawer__divider" aria-hidden="true"></span>
-								<a href="<?php echo esc_url( $myaccount_url ); ?>" class="gk-account-drawer__item gk-account-drawer__item--pill"><?php esc_html_e( 'Dashboard', 'globalkeys' ); ?></a>
-								<a href="<?php echo esc_url( $orders_url ); ?>" class="gk-account-drawer__item"><?php esc_html_e( 'Meine Einkäufe', 'globalkeys' ); ?></a>
-								<a href="<?php echo esc_url( $wunschliste_url ); ?>" class="gk-account-drawer__item"><?php esc_html_e( 'Wunschliste', 'globalkeys' ); ?></a>
-								<a href="<?php echo esc_url( $affiliate_url ); ?>" class="gk-account-drawer__item"><?php esc_html_e( 'Partnerschaft', 'globalkeys' ); ?></a>
-								<a href="<?php echo esc_url( $edit_account_url ); ?>" class="gk-account-drawer__item"><?php esc_html_e( 'Einstellungen', 'globalkeys' ); ?></a>
+								<a href="<?php echo esc_url( $myaccount_url ); ?>" class="<?php echo esc_attr( $gk_drawer_class( $myaccount_url ) ); ?> gk-account-drawer__item--pill"><?php esc_html_e( 'Dashboard', 'globalkeys' ); ?></a>
+								<a href="<?php echo esc_url( $orders_url ); ?>" class="<?php echo esc_attr( $gk_drawer_class( $orders_url ) ); ?>"><?php esc_html_e( 'Meine Einkäufe', 'globalkeys' ); ?></a>
+								<a href="<?php echo esc_url( $wunschliste_url ); ?>" class="<?php echo esc_attr( $gk_drawer_class( $wunschliste_url ) ); ?>"><?php esc_html_e( 'Wunschliste', 'globalkeys' ); ?></a>
+								<a href="<?php echo esc_url( $affiliate_url ); ?>" class="<?php echo esc_attr( $gk_drawer_class( $affiliate_url ) ); ?>"><?php esc_html_e( 'Partnerschaft', 'globalkeys' ); ?></a>
+								<a href="<?php echo esc_url( $edit_account_url ); ?>" class="<?php echo esc_attr( $gk_drawer_class( $edit_account_url ) ); ?>"><?php esc_html_e( 'Einstellungen', 'globalkeys' ); ?></a>
+								<span class="gk-account-drawer__divider" aria-hidden="true"></span>
+								<div class="gk-account-drawer__toggle-row">
+									<span class="gk-account-drawer__toggle-label"><?php esc_html_e( 'Videovorschau', 'globalkeys' ); ?></span>
+									<label class="gk-account-drawer__switch" aria-label="<?php esc_attr_e( 'Videovorschau ein oder aus', 'globalkeys' ); ?>">
+										<input type="checkbox" class="gk-account-drawer__switch-input" id="gk-drawer-videovorschau" name="videovorschau" autocomplete="off">
+										<span class="gk-account-drawer__switch-track"></span>
+									</label>
+								</div>
 								<span class="gk-account-drawer__divider" aria-hidden="true"></span>
 								<a href="<?php echo esc_url( $logout_url ); ?>" class="gk-account-drawer__item"><?php esc_html_e( 'Abmelden', 'globalkeys' ); ?></a>
 							</nav>

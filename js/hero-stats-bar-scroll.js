@@ -1,36 +1,14 @@
 /**
- * Hero Stats Bar: Beim Runterscrollen nach oben wegrücken, unten fest anzeigen.
- * Seitenlänge bleibt gleich (padding-bottom gleicht aus).
+ * Hero Stats Bar: Bleibt an ihrer Position im Seitenfluss (kein Anheften unten beim Scrollen).
  *
  * @package globalkeys
  */
 (function () {
 	'use strict';
 
-	var scrollThreshold = 120;
-	var ticking = false;
-
-	function updateBarState() {
-		if (window.scrollY > scrollThreshold) {
-			document.body.classList.add('gk-stats-bar-pinned-bottom');
-		} else {
-			document.body.classList.remove('gk-stats-bar-pinned-bottom');
-		}
-		ticking = false;
-	}
-
-	function onScroll() {
-		if (!ticking) {
-			requestAnimationFrame(updateBarState);
-			ticking = true;
-		}
-	}
-
 	function init() {
 		if (!document.querySelector('.gk-hero-stats-bar')) return;
-
-		updateBarState();
-		window.addEventListener('scroll', onScroll, { passive: true });
+		// Klasse gk-stats-bar-pinned-bottom wird nicht mehr gesetzt – Bar bleibt stehen
 	}
 
 	if (document.readyState === 'loading') {
