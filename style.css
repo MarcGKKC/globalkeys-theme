@@ -1681,6 +1681,14 @@ body.gk-drawer-open #masthead {
 	padding-top: 0;
 }
 
+/* Kompakt-Header: mehr Abstand oben, damit die Seite nicht nach oben springt (Header 4rem kürzer) */
+body.gk-header-scrolled .site-main {
+	padding-top: 12rem; /* 8rem + 4rem */
+}
+body.gk-header-scrolled .site-main.site-main--front {
+	padding-top: 4rem;
+}
+
 /* Pill auf kleinen Screens schmaler und umbruchfähig */
 @media screen and (max-width: 767px) {
 	.header-pill {
