@@ -176,6 +176,104 @@ function globalkeys_hide_myaccount_menu_class( $classes, $item ) {
 add_filter( 'nav_menu_css_class', 'globalkeys_hide_myaccount_menu_class', 10, 2 );
 
 /**
+ * Plattform-Seiten: URL /platform/{slug}/ (z. B. /platform/pc/) → eigene Seite mit Header + leerem Inhalt.
+ */
+function globalkeys_platform_rewrite_rules() {
+	add_rewrite_rule( 'platform/([^/]+)/?$', 'index.php?gk_platform=$matches[1]', 'top' );
+}
+add_action( 'init', 'globalkeys_platform_rewrite_rules' );
+
+function globalkeys_platform_query_vars( $vars ) {
+	$vars[] = 'gk_platform';
+	return $vars;
+}
+add_filter( 'query_vars', 'globalkeys_platform_query_vars' );
+
+function globalkeys_platform_template_include( $template ) {
+	$slug = get_query_var( 'gk_platform' );
+	if ( $slug !== '' && $slug !== false ) {
+		$platform_template = get_template_directory() . '/template-platform.php';
+		if ( file_exists( $platform_template ) ) {
+			return $platform_template;
+		}
+	}
+	return $template;
+}
+add_filter( 'template_include', 'globalkeys_platform_template_include', 5 );
+
+function globalkeys_platform_flush_rewrites() {
+	globalkeys_platform_rewrite_rules();
+	flush_rewrite_rules();
+}
+add_action( 'after_switch_theme', 'globalkeys_platform_flush_rewrites' );
+
+function globalkeys_platform_maybe_flush_rewrites() {
+	if ( get_option( 'globalkeys_platform_rewrite_flushed' ) ) {
+		return;
+	}
+	globalkeys_platform_rewrite_rules();
+	flush_rewrite_rules();
+	update_option( 'globalkeys_platform_rewrite_flushed', 1 );
+}
+add_action( 'init', 'globalkeys_platform_maybe_flush_rewrites', 999 );
+
+function globalkeys_platform_body_class( $classes ) {
+	if ( get_query_var( 'gk_platform' ) !== '' && get_query_var( 'gk_platform' ) !== false ) {
+		$classes[] = 'gk-platform-page';
+	}
+	return $classes;
+}
+add_filter( 'body_class', 'globalkeys_platform_body_class' );
+
+/**
+ * Nav-Punkte über der Pill: eigene Seiten (Trending Games, Preorders, Available Soon, Activation, Support).
+ */
+function globalkeys_nav_section_rewrite_rules() {
+	add_rewrite_rule( 'trending-games/?$', 'index.php?gk_nav_section=trending-games', 'top' );
+	add_rewrite_rule( 'preorders/?$', 'index.php?gk_nav_section=preorders', 'top' );
+	add_rewrite_rule( 'available-soon/?$', 'index.php?gk_nav_section=available-soon', 'top' );
+	add_rewrite_rule( 'activation/?$', 'index.php?gk_nav_section=activation', 'top' );
+	add_rewrite_rule( 'support/?$', 'index.php?gk_nav_section=support', 'top' );
+}
+add_action( 'init', 'globalkeys_nav_section_rewrite_rules' );
+
+function globalkeys_nav_section_query_vars( $vars ) {
+	$vars[] = 'gk_nav_section';
+	return $vars;
+}
+add_filter( 'query_vars', 'globalkeys_nav_section_query_vars' );
+
+function globalkeys_nav_section_template_include( $template ) {
+	$slug = get_query_var( 'gk_nav_section' );
+	if ( $slug !== '' && $slug !== false ) {
+		$nav_template = get_template_directory() . '/template-nav-section.php';
+		if ( file_exists( $nav_template ) ) {
+			return $nav_template;
+		}
+	}
+	return $template;
+}
+add_filter( 'template_include', 'globalkeys_nav_section_template_include', 5 );
+
+function globalkeys_nav_section_body_class( $classes ) {
+	if ( get_query_var( 'gk_nav_section' ) !== '' && get_query_var( 'gk_nav_section' ) !== false ) {
+		$classes[] = 'gk-nav-section-page';
+	}
+	return $classes;
+}
+add_filter( 'body_class', 'globalkeys_nav_section_body_class' );
+
+function globalkeys_nav_section_maybe_flush_rewrites() {
+	if ( get_option( 'globalkeys_nav_section_rewrite_flushed' ) ) {
+		return;
+	}
+	globalkeys_nav_section_rewrite_rules();
+	flush_rewrite_rules();
+	update_option( 'globalkeys_nav_section_rewrite_flushed', 1 );
+}
+add_action( 'init', 'globalkeys_nav_section_maybe_flush_rewrites', 998 );
+
+/**
  * Admin-Bar auf Login/Register-Seite ausblenden.
  * wp_body_open wird für Login-Seite ans Seitenende verschoben (header.php/footer.php),
  * damit eingespritzte Inhalte (z. B. Store Notice) nicht oben als Balken erscheinen.
@@ -1295,8 +1393,8 @@ function globalkeys_scripts() {
 		}
 		#masthead .header-nav-above a.current,
 		#masthead .header-nav-above .current-menu-item a {
-			color: #fff !important;
-			background: rgba(90, 90, 95, 0.6) !important;
+			color: #04DA8D !important;
+			background: transparent !important;
 		}
 		/* Pill-Plattform-Filter (PC, PlayStation…): Hover und aktiv in Grau, kein Grün */
 		#masthead .header-pill .platform-filter {
@@ -1308,7 +1406,22 @@ function globalkeys_scripts() {
 		}
 		#masthead .header-pill .platform-filter.active {
 			color: #fff !important;
-			background: rgba(90, 90, 95, 0.6) !important;
+		}
+		#masthead .header-pill .platform-filter.active[data-platform="pc"] {
+			background: #04DA8D !important;
+			box-shadow: 0 0 0 2px #04DA8D !important;
+		}
+		#masthead .header-pill .platform-filter.active[data-platform="playstation"] {
+			background: #1740c6 !important;
+			box-shadow: 0 0 0 2px #1740c6 !important;
+		}
+		#masthead .header-pill .platform-filter.active[data-platform="xbox"] {
+			background: #397a27 !important;
+			box-shadow: 0 0 0 2px #397a27 !important;
+		}
+		#masthead .header-pill .platform-filter.active[data-platform="nintendo"] {
+			background: #ff000b !important;
+			box-shadow: 0 0 0 2px #ff000b !important;
 		}
 	';
 	wp_add_inline_style( 'globalkeys-style', $account_css );

@@ -1,6 +1,6 @@
 /**
- * Account-Drawer (Original): Drawer ist fest im Header.
- * Klick auf Avatar öffnet/schließt, Klick außerhalb oder Escape schließt.
+ * Account-Drawer: Beim Öffnen in body verschieben, damit kein transform-Vorfahre
+ * den Glas-Hintergrund (backdrop-filter) beim Scrollen kaputt macht.
  */
 (function() {
 	'use strict';
@@ -13,6 +13,15 @@
 		if ( ! wrap || ! trigger || ! drawer ) return;
 
 		var overlay = null;
+		var scrollResizeCleanup = null;
+
+		function updateDrawerPosition() {
+			var rect = trigger.getBoundingClientRect();
+			drawer.style.position = 'fixed';
+			drawer.style.top = (rect.bottom + 8) + 'px';
+			drawer.style.left = '';
+			drawer.style.right = (window.innerWidth - rect.right) + 'px';
+		}
 
 		function open() {
 			drawer.removeAttribute( 'hidden' );
@@ -25,6 +34,16 @@
 			overlay.className = 'gk-drawer-overlay';
 			overlay.setAttribute( 'aria-hidden', 'true' );
 			document.body.appendChild( overlay );
+			document.body.appendChild( drawer );
+			drawer.classList.add( 'gk-account-drawer--portal' );
+			updateDrawerPosition();
+			scrollResizeCleanup = function() {
+				window.removeEventListener( 'scroll', updateDrawerPosition, true );
+				window.removeEventListener( 'resize', updateDrawerPosition );
+				scrollResizeCleanup = null;
+			};
+			window.addEventListener( 'scroll', updateDrawerPosition, true );
+			window.addEventListener( 'resize', updateDrawerPosition );
 			document.body.addEventListener( 'click', onClickOutside );
 			document.addEventListener( 'keydown', onKeydown );
 		}
@@ -35,6 +54,14 @@
 			trigger.setAttribute( 'aria-expanded', 'false' );
 			document.body.classList.remove( 'gk-drawer-open' );
 			wrap.classList.remove( 'gk-drawer-open' );
+			drawer.classList.remove( 'gk-account-drawer--portal' );
+			drawer.style.position = '';
+			drawer.style.top = '';
+			drawer.style.right = '';
+			if ( scrollResizeCleanup ) {
+				scrollResizeCleanup();
+			}
+			wrap.appendChild( drawer );
 			if ( overlay && overlay.parentNode ) {
 				overlay.parentNode.removeChild( overlay );
 			}
@@ -52,7 +79,7 @@
 		}
 
 		function onClickOutside( e ) {
-			if ( wrap.contains( e.target ) ) return;
+			if ( wrap.contains( e.target ) || drawer.contains( e.target ) ) return;
 			close();
 		}
 

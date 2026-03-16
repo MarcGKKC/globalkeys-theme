@@ -62,36 +62,40 @@ if ( ! $gk_account_login ) {
 			</div>
 
 			<!-- Mitte: 5 Menüpunkte über der Pill, darunter Pill (Plattformen + Suche) – zentriert -->
+			<?php
+			$gk_cur_nav = is_string( get_query_var( 'gk_nav_section' ) ) ? get_query_var( 'gk_nav_section' ) : '';
+			?>
 			<div class="header-pill-wrapper">
 				<nav class="header-nav-above" aria-label="<?php esc_attr_e( 'Hauptmenü', 'globalkeys' ); ?>">
-					<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Trending Games', 'globalkeys' ); ?></a>
-					<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Preorders', 'globalkeys' ); ?></a>
-					<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Available Soon', 'globalkeys' ); ?></a>
-					<a href="<?php echo esc_url( home_url( '/activation/' ) ); ?>"><?php esc_html_e( 'Activation', 'globalkeys' ); ?></a>
-					<a href="<?php echo esc_url( home_url( '/support/' ) ); ?>"><?php esc_html_e( '24/7 Support', 'globalkeys' ); ?></a>
+					<a href="<?php echo esc_url( home_url( '/trending-games/' ) ); ?>" class="<?php echo ( $gk_cur_nav === 'trending-games' ) ? 'current' : ''; ?>"><?php esc_html_e( 'Trending Games', 'globalkeys' ); ?></a>
+					<a href="<?php echo esc_url( home_url( '/preorders/' ) ); ?>" class="<?php echo ( $gk_cur_nav === 'preorders' ) ? 'current' : ''; ?>"><?php esc_html_e( 'Preorders', 'globalkeys' ); ?></a>
+					<a href="<?php echo esc_url( home_url( '/available-soon/' ) ); ?>" class="<?php echo ( $gk_cur_nav === 'available-soon' ) ? 'current' : ''; ?>"><?php esc_html_e( 'Available Soon', 'globalkeys' ); ?></a>
+					<a href="<?php echo esc_url( home_url( '/activation/' ) ); ?>" class="<?php echo ( $gk_cur_nav === 'activation' ) ? 'current' : ''; ?>"><?php esc_html_e( 'Activation', 'globalkeys' ); ?></a>
+					<a href="<?php echo esc_url( home_url( '/support/' ) ); ?>" class="<?php echo ( $gk_cur_nav === 'support' ) ? 'current' : ''; ?>"><?php esc_html_e( '24/7 Support', 'globalkeys' ); ?></a>
 				</nav>
 			<div class="header-pill-search-outer">
 				<div class="header-pill-container">
 					<div class="header-pill">
 						<?php
-						$pictures_uri = get_template_directory_uri() . '/Pictures/';
+						$pictures_uri    = get_template_directory_uri() . '/Pictures/';
+						$gk_cur_platform = is_string( get_query_var( 'gk_platform' ) ) ? get_query_var( 'gk_platform' ) : '';
 						?>
 						<div class="header-pill-platforms">
-							<a href="<?php echo esc_url( home_url( '/' ) ); ?>?platform=pc" class="platform-filter" data-platform="pc" aria-label="PC">
+							<a href="<?php echo esc_url( home_url( '/platform/pc/' ) ); ?>" class="platform-filter<?php echo ( $gk_cur_platform === 'pc' ) ? ' active' : ''; ?>" data-platform="pc" aria-label="PC">
 								<img src="<?php echo esc_url( $pictures_uri . 'PC-gk (1).svg' ); ?>" alt="" class="platform-filter-icon" width="30" height="30" aria-hidden="true" />
 								<span class="platform-filter-label">PC</span>
 							</a>
-							<a href="<?php echo esc_url( home_url( '/' ) ); ?>?platform=playstation" class="platform-filter" data-platform="playstation" aria-label="PlayStation">
+							<a href="<?php echo esc_url( home_url( '/platform/playstation/' ) ); ?>" class="platform-filter<?php echo ( $gk_cur_platform === 'playstation' ) ? ' active' : ''; ?>" data-platform="playstation" aria-label="PlayStation">
 								<img src="<?php echo esc_url( $pictures_uri . 'playstation-logo-gk (1).svg' ); ?>" alt="" class="platform-filter-icon" width="30" height="30" aria-hidden="true" />
 								<span class="platform-filter-label">PlayStation</span>
 							</a>
-							<a href="<?php echo esc_url( home_url( '/' ) ); ?>?platform=xbox" class="platform-filter" data-platform="xbox" aria-label="Xbox">
+							<a href="<?php echo esc_url( home_url( '/platform/xbox/' ) ); ?>" class="platform-filter<?php echo ( $gk_cur_platform === 'xbox' ) ? ' active' : ''; ?>" data-platform="xbox" aria-label="Xbox">
 								<img src="<?php echo esc_url( $pictures_uri . 'xbox-logo-gk (1).svg' ); ?>" alt="" class="platform-filter-icon" width="30" height="30" aria-hidden="true" />
 								<span class="platform-filter-label">Xbox</span>
 							</a>
-<a href="<?php echo esc_url( home_url( '/' ) ); ?>?platform=nintendo" class="platform-filter" data-platform="nintendo" aria-label="<?php esc_attr_e( 'Nintendo', 'globalkeys' ); ?>">
-							<img src="<?php echo esc_url( $pictures_uri . 'Switch-gk (1).svg' ); ?>" alt="" class="platform-filter-icon" width="30" height="30" aria-hidden="true" />
-							<span class="platform-filter-label"><?php esc_html_e( 'Nintendo', 'globalkeys' ); ?></span>
+							<a href="<?php echo esc_url( home_url( '/platform/nintendo/' ) ); ?>" class="platform-filter<?php echo ( $gk_cur_platform === 'nintendo' ) ? ' active' : ''; ?>" data-platform="nintendo" aria-label="<?php esc_attr_e( 'Nintendo', 'globalkeys' ); ?>">
+								<img src="<?php echo esc_url( $pictures_uri . 'Switch-gk (1).svg' ); ?>" alt="" class="platform-filter-icon" width="30" height="30" aria-hidden="true" />
+								<span class="platform-filter-label"><?php esc_html_e( 'Nintendo', 'globalkeys' ); ?></span>
 							</a>
 						</div>
 						<button type="button" class="header-pill-search-trigger header-pill-search-submit" aria-label="<?php esc_attr_e( 'Suchen öffnen', 'globalkeys' ); ?>" aria-expanded="false" aria-controls="gk-pill-search-overlay">
