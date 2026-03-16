@@ -42,22 +42,19 @@ document.addEventListener('click',function(e){var b=e.target.closest('.gk-passwo
 				<div class="gk-login-box">
 					<h2 class="gk-login-box-title"><?php esc_html_e( 'Login', 'globalkeys' ); ?></h2>
 
-					<div class="gk-social-placeholders">
-						<span class="gk-social-placeholder"></span>
-						<span class="gk-social-placeholder"></span>
-						<span class="gk-social-placeholder"></span>
-						<span class="gk-social-placeholder"></span>
-					</div>
-
-					<div class="gk-divider-oder">
-						<span class="gk-divider-line"></span>
-						<span class="gk-divider-text"><?php esc_html_e( 'oder', 'globalkeys' ); ?></span>
-						<span class="gk-divider-line"></span>
-					</div>
-
 					<form class="woocommerce-form woocommerce-form-login login" method="post" novalidate>
+						<div class="gk-social-placeholders">
+							<span class="gk-social-placeholder" aria-hidden="true"></span>
+							<span class="gk-social-placeholder" aria-hidden="true"></span>
+							<span class="gk-social-placeholder" aria-hidden="true"></span>
+							<span class="gk-social-placeholder" aria-hidden="true"></span>
+						</div>
 
-						<?php do_action( 'woocommerce_login_form_start' ); ?>
+						<div class="gk-divider-oder">
+							<span class="gk-divider-line"></span>
+							<span class="gk-divider-text"><?php esc_html_e( 'oder', 'globalkeys' ); ?></span>
+							<span class="gk-divider-line"></span>
+						</div>
 
 						<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide gk-login-row">
 							<label for="username"><?php esc_html_e( 'Gamertag oder E-Mail', 'globalkeys' ); ?></label>

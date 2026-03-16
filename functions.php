@@ -295,6 +295,13 @@ function globalkeys_login_failed_redirect() {
 add_action( 'woocommerce_login_failed', 'globalkeys_login_failed_redirect', 5 );
 
 /**
+ * Nach Logout (Drawer, Dashboard, Pill) immer auf die Startseite leiten.
+ */
+add_filter( 'woocommerce_logout_redirect', function( $redirect ) {
+	return home_url( '/' );
+} );
+
+/**
  * Bei Registrierungs-Fehler: Redirect mit Transient für Custom-Modal.
  * Bei reinen Passwort-Fehlern: Gamertag und E-Mail beibehalten (nur Passwort leeren).
  */
@@ -412,11 +419,12 @@ function globalkeys_scripts() {
 			box-shadow: none !important;
 		}
 		body.gk-account-login .gk-account-logo-header .site-header-inner {
-			padding-top: 1.5rem;
+			padding-top: 1rem;
+			padding-bottom: 0.75rem;
 			padding-left: 1.75rem;
 			padding-right: 1.75rem;
 			display: flex;
-			align-items: center;
+			align-items: flex-start;
 			justify-content: space-between;
 		}
 		body.gk-account-login .skip-link {
@@ -595,17 +603,35 @@ function globalkeys_scripts() {
 		}
 		body.gk-account-login .gk-social-placeholders {
 			display: flex;
+			flex-wrap: wrap;
 			gap: 0.5rem;
 			margin-bottom: 1.15rem;
 			width: 100%;
 		}
-		body.gk-account-login .gk-social-placeholder {
+		body.gk-account-login .gk-social-placeholders > * {
 			flex: 1;
+			min-width: 0;
 			height: 44px;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
 			background: #0e0d1e;
 			border: 1px solid rgba(180, 180, 190, 0.35);
 			border-radius: 5px;
-			min-width: 0;
+			color: #fff;
+			text-decoration: none;
+			font-size: 0.9rem;
+			transition: border-color 0.2s ease, background 0.2s ease;
+		}
+		body.gk-account-login .gk-social-placeholders > *:hover {
+			border-color: rgba(4, 218, 141, 0.5);
+			background: rgba(4, 218, 141, 0.08);
+		}
+		body.gk-account-login .gk-social-placeholders > a img,
+		body.gk-account-login .gk-social-placeholders > * img {
+			max-height: 22px;
+			width: auto;
+			vertical-align: middle;
 		}
 		body.gk-account-login .gk-divider-oder {
 			display: flex;
