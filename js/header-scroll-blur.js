@@ -11,10 +11,10 @@
 (function () {
 	'use strict';
 
-	var SCROLLED_PX = 20;
+	var SCROLLED_PX = 1;
 	var AT_TOP_PX = 2;   /* nur bei echt 0–2px = ganz oben wechseln, sonst Stop kurz vor oben */
 	var CONSECUTIVE_TICKS_AT_TOP = 4;   /* scrolled → top: erst 4 Ticks in Folge y<=2 */
-	var CONSECUTIVE_TICKS_SCROLLED = 3; /* top → scrolled: erst 3 Ticks in Folge y>20, verhindert Rückflip nach Layout-Änderung */
+	var CONSECUTIVE_TICKS_SCROLLED = 1; /* top → scrolled: 1 Tick mit y>1 reicht, Animation früher */
 	var LOCK_MS_AFTER_SCROLLED = 450;
 	var LOCK_MS_AFTER_TOP = 400;   /* nur kurz, damit sofortiges Runterscrollen nicht blockiert wird */
 	var POLL_MS = 150;
@@ -33,15 +33,24 @@
 		return Math.max(0, a, b, c);
 	}
 
+	var blurTimeout = null;
+
 	function applyState(newState) {
 		if (newState === state) return;
 		state = newState;
 		if (!document.body) return;
 		if (state === 'scrolled') {
 			document.body.classList.add('gk-header-scrolled');
+			if (blurTimeout) clearTimeout(blurTimeout);
+			blurTimeout = setTimeout(function () {
+				document.body.classList.add('gk-header-blur');
+				blurTimeout = null;
+			}, 140);
 			lockedUntil = Date.now() + LOCK_MS_AFTER_SCROLLED;
 		} else {
 			document.body.classList.remove('gk-header-scrolled');
+			document.body.classList.remove('gk-header-blur');
+			if (blurTimeout) { clearTimeout(blurTimeout); blurTimeout = null; }
 			lockedUntil = Date.now() + LOCK_MS_AFTER_TOP;
 		}
 	}
@@ -97,16 +106,32 @@
 		var y = getScrollTop();
 		if (y > SCROLLED_PX) {
 			state = 'scrolled';
-			if (document.body) document.body.classList.add('gk-header-scrolled');
+			if (document.body) {
+				document.body.classList.add('gk-header-scrolled');
+				if (blurTimeout) clearTimeout(blurTimeout);
+				blurTimeout = setTimeout(function () {
+					if (document.body) document.body.classList.add('gk-header-blur');
+					blurTimeout = null;
+				}, 140);
+			}
 			lockedUntil = 0;
 		} else {
 			state = 'top';
-			if (document.body) document.body.classList.remove('gk-header-scrolled');
+			if (document.body) {
+				document.body.classList.remove('gk-header-scrolled');
+				document.body.classList.remove('gk-header-blur');
+				if (blurTimeout) { clearTimeout(blurTimeout); blurTimeout = null; }
+			}
 			lockedUntil = 0;
 		}
 
 		window.addEventListener('scroll', onScroll, { passive: true });
 		window.addEventListener('resize', onScroll, { passive: true });
+		document.addEventListener('wheel', function (e) {
+			if (e.deltaY > 0 && state === 'top' && document.body && document.querySelector('.site-header')) {
+				applyState('scrolled');
+			}
+		}, { passive: true, capture: true });
 		setInterval(tick, POLL_MS);
 	}
 
