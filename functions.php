@@ -1394,7 +1394,12 @@ function globalkeys_scripts() {
 		#masthead .header-nav-above a.current,
 		#masthead .header-nav-above .current-menu-item a {
 			color: #04DA8D !important;
-			background: transparent !important;
+			background: rgba(90, 90, 95, 0.5) !important;
+		}
+		#masthead .header-nav-above a.current:hover,
+		#masthead .header-nav-above .current-menu-item a:hover {
+			background: rgba(90, 90, 95, 0.5) !important;
+			color: #04DA8D !important;
 		}
 		/* Pill-Plattform-Filter (PC, PlayStation…): Hover und aktiv in Grau, kein Grün */
 		#masthead .header-pill .platform-filter {

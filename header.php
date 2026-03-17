@@ -185,7 +185,7 @@ if ( ! $gk_account_login ) {
 					<div class="header-account-drawer-wrap" id="gk-account-drawer-wrap">
 						<button type="button" class="header-icon-link header-account-link header-account-trigger" id="gk-account-drawer-trigger" aria-label="<?php esc_attr_e( 'Mein Konto', 'globalkeys' ); ?>" aria-expanded="false" aria-controls="gk-account-drawer">
 							<span class="header-account-avatar-wrap">
-								<img src="<?php echo esc_url( $header_avatar ); ?>" alt="" class="header-account-avatar" width="54" height="54" loading="eager" style="object-position: center bottom;">
+								<img src="<?php echo esc_url( $header_avatar ); ?>" alt="" class="header-account-avatar" width="46" height="46" loading="eager" style="object-position: center bottom;">
 							</span>
 						</button>
 						<div class="gk-account-drawer" id="gk-account-drawer" hidden aria-hidden="true" role="dialog" aria-label="<?php esc_attr_e( 'Konto-Menü', 'globalkeys' ); ?>">

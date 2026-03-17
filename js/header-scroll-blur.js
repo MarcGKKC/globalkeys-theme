@@ -13,7 +13,7 @@
 
 	var SCROLLED_PX = 1;
 	var AT_TOP_PX = 2;   /* nur bei echt 0–2px = ganz oben wechseln, sonst Stop kurz vor oben */
-	var CONSECUTIVE_TICKS_AT_TOP = 4;   /* scrolled → top: erst 4 Ticks in Folge y<=2 */
+	var CONSECUTIVE_TICKS_AT_TOP = 1;   /* scrolled → top: sofort wenn y<=2, keine Wartezeit */
 	var CONSECUTIVE_TICKS_SCROLLED = 1; /* top → scrolled: 1 Tick mit y>1 reicht, Animation früher */
 	var LOCK_MS_AFTER_SCROLLED = 450;
 	var LOCK_MS_AFTER_TOP = 400;   /* nur kurz, damit sofortiges Runterscrollen nicht blockiert wird */

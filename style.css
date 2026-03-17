@@ -694,11 +694,12 @@ textarea {
 	box-shadow: none;
 }
 
-/* Großer Header: niemals Hintergrund/Blur, nur transparent */
+/* Großer Header: niemals Hintergrund/Blur, nur transparent – ohne Transition, damit beim Hochscrollen kein kurzer Blur auf dem großen Header sichtbar ist */
 body:not(.gk-header-scrolled) .site-header {
 	background: transparent !important;
 	-webkit-backdrop-filter: none !important;
 	backdrop-filter: none !important;
+	transition: background 0s, backdrop-filter 0s, -webkit-backdrop-filter 0s;
 }
 
 .site-header--transparent {
@@ -861,10 +862,17 @@ body.gk-header-scrolled .site-header-inner {
 	background: rgba(255, 255, 255, 0.12) !important;
 }
 
+/* Aktiv-Punkt: grüne Schrift + Box (bleibt auch nach Klick sichtbar) */
 #masthead .header-nav-above a.current,
 #masthead .header-nav-above .current-menu-item a {
-	color: #04DA8D;
-	background: none !important;
+	color: #04DA8D !important;
+	background: rgba(255, 255, 255, 0.12) !important;
+}
+
+#masthead .header-nav-above a.current:hover,
+#masthead .header-nav-above .current-menu-item a:hover {
+	background: rgba(255, 255, 255, 0.12) !important;
+	color: #04DA8D !important;
 }
 
 /* Äußerer Bereich: Pill + X-Bereich (X nur bei offener Suche sichtbar, absolut positioniert) */
@@ -914,7 +922,7 @@ body.gk-header-scrolled .site-header-inner {
 	-webkit-backdrop-filter: blur(12px);
 	backdrop-filter: blur(12px);
 	border-radius: 10px;
-	max-width: 40rem;
+	max-width: 46rem;
 }
 
 /* Such-Overlay: Verlauf setzt am Button an (rechts #027a54) und wird nach links fortgeführt – kein eigener Verlauf */
@@ -1309,8 +1317,8 @@ body.gk-header-scrolled .site-header-inner {
 /* Profilbild statt Icon, wenn eingeloggt */
 .header-account-avatar-wrap {
 	display: block;
-	width: 3.35rem;
-	height: 3.35rem;
+	width: 2.85rem;
+	height: 2.85rem;
 	border-radius: 50%;
 	overflow: hidden;
 	flex-shrink: 0;
@@ -1727,12 +1735,12 @@ body.gk-header-scrolled .site-main.site-main--front {
 
 /* Plattform-Seite: Header + leerer Hauptbereich (nur Hintergrund) */
 body.gk-platform-page .site-main.site-main--platform {
-	min-height: 50vh;
+	min-height: 170vh;
 }
 
 /* Nav-Section-Seiten (Trending Games, Preorders, …): gleicher leerer Hauptbereich */
 body.gk-nav-section-page .site-main.site-main--nav-section {
-	min-height: 50vh;
+	min-height: 170vh;
 }
 
 /* Pill auf kleinen Screens schmaler und umbruchfähig */
