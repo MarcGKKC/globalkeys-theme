@@ -52,15 +52,17 @@ $gk_categories_bg_url = get_template_directory_uri() . '/Pictures/category-card-
 				<span class="gk-featured-heading-arrow" aria-hidden="true"></span>
 			</h2>
 		</div>
+		<!-- 4 Karten/Reihe (zurückkehren: 5 Karten, i<=5, idx=page*5+i-1) · Wrapper begrenzt Breite, Pfeile bleiben nah an Karten -->
 		<div class="gk-categories-carousel" data-current="0">
+			<div class="gk-categories-carousel-inner">
 			<button type="button" class="gk-categories-arrow gk-categories-arrow--prev" aria-label="<?php esc_attr_e( 'Vorherige', 'globalkeys' ); ?>">
-				<span class="gk-categories-arrow-circle"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></span>
+				<span class="gk-categories-arrow-circle"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></span>
 			</button>
 			<div class="gk-categories-slides">
 				<?php for ( $page = 0; $page < 4; $page++ ) : ?>
 				<div class="gk-categories-slide<?php echo 0 === $page ? ' is-active' : ''; ?>" data-page="<?php echo (int) $page; ?>">
 					<div class="gk-categories-cards">
-						<?php for ( $i = 1; $i <= 5; $i++ ) : $idx = $page * 5 + $i - 1; $label = isset( $gk_category_labels[ $idx ] ) ? $gk_category_labels[ $idx ] : ''; ?>
+						<?php for ( $i = 1; $i <= 4; $i++ ) : $idx = $page * 4 + $i - 1; $label = isset( $gk_category_labels[ $idx ] ) ? $gk_category_labels[ $idx ] : ''; ?>
 						<div class="gk-categories-card">
 							<span class="gk-categories-card-inner gk-categories-card-inner--bg" style="--gk-card-bg: url('<?php echo esc_url( $gk_categories_bg_url ); ?>');">
 								<span class="gk-categories-card-label"><?php echo esc_html( $label ); ?></span>
@@ -72,8 +74,9 @@ $gk_categories_bg_url = get_template_directory_uri() . '/Pictures/category-card-
 				<?php endfor; ?>
 			</div>
 			<button type="button" class="gk-categories-arrow gk-categories-arrow--next" aria-label="<?php esc_attr_e( 'Nächste', 'globalkeys' ); ?>">
-				<span class="gk-categories-arrow-circle"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+				<span class="gk-categories-arrow-circle"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
 			</button>
+			</div>
 		</div>
 		<nav class="gk-categories-pagination" aria-label="<?php esc_attr_e( 'Kategorien-Seiten', 'globalkeys' ); ?>">
 			<?php for ( $d = 0; $d < 4; $d++ ) : ?>

@@ -8,20 +8,26 @@
 		var carousel = document.querySelector('.gk-categories-carousel');
 		if (!carousel) return;
 
-		var total = 4;
+		var slides = carousel.querySelectorAll('.gk-categories-slide');
+		var total = slides.length;
+		if (total === 0) return;
+
 		var prevBtn = carousel.querySelector('.gk-categories-arrow--prev');
 		var nextBtn = carousel.querySelector('.gk-categories-arrow--next');
-		var slides = carousel.querySelectorAll('.gk-categories-slide');
 		var section = carousel.closest('.gk-section-categories');
 		var dots = section ? section.querySelectorAll('.gk-categories-dot') : [];
 
+		function normalizePage(page) {
+			return ((page % total) + total) % total;
+		}
+
 		function getCurrent() {
 			var cur = parseInt(carousel.getAttribute('data-current'), 10);
-			return isNaN(cur) ? 0 : Math.max(0, Math.min(total - 1, cur));
+			return isNaN(cur) ? 0 : normalizePage(cur);
 		}
 
 		function goTo(page) {
-			page = Math.max(0, Math.min(total - 1, page));
+			page = normalizePage(page);
 			carousel.setAttribute('data-current', String(page));
 			slides.forEach(function (slide, i) {
 				slide.classList.toggle('is-active', i === page);
@@ -32,6 +38,7 @@
 			});
 		}
 
+		/* Endlosschleife: letzte → weiter = erste; erste → zurück = letzte */
 		if (prevBtn) {
 			prevBtn.addEventListener('click', function () {
 				goTo(getCurrent() - 1);
