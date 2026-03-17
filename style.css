@@ -2140,11 +2140,78 @@ body.gk-stats-bar-pinned-bottom {
 	background: #f8f0e8;
 }
 
+/* Trust Strip: Instant Delivery, 24/7 Support, Trustpilot, Neu dabei, Games – weiter unten, volle Breite */
+.gk-section-trust-strip {
+	background: #13122a;
+	padding: 1.25rem 2rem;
+	margin-bottom: 0;
+	width: 100vw;
+	position: relative;
+	left: 50%;
+	right: 50%;
+	margin-left: -50vw;
+	margin-right: -50vw;
+	box-sizing: border-box;
+}
+
+.gk-trust-strip-inner {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	gap: 1.5rem 4rem;
+	max-width: 100%;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+.gk-trust-strip-item {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	color: rgba(255, 255, 255, 0.92);
+	font-size: 0.9375rem;
+	font-weight: 500;
+}
+
+.gk-trust-strip-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	color: #04DA8D;
+}
+
+.gk-trust-strip-icon svg {
+	width: 1.25rem;
+	height: 1.25rem;
+}
+
+.gk-trust-strip-icon--trustpilot {
+	font-size: 1.125rem;
+	letter-spacing: 0.02em;
+}
+
+.gk-trust-strip-text {
+	white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+	.gk-trust-strip-inner {
+		gap: 1rem 1.5rem;
+	}
+	.gk-trust-strip-item {
+		font-size: 0.875rem;
+	}
+}
+
 /* Featured Products (unter der Hero-Stats-Bar) – Design wie Referenz */
 .gk-section-featured {
 	background: var(--gk-bg-color);
 	padding-top: 2.5rem;
-	padding-bottom: 2.5rem;
+	padding-bottom: 1.25rem;
 }
 
 .gk-section-featured-inner {

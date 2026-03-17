@@ -32,6 +32,12 @@ function globalkeys_get_front_page_sections() {
 			'aria_label' => __( 'Empfohlene Produkte', 'globalkeys' ),
 		),
 		array(
+			'id'        => 'section-trust-strip',
+			'slug'      => 'trust-strip',
+			'label'     => __( 'Trust Strip', 'globalkeys' ),
+			'aria_label' => __( 'Vertrauen & Service', 'globalkeys' ),
+		),
+		array(
 			'id'        => 'section-intro',
 			'slug'      => 'intro',
 			'label'     => __( 'Intro', 'globalkeys' ),
