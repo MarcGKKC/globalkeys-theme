@@ -71,6 +71,7 @@ html {
 	-webkit-text-size-adjust: 100%;
 	margin: 0;
 	padding: 0;
+	overflow-x: hidden;
 }
 
 /* Sections
@@ -2143,14 +2144,9 @@ body.gk-stats-bar-pinned-bottom {
 /* Trust Strip: Instant Delivery, 24/7 Support, Trustpilot, Neu dabei, Games – weiter unten, volle Breite */
 .gk-section-trust-strip {
 	background: #13122a;
-	padding: 1.25rem 2rem;
+	padding: 4rem 2rem;
 	margin-bottom: 0;
-	width: 100vw;
-	position: relative;
-	left: 50%;
-	right: 50%;
-	margin-left: -50vw;
-	margin-right: -50vw;
+	width: 100%;
 	box-sizing: border-box;
 }
 
@@ -2159,7 +2155,7 @@ body.gk-stats-bar-pinned-bottom {
 	flex-wrap: wrap;
 	align-items: center;
 	justify-content: center;
-	gap: 1.5rem 4rem;
+	gap: 1.5rem 3rem;
 	max-width: 100%;
 	width: 100%;
 	margin: 0;
@@ -2207,8 +2203,86 @@ body.gk-stats-bar-pinned-bottom {
 	}
 }
 
+/* Kleiner Hero-/Produktbereich unter Featured (Bild: Sdlc-gk (1).jpg) */
+.gk-section-hero-product {
+	background-color: #2a2a2a;
+	background-size: cover;
+	background-position: center center;
+	background-repeat: no-repeat;
+	margin-bottom: 0;
+	padding: 0;
+	min-height: 32rem;
+	box-shadow: inset 0 0 48px -8px rgba(0, 0, 0, 0.25);
+}
+
+.gk-section-hero-product[style*="background-image"] {
+	background-color: transparent;
+}
+
+.gk-section-hero-product-inner {
+	display: flex;
+	align-items: center;
+	min-height: 32rem;
+	padding: 2rem 3rem 2rem 22%;
+	box-sizing: border-box;
+}
+
+.gk-section-hero-product-link {
+	text-decoration: none;
+	color: inherit;
+	transition: opacity 0.2s ease;
+}
+
+.gk-section-hero-product-link:hover {
+	opacity: 0.95;
+}
+
+.gk-section-hero-product-content {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	max-width: 20rem;
+}
+
+.gk-section-hero-product-title {
+	font-size: 1.5rem;
+	font-weight: 700;
+	line-height: 1.25;
+	color: #fff;
+}
+
+.gk-section-hero-product-price-row {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	flex-wrap: wrap;
+}
+
+.gk-section-hero-product-price {
+	font-size: 1.25rem;
+	font-weight: 600;
+	color: #fff;
+}
+
+.gk-section-hero-product-price del {
+	opacity: 0.8;
+	color: rgba(255, 255, 255, 0.85);
+}
+
+.gk-section-hero-product-badge {
+	display: inline-block;
+	padding: 0.25rem 0.5rem;
+	font-size: 0.875rem;
+	font-weight: 700;
+	color: #0a0a0a;
+	background: #00e599;
+	border-radius: 4px;
+	line-height: 1.2;
+}
+
 /* Featured Products (unter der Hero-Stats-Bar) – Design wie Referenz */
-.gk-section-featured {
+.gk-section-featured,
+.gk-section-bestsellers {
 	background: var(--gk-bg-color);
 	padding-top: 2.5rem;
 	padding-bottom: 1.25rem;
@@ -2222,9 +2296,228 @@ body.gk-stats-bar-pinned-bottom {
 	padding-right: 1.5rem;
 }
 
+/* Categories Section: Überschrift 1:1 wie Featured (gleiches Design, gleicher Hover) */
+.gk-section-categories {
+	background: var(--gk-bg-color);
+	padding-top: 2.5rem;
+	padding-bottom: 1.25rem;
+}
+
+.gk-section-categories-inner {
+	max-width: 72rem;
+	margin-left: auto;
+	margin-right: auto;
+	padding-left: 1.5rem;
+	padding-right: 1.5rem;
+}
+
+/* 5 Karten mittig mit gleichem Rand links/rechts (Viewport-Zentrierung) */
+.gk-section-categories .gk-featured-heading-wrap {
+	margin-bottom: 2.5rem;
+}
+
+.gk-categories-carousel {
+	display: flex;
+	align-items: stretch;
+	justify-content: center;
+	gap: 0;
+	width: 100vw;
+	max-width: 100vw;
+	margin-left: calc(-50vw + 50%);
+	box-sizing: border-box;
+}
+
+.gk-categories-arrow {
+	display: none !important;
+	flex-shrink: 0;
+	align-self: center;
+	align-items: center;
+	justify-content: center;
+	width: 3rem;
+	height: 3rem;
+	padding: 0;
+	border: none;
+	border-radius: 10px;
+	background: rgba(50, 50, 55, 0.5);
+	-webkit-backdrop-filter: blur(12px);
+	backdrop-filter: blur(12px);
+	color: #fff;
+	cursor: pointer;
+	transition: background 0.2s ease, color 0.2s ease;
+}
+
+.gk-categories-arrow-circle {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.25rem;
+	height: 2.25rem;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.08);
+}
+
+.gk-categories-arrow:hover {
+	background: rgba(60, 60, 68, 0.55);
+	color: #04DA8D;
+}
+
+.gk-categories-arrow:hover .gk-categories-arrow-circle {
+	background: rgba(255, 255, 255, 0.12);
+}
+
+.gk-categories-arrow svg {
+	width: 1rem;
+	height: 1rem;
+}
+
+.gk-categories-slides {
+	position: relative;
+	flex: 0 0 auto;
+	width: calc(5 * 16.5rem + 4 * 1rem);
+	max-width: 100%;
+	margin: 0 auto;
+	display: flex;
+}
+
+.gk-categories-slide {
+	display: none;
+	width: 100%;
+}
+
+.gk-categories-slide.is-active {
+	display: block;
+}
+
+.gk-categories-cards {
+	display: grid;
+	grid-template-columns: repeat(5, minmax(16.5rem, 1fr));
+	gap: 1rem;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.gk-categories-card {
+	aspect-ratio: 6 / 5;
+	border-radius: 10px;
+	overflow: hidden;
+	background: #13122a;
+	border: none;
+}
+
+.gk-categories-card-inner {
+	position: relative;
+	display: flex;
+	align-items: flex-end;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	background-color: #13122a;
+	padding-bottom: 2.25rem;
+	transition: padding-bottom 0.35s ease;
+}
+
+.gk-categories-card:hover .gk-categories-card-inner {
+	padding-bottom: 1rem;
+}
+
+/* Hintergrundbild in eigener Schicht für Zoom */
+.gk-categories-card-inner--bg::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	border-radius: 10px;
+	background-image: var(--gk-card-bg);
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+	pointer-events: none;
+	transition: transform 0.35s ease;
+}
+
+.gk-categories-card:hover .gk-categories-card-inner--bg::after {
+	transform: scale(1.05);
+}
+
+/* Filter: dunkler Verlauf wie zuvor, in Schwarz (unten rechts stärker, oben links wenig) */
+.gk-categories-card-inner--bg::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	border-radius: 10px;
+	background: linear-gradient(
+		to top left,
+		rgba(0, 0, 0, 0.82) 0%,
+		rgba(0, 0, 0, 0.52) 35%,
+		rgba(0, 0, 0, 0.25) 70%,
+		transparent 100%
+	);
+	pointer-events: none;
+	transition: opacity 0.35s ease;
+}
+
+.gk-categories-card:hover .gk-categories-card-inner--bg::before {
+	opacity: 0;
+}
+
+/* Kleine Box auf der Karte: Kategoriename, passend zum Farbschema (Grün-Akzent) */
+.gk-categories-card-label {
+	position: relative;
+	z-index: 2;
+	display: inline-block;
+	padding: 0.5rem 0.9rem;
+	border-radius: 8px;
+	background: rgba(19, 18, 42, 0.92);
+	border: 1px solid rgba(255, 255, 255, 0.88);
+	color: rgba(255, 255, 255, 0.88);
+	font-size: 0.95rem;
+	font-weight: 700;
+	line-height: 1.2;
+	text-transform: uppercase;
+	letter-spacing: 0.02em;
+	text-align: center;
+	max-width: 90%;
+	box-sizing: border-box;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Breadcrumb / Pagination unter dem Carousel, mittig, gleicher Rand */
+.gk-categories-pagination {
+	display: flex;
+	justify-content: center;
+	gap: 0.4rem;
+	margin-top: 1.25rem;
+	padding: 0;
+	list-style: none;
+	width: 100vw;
+	max-width: 100vw;
+	margin-left: calc(-50vw + 50%);
+	box-sizing: border-box;
+}
+
+.gk-categories-dot {
+	width: 1.15rem;
+	height: 0.65rem;
+	padding: 0;
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	border-radius: 2px;
+	background: #13122a;
+	cursor: pointer;
+	transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.gk-categories-dot:hover {
+	background: rgba(255, 255, 255, 0.25);
+}
+
+.gk-categories-dot.is-active {
+	background: #04DA8D;
+}
+
 .gk-featured-heading-wrap {
 	display: inline-block;
-	transform: translateX(-5.5rem);
+	transform: translateX(-6.5rem);
 	margin-bottom: 1.5rem;
 }
 

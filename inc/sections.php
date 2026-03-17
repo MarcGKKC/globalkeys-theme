@@ -32,10 +32,28 @@ function globalkeys_get_front_page_sections() {
 			'aria_label' => __( 'Empfohlene Produkte', 'globalkeys' ),
 		),
 		array(
+			'id'        => 'section-hero-product',
+			'slug'      => 'hero-product',
+			'label'     => __( 'Hero Product', 'globalkeys' ),
+			'aria_label' => __( 'Produktbereich', 'globalkeys' ),
+		),
+		array(
+			'id'        => 'section-bestsellers',
+			'slug'      => 'bestsellers',
+			'label'     => __( 'Bestsellers', 'globalkeys' ),
+			'aria_label' => __( 'Bestseller', 'globalkeys' ),
+		),
+		array(
 			'id'        => 'section-trust-strip',
 			'slug'      => 'trust-strip',
 			'label'     => __( 'Trust Strip', 'globalkeys' ),
 			'aria_label' => __( 'Vertrauen & Service', 'globalkeys' ),
+		),
+		array(
+			'id'        => 'section-categories',
+			'slug'      => 'categories',
+			'label'     => __( 'Our Categories', 'globalkeys' ),
+			'aria_label' => __( 'Kategorien', 'globalkeys' ),
 		),
 		array(
 			'id'        => 'section-intro',
