@@ -2058,6 +2058,82 @@ body.gk-nav-section-page .site-main.site-main--nav-section {
 	color: #fff;
 }
 
+/* Produkthero-Inhalt (Titel, Preis, Badge) – als Overlay mittig links, Hero-Bild/Layout unverändert */
+.gk-hero-product-overlay {
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	align-items: center;
+	padding-left: 12%;
+	padding-right: 2rem;
+	box-sizing: border-box;
+	pointer-events: none;
+}
+.gk-hero-product-overlay .gk-hero-product-block,
+.gk-hero-product-overlay .gk-hero-product-link {
+	pointer-events: auto;
+}
+
+.gk-section-hero {
+	position: relative;
+}
+
+.gk-hero-product-block {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.gk-hero-product-link {
+	text-decoration: none;
+	color: inherit;
+}
+
+.gk-hero-product-title {
+	font-size: clamp(1.5rem, 3.5vw, 2.25rem);
+	font-weight: 700;
+	line-height: 1.2;
+	color: #fff;
+	display: block;
+}
+
+.gk-hero-product-price-row {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	flex-wrap: wrap;
+}
+
+.gk-hero-product-badge {
+	display: inline-block;
+	padding: 0.25rem 0.6rem;
+	background: #e63946;
+	color: #fff;
+	font-size: 0.875rem;
+	font-weight: 700;
+	border-radius: 4px;
+}
+
+.gk-hero-product-price {
+	font-size: clamp(1.375rem, 2.6vw, 1.875rem);
+	font-weight: 700;
+	color: #fff;
+	font-variant-numeric: proportional-nums;
+	letter-spacing: 0.02em;
+}
+
+.gk-hero-product-price del {
+	opacity: 0.85;
+	margin-right: 0.35em;
+}
+
+.gk-hero-product-price ins {
+	text-decoration: none;
+}
+
 /* Infobar: oben unter Hero, beim Scrollen nach oben wegrücken, unten fest erscheinen – Seitenlänge gleich */
 .gk-hero-stats-bar-wrapper {
 	overflow: hidden;
@@ -2151,11 +2227,17 @@ body.gk-stats-bar-pinned-bottom {
 }
 
 .gk-section-intro {
-	background: #f5f5f5;
+	background: var(--gk-bg-color);
 }
 
 .gk-section-cta {
-	background: #f8f0e8;
+	background: var(--gk-bg-color);
+}
+
+/* Startseite: Intro + Call to Action nur als leere Fläche (Hintergrund, Inhalt ausgeblendet) */
+body.home .gk-section-intro .gk-section-inner,
+body.home .gk-section-cta .gk-section-inner {
+	visibility: hidden;
 }
 
 /* Trust Strip: wie Referenz – Icon, Titel, Untertitel, Trennlinien */
@@ -2371,6 +2453,7 @@ body.gk-stats-bar-pinned-bottom {
 .gk-section-hero-product-price-row {
 	display: flex;
 	align-items: center;
+	justify-content: space-between;
 	gap: 0.75rem;
 	flex-wrap: wrap;
 }
@@ -2379,6 +2462,12 @@ body.gk-stats-bar-pinned-bottom {
 	font-size: 1.25rem;
 	font-weight: 600;
 	color: #fff;
+	font-variant-numeric: proportional-nums;
+	letter-spacing: -0.02em;
+}
+
+.gk-section-hero-product-price * {
+	letter-spacing: inherit;
 }
 
 .gk-section-hero-product-price del {
@@ -2399,11 +2488,15 @@ body.gk-stats-bar-pinned-bottom {
 
 /* Featured Products (unter der Hero-Stats-Bar) – Design wie Referenz */
 .gk-section-featured,
-.gk-section-bestsellers {
+.gk-section-bestsellers,
+.gk-section-recently-viewed,
+.gk-section-preorders,
+.gk-section-weekly-deals {
 	background: var(--gk-bg-color);
 	padding-top: 2.5rem;
 	padding-bottom: 1.25rem;
 }
+
 
 .gk-section-featured-inner {
 	max-width: 72rem;
@@ -2431,6 +2524,203 @@ body.gk-stats-bar-pinned-bottom {
 /* 5 Karten mittig mit gleichem Rand links/rechts (Viewport-Zentrierung) */
 .gk-section-categories .gk-featured-heading-wrap {
 	margin-bottom: 2.5rem;
+}
+
+/* Spiele für jeden Geldbeutel: gleiche Karten wie Categories, ohne Carousel */
+.gk-section-budget-games {
+	background: var(--gk-bg-color);
+	padding-top: 2.5rem;
+	padding-bottom: 2.5rem;
+}
+.gk-section-budget-inner {
+	max-width: 72rem;
+	margin-left: auto;
+	margin-right: auto;
+	padding-left: 1.5rem;
+	padding-right: 1.5rem;
+}
+.gk-section-budget-games .gk-featured-heading-wrap {
+	margin-bottom: 2.5rem;
+}
+
+/* 3 Kästen (Our Categories): Wrapper bricht auf Viewport-Breite aus */
+.gk-test-boxes-wrapper {
+	width: 100vw;
+	max-width: 100vw;
+	margin-left: calc(-50vw + 50%);
+	box-sizing: border-box;
+	padding-left: 1.5rem;
+	padding-right: 1.5rem;
+}
+.gk-test-boxes-row {
+	display: flex;
+	gap: 0;
+	width: calc(4 * 20rem + 3 * 1rem);
+	max-width: 100%;
+	margin: 0 auto;
+	box-sizing: border-box;
+}
+.gk-test-box {
+	position: relative;
+	flex: 1;
+	min-width: 0;
+	min-height: 24.35rem;
+	border: none;
+	border-radius: 0;
+	box-sizing: border-box;
+	overflow: hidden;
+	background: #13122a;
+}
+.gk-test-box--bg::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	border-radius: 0;
+	background-image: var(--gk-card-bg);
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+	pointer-events: none;
+	transform: scale(1);
+	transform-origin: center center;
+	transition: transform 0.35s ease;
+}
+.gk-test-box--bg:hover::after {
+	transform: scale(1.06);
+}
+.gk-test-box--bg::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	border-radius: 0;
+	background: linear-gradient(
+		to top left,
+		rgba(0, 0, 0, 0.68) 0%,
+		rgba(0, 0, 0, 0.45) 35%,
+		rgba(0, 0, 0, 0.2) 70%,
+		transparent 100%
+	);
+	pointer-events: none;
+}
+.gk-test-box-label {
+	position: absolute;
+	left: 2.35rem;
+	bottom: 2.5rem;
+	z-index: 2;
+	display: flex;
+	align-items: center;
+	gap: 1.28rem;
+}
+.gk-test-box-label-line {
+	width: 4px;
+	height: 2.65em;
+	min-height: 2.95rem;
+	background: #04DA8D;
+	border-radius: 0;
+	flex-shrink: 0;
+}
+.gk-test-box-label-text {
+	color: #fff;
+	font-size: 2.05rem;
+	font-weight: 700;
+	line-height: 1.2;
+}
+
+/* Test-Carousel: gleiche Logik wie Categories, Pfeile etwas größer */
+.gk-test-carousel {
+	width: 100%;
+	box-sizing: border-box;
+}
+.gk-test-carousel-inner {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0;
+	max-width: 90rem;
+	margin: 0 auto;
+	width: 100%;
+	box-sizing: border-box;
+}
+.gk-test-arrow {
+	display: flex !important;
+	flex-shrink: 0;
+	align-self: center;
+	align-items: center;
+	justify-content: center;
+	width: auto;
+	height: auto;
+	padding: 0.75rem;
+	border: none;
+	background: transparent;
+	color: #04DA8D;
+	cursor: pointer;
+	transition: color 0.2s ease, transform 0.2s ease;
+	z-index: 2;
+}
+.gk-test-arrow--prev {
+	margin-right: 0.2rem;
+}
+.gk-test-arrow--next {
+	margin-left: 0.2rem;
+}
+.gk-test-arrow-circle {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: transparent;
+}
+.gk-test-arrow:hover {
+	color: #04DA8D;
+	transform: scale(1.1);
+}
+.gk-test-arrow svg {
+	width: 4rem;
+	height: 4rem;
+}
+.gk-test-slides {
+	position: relative;
+	flex: 0 0 auto;
+	width: calc(4 * 20rem + 3 * 1rem);
+	max-width: 100%;
+	margin: 0 auto;
+	display: block;
+	overflow: hidden;
+}
+.gk-test-slide {
+	display: none !important;
+	width: 100%;
+}
+.gk-test-slide.is-active {
+	display: block !important;
+}
+.gk-test-pagination {
+	display: none;
+}
+.gk-test-dot {
+	width: 1.35rem;
+	height: 0.78rem;
+	padding: 0;
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	border-radius: 2px;
+	background: #13122a;
+	cursor: pointer;
+	transition: background 0.2s ease, border-color 0.2s ease;
+}
+.gk-test-dot:hover {
+	background: rgba(255, 255, 255, 0.25);
+}
+.gk-test-dot.is-active {
+	background: #04DA8D;
+}
+
+/* Last seen: Überschrift ohne Hover (wie Categories) */
+.gk-section-recently-viewed .gk-featured-heading-wrap:hover .gk-featured-heading-arrow {
+	transform: translateY(-0.02em);
+}
+.gk-section-recently-viewed .gk-featured-heading-wrap:hover .gk-featured-title-underline {
+	width: 35%;
 }
 
 .gk-categories-carousel {

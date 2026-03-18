@@ -400,6 +400,37 @@ add_filter( 'woocommerce_logout_redirect', function( $redirect ) {
 } );
 
 /**
+ * Währung immer rechts vom Preis (Euro, USD etc.) – site-weit.
+ */
+add_filter( 'pre_option_woocommerce_currency_pos', function( $value ) {
+	return 'right_space';
+} );
+
+/**
+ * Zuletzt angesehene Produkte: Cookie setzen beim Aufruf einer Produktseite.
+ */
+function globalkeys_track_recently_viewed_product() {
+	if ( ! function_exists( 'is_product' ) || ! is_product() ) {
+		return;
+	}
+	$product_id = get_the_ID();
+	if ( ! $product_id ) {
+		return;
+	}
+	$cookie_name = 'gk_recently_viewed';
+	$max         = 12;
+	$ids         = array();
+	if ( ! empty( $_COOKIE[ $cookie_name ] ) ) {
+		$ids = array_map( 'absint', array_filter( explode( ',', sanitize_text_field( wp_unslash( $_COOKIE[ $cookie_name ] ) ) ) ) );
+	}
+	$ids = array_diff( $ids, array( $product_id ) );
+	array_unshift( $ids, $product_id );
+	$ids = array_slice( array_unique( $ids ), 0, $max );
+	setcookie( $cookie_name, implode( ',', $ids ), time() + ( 30 * DAY_IN_SECONDS ), '/', '', is_ssl(), true );
+}
+add_action( 'template_redirect', 'globalkeys_track_recently_viewed_product', 20 );
+
+/**
  * Bei Registrierungs-Fehler: Redirect mit Transient für Custom-Modal.
  * Bei reinen Passwort-Fehlern: Gamertag und E-Mail beibehalten (nur Passwort leeren).
  */
@@ -1442,6 +1473,9 @@ function globalkeys_scripts() {
 	if ( function_exists( 'globalkeys_has_front_page_sections' ) && globalkeys_has_front_page_sections() ) {
 		wp_enqueue_script( 'globalkeys-hero-stats-count', get_template_directory_uri() . '/js/hero-stats-count.js', array(), _S_VERSION, true );
 		wp_enqueue_script( 'globalkeys-hero-stats-bar-scroll', get_template_directory_uri() . '/js/hero-stats-bar-scroll.js', array(), _S_VERSION, true );
+	}
+	/* Carousel: immer auf der Startseite laden (Hero-Sections + Test; unabhängig von strikter has_front_page_sections-Bedingung) */
+	if ( is_front_page() ) {
 		wp_enqueue_script( 'globalkeys-categories-carousel', get_template_directory_uri() . '/js/gk-categories-carousel.js', array(), _S_VERSION, true );
 	}
 

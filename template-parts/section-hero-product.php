@@ -35,9 +35,9 @@ if ( ! $product && function_exists( 'wc_get_products' ) ) {
 }
 
 $product_url   = $product ? $product->get_permalink() : '';
-$product_name = $product ? $product->get_name() : '';
-$price_html   = $product ? $product->get_price_html() : '';
-$discount_pct = 0;
+$product_name  = $product ? $product->get_name() : __( 'Produkt', 'globalkeys' );
+$price_html    = $product ? $product->get_price_html() : '—';
+$discount_pct  = 0;
 if ( $product && $product->is_on_sale() && ! $product->is_type( 'variable' ) ) {
 	$regular = (float) $product->get_regular_price();
 	$sale    = (float) $product->get_price();
@@ -48,23 +48,25 @@ if ( $product && $product->is_on_sale() && ! $product->is_type( 'variable' ) ) {
 ?>
 
 <section id="<?php echo esc_attr( $id ); ?>" class="gk-section gk-section-hero-product" role="region" aria-label="<?php echo esc_attr( $aria_label ); ?>" style="background-image: url('<?php echo esc_url( $hero_product_img ); ?>');">
-	<?php if ( $product_url && $product_name ) : ?>
+	<?php if ( $product_url ) : ?>
 		<a href="<?php echo esc_url( $product_url ); ?>" class="gk-section-hero-product-inner gk-section-hero-product-link">
 			<div class="gk-section-hero-product-content">
 				<span class="gk-section-hero-product-title"><?php echo esc_html( $product_name ); ?></span>
 				<div class="gk-section-hero-product-price-row">
-					<span class="gk-section-hero-product-price"><?php echo $price_html; ?></span>
 					<?php if ( $discount_pct > 0 ) : ?>
 						<span class="gk-section-hero-product-badge">-<?php echo (int) $discount_pct; ?>%</span>
 					<?php endif; ?>
+					<span class="gk-section-hero-product-price"><?php echo $price_html; ?></span>
 				</div>
 			</div>
 		</a>
 	<?php else : ?>
 		<div class="gk-section-hero-product-inner">
 			<div class="gk-section-hero-product-content">
-				<span class="gk-section-hero-product-title"><?php esc_html_e( 'Produkt', 'globalkeys' ); ?></span>
-				<span class="gk-section-hero-product-price"><?php echo $price_html ? $price_html : '—'; ?></span>
+				<span class="gk-section-hero-product-title"><?php echo esc_html( $product_name ); ?></span>
+				<div class="gk-section-hero-product-price-row">
+					<span class="gk-section-hero-product-price"><?php echo $price_html; ?></span>
+				</div>
 			</div>
 		</div>
 	<?php endif; ?>

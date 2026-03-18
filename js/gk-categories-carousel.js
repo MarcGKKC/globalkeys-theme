@@ -1,21 +1,20 @@
 /**
- * Categories carousel: Pfeile + Pagination-Dots zum Umschalten der Seiten.
+ * Categories + Test carousel: Pfeile + Pagination-Dots zum Umschalten der Seiten.
  */
 (function () {
 	'use strict';
 
-	function init() {
-		var carousel = document.querySelector('.gk-categories-carousel');
+	function initCarousel(carousel, slideSelector, prevSelector, nextSelector, sectionSelector, dotSelector) {
 		if (!carousel) return;
 
-		var slides = carousel.querySelectorAll('.gk-categories-slide');
+		var slides = carousel.querySelectorAll(slideSelector);
 		var total = slides.length;
 		if (total === 0) return;
 
-		var prevBtn = carousel.querySelector('.gk-categories-arrow--prev');
-		var nextBtn = carousel.querySelector('.gk-categories-arrow--next');
-		var section = carousel.closest('.gk-section-categories');
-		var dots = section ? section.querySelectorAll('.gk-categories-dot') : [];
+		var prevBtn = carousel.querySelector(prevSelector);
+		var nextBtn = carousel.querySelector(nextSelector);
+		var section = carousel.closest(sectionSelector);
+		var dots = section ? section.querySelectorAll(dotSelector) : [];
 
 		function normalizePage(page) {
 			return ((page % total) + total) % total;
@@ -38,7 +37,6 @@
 			});
 		}
 
-		/* Endlosschleife: letzte → weiter = erste; erste → zurück = letzte */
 		if (prevBtn) {
 			prevBtn.addEventListener('click', function () {
 				goTo(getCurrent() - 1);
@@ -54,6 +52,18 @@
 				goTo(i);
 			});
 		});
+	}
+
+	function init() {
+		/* Altes 4er-Karussell entfernt; Our Categories nutzt Inline-Script in section-categories.php */
+		initCarousel(
+			document.querySelector('.gk-categories-carousel'),
+			'.gk-categories-slide',
+			'.gk-categories-arrow--prev',
+			'.gk-categories-arrow--next',
+			'.gk-section-categories',
+			'.gk-categories-dot'
+		);
 	}
 
 	if (document.readyState === 'loading') {
