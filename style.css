@@ -72,6 +72,7 @@ html {
 	margin: 0;
 	padding: 0;
 	overflow-x: hidden;
+	scrollbar-gutter: stable; /* Reserviert Platz für Scrollbar, verhindert Layout-Sprünge beim Header-Wechsel */
 }
 
 /* Sections
@@ -483,6 +484,13 @@ big {
 body {
 	background: var(--gk-bg-color);
 	transition: padding-bottom 0.4s ease-out;
+	/* Sync: Variablen auf Body, Main liest sie – Header + Padding gleicher Update-Zyklus */
+	--gk-main-padding-top: 8rem;
+	--gk-front-padding-top: 0;
+}
+body.gk-header-scrolled {
+	--gk-main-padding-top: 12rem;
+	--gk-front-padding-top: 4rem;
 }
 
 /* Kein Spalt links: Seite und Inhalt bündig bis zum Rand; keine Linie über dem Header */
@@ -719,14 +727,14 @@ body.gk-header-scrolled .header-pill {
 	background: transparent;
 	-webkit-backdrop-filter: none;
 	backdrop-filter: none;
-	transition: background 0.12s ease, backdrop-filter 0.12s ease, -webkit-backdrop-filter 0.12s ease, height 0.14s ease;
+	transition: background 0.16s ease, backdrop-filter 0.16s ease, -webkit-backdrop-filter 0.16s ease, height 0.16s ease;
 }
 
 /* Header-Animation: oben groß (Menü + Pill sichtbar), beim Scrollen kompakt */
 .header-pill-wrapper .header-nav-above {
 	max-height: 4rem;
 	overflow: hidden;
-	transition: max-height 0.12s ease-out, transform 0.12s ease-out, opacity 0.12s ease-out, visibility 0s linear 0.12s;
+	transition: max-height 0.16s ease-out, transform 0.16s ease-out, opacity 0.16s ease-out, visibility 0s linear 0.16s;
 }
 
 body.gk-header-scrolled .header-pill-wrapper .header-nav-above {
@@ -735,12 +743,12 @@ body.gk-header-scrolled .header-pill-wrapper .header-nav-above {
 	opacity: 0;
 	pointer-events: none;
 	visibility: hidden;
-	transition: max-height 0.12s ease-out, transform 0.12s ease-out, opacity 0.12s ease-out, visibility 0s linear 0.12s;
+	transition: max-height 0.16s ease-out, transform 0.16s ease-out, opacity 0.16s ease-out, visibility 0s linear 0.16s;
 }
 
 .header-pill-wrapper {
 	gap: 0.4rem;
-	transition: gap 0.12s ease-out;
+	transition: gap 0.16s ease-out;
 }
 
 body.gk-header-scrolled .header-pill-wrapper {
@@ -749,7 +757,7 @@ body.gk-header-scrolled .header-pill-wrapper {
 
 .header-pill-container {
 	--gk-pill-height: 3.5rem;
-	transition: transform 0.12s ease-out;
+	transition: transform 0.16s ease-out;
 }
 
 body.gk-header-scrolled .header-pill-container {
@@ -767,6 +775,9 @@ body:not(.gk-header-scrolled) .site-header-inner {
 body.gk-header-scrolled .site-header-inner {
 	height: 4.5rem;
 	min-height: 4.5rem;
+}
+.site-header-inner {
+	transition: height 0.16s ease-out, min-height 0.16s ease-out; /* Sync mit site-main, verhindert Scrollbar-Sprung */
 }
 
 .site-header-inner {
@@ -1717,22 +1728,16 @@ body.gk-drawer-open #masthead {
 	text-decoration: none;
 }
 
-/* Abstand unter Header (Startseite: Hero-padding; andere: site-main) */
+/* Abstand unter Header – liest Variable von Body, Transition sync mit Header */
 .site-main {
-	padding-top: 8rem;
+	padding-top: var(--gk-main-padding-top, 8rem);
+	transition: padding-top 0.16s ease-out;
 }
 
 .site-main--front {
-	padding-top: 0;
+	padding-top: var(--gk-front-padding-top, 0);
 }
 
-/* Kompakt-Header: mehr Abstand oben, damit die Seite nicht nach oben springt (Header 4rem kürzer) */
-body.gk-header-scrolled .site-main {
-	padding-top: 12rem; /* 8rem + 4rem */
-}
-body.gk-header-scrolled .site-main.site-main--front {
-	padding-top: 4rem;
-}
 
 /* Plattform-Seite: Header + leerer Hauptbereich (nur Hintergrund) */
 body.gk-platform-page .site-main.site-main--platform {
@@ -2055,13 +2060,13 @@ body.gk-nav-section-page .site-main.site-main--nav-section {
 	row-gap: 0.75rem;
 	width: 100%;
 	max-width: 100%;
-	margin: 0 0 2rem;
+	margin: 0 0 3.25rem;
 	align-self: stretch;
 	box-sizing: border-box;
 }
 .gk-footer-community-heading {
 	font-size: 1.625rem;
-	font-weight: 800;
+	font-weight: 700;
 	margin: 0;
 	padding: 0;
 	margin-block: 0;
@@ -2129,24 +2134,27 @@ body.gk-nav-section-page .site-main.site-main--nav-section {
 	}
 }
 .gk-footer-col-title {
-	font-size: 0.9375rem;
+	font-size: 1.0625rem;
 	font-weight: 700;
 	margin: 0 0 0.75rem;
+	color: #fff;
+	letter-spacing: -0.01em;
+	line-height: 1.25;
 }
 .gk-footer-col a {
 	display: block;
 	font-size: 0.875rem;
-	color: rgba(255, 255, 255, 0.88);
+	color: #5c6270;
 	margin-bottom: 0.5rem;
+	line-height: 1.45;
 }
 .gk-footer-col a:hover {
 	color: #04DA8D;
 }
 
 .gk-footer-payment-bar {
-	background: rgba(0, 0, 0, 0.25);
+	background: transparent;
 	padding: 1.25rem 1.5rem;
-	border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 .gk-footer-payment-inner {
 	max-width: calc(72rem + (6.5rem + 8px) * 2);
@@ -2162,9 +2170,9 @@ body.gk-nav-section-page .site-main.site-main--nav-section {
 	flex-wrap: wrap;
 }
 .gk-footer-payment-label {
-	font-size: 0.6875rem;
+	font-size: 0.8125rem;
 	font-weight: 700;
-	letter-spacing: 0.08em;
+	letter-spacing: 0.06em;
 	color: #04DA8D;
 	text-transform: uppercase;
 	flex-shrink: 0;
@@ -2172,22 +2180,56 @@ body.gk-nav-section-page .site-main.site-main--nav-section {
 .gk-footer-payment-logos {
 	display: flex;
 	align-items: center;
-	gap: 1rem;
+	gap: 1rem 1.4rem;
 	flex-wrap: wrap;
 	justify-content: center;
 	flex: 1;
 	min-width: 200px;
 }
+/* Helle Kachel pro Zahlungsmethode (#f3f4f6) – Ecken 3px */
+.gk-footer-payment-pill {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	width: 3.25rem;
+	height: 2rem;
+	padding: 0.22rem 0.35rem;
+	border-radius: 3px;
+	background: #f3f4f6;
+	border: 1px solid #e5e7eb;
+	box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+	flex-shrink: 0;
+}
+.gk-footer-payment-pill--text {
+	width: auto;
+	min-width: 3.25rem;
+	max-width: 5rem;
+	padding: 0.22rem 0.4rem;
+}
 .gk-footer-payment-logo {
-	font-size: 0.65rem;
-	color: rgba(255, 255, 255, 0.6);
+	font-size: 0.53125rem;
+	font-weight: 700;
+	color: #374151;
 	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	line-height: 1.15;
+	text-align: center;
 }
 .gk-footer-payment-logo-img {
-	height: 1.25rem;
+	max-height: 1.05rem;
+	max-width: 100%;
 	width: auto;
+	height: auto;
 	object-fit: contain;
-	opacity: 0.9;
+	object-position: center;
+	flex-shrink: 0;
+	display: block;
+}
+/* Simple Icons: dunkle Pfade auf hellem Kachel-Hintergrund */
+.gk-footer-payment-logo-img--mono {
+	filter: none;
+	opacity: 0.88;
 }
 
 .gk-footer-bottom {
@@ -2215,17 +2257,65 @@ body.gk-nav-section-page .site-main.site-main--nav-section {
 .gk-footer-trustpilot {
 	display: flex;
 	align-items: center;
-	gap: 0.75rem;
+	gap: 1.15rem;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	margin-left: auto;
 }
-.gk-footer-trustpilot-text {
-	font-size: 0.8125rem;
+.gk-footer-trustpilot-copy {
+	text-align: right;
+	display: flex;
+	flex-direction: column;
+	gap: 0.2rem;
+	align-items: flex-end;
+}
+.gk-footer-trustpilot-line1,
+.gk-footer-trustpilot-line2 {
 	margin: 0;
-	color: rgba(255, 255, 255, 0.85);
+	font-size: 0.875rem;
+	line-height: 1.35;
+	max-width: 22rem;
 }
-.gk-footer-trustpilot-badge img {
-	height: 1.75rem;
-	width: auto;
+.gk-footer-trustpilot-line1 {
+	color: #94a3b8;
+	font-weight: 400;
+}
+.gk-footer-trustpilot-line2 {
+	color: #00b67a;
+	font-weight: 600;
+}
+/* Wie Social-Buttons: Rand & Hover; etwas hellerer Grund, damit Originalfarben im SVG lesbar bleiben (ohne Filter) */
+/* Mockup: transparenter Button, Rand #262635, abgerundet; Logo grüner Stern + weißes Wordmark (Footer-SVG) */
+.gk-footer-trustpilot-badge {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: fit-content;
+	max-width: 6.85rem;
+	padding: 0.5rem 0.5rem;
+	min-height: 2.5rem;
+	box-sizing: border-box;
+	border-radius: 6px;
+	background: transparent;
+	border: 1px solid #262635;
+	color: #fff;
+	text-decoration: none;
+	flex-shrink: 0;
+	transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+.gk-footer-trustpilot-badge:hover {
+	border-color: #3d3d52;
+	background: rgba(255, 255, 255, 0.03);
+	color: #fff;
+}
+.gk-footer-trustpilot-badge-img {
 	display: block;
+	width: 100%;
+	height: auto;
+	max-height: 1.55rem;
+	max-width: 100%;
+	object-fit: contain;
+	object-position: center;
 }
 
 /*--------------------------------------------------------------

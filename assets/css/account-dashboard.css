@@ -1,7 +1,12 @@
 /**
- * Account Dashboard Layout – Hero, Tabs, 2-col grid
- * Inspired by Shopify Liquid design (visual only)
+ * Account Dashboard Layout – Hero, Tabs, Content
+ * Nutzt template-my-account.php (gleiche Struktur wie Plattform = Header OK)
  */
+
+/* Template: Hintergrund wie Plattform */
+body.gk-account-dashboard-page {
+  background: var(--gk-bg, #1a193f);
+}
 
 /* =========================================================
    BASE LAYOUT
@@ -16,8 +21,9 @@
   --gk-pink: #ff346d;
 
   background: var(--gk-bg);
-  padding: 80px 0 96px;
-  margin-top: 100px;
+  padding: 26px 0 96px;
+  margin-top: 28px;
+  padding-bottom: 120px; /* Abstand vor Footer */
 }
 
 .gk-accdash__outer {
@@ -361,6 +367,12 @@
   white-space: nowrap;
 }
 
+.gk-accdash__tab:focus,
+.gk-accdash__tab:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
 .gk-accdash__tab:link,
 .gk-accdash__tab:visited {
   color: #fff;
@@ -413,25 +425,16 @@
   background: #ff3b3b;
 }
 
-/* Zwei untere Boxen (links schmal, rechts breiter wie damals) */
-.gk-accdash__bottomRow {
-  display: grid;
-  grid-template-columns: 380px 1fr;
-  gap: 37px;
-  margin-top: 40px;
+/* Content: Tab-Nummer anzeigen, Original-Inhalt ausblenden */
+.gk-accdash__tab-num {
+  font-size: 4rem;
+  font-weight: 700;
+  color: var(--gk-muted);
+  line-height: 1;
 }
 
-.gk-accdash__bottomBox {
-  background: #13122a;
-  border-radius: 6px;
-}
-
-.gk-accdash__bottomBox:first-child {
-  min-height: 645px;
-}
-
-.gk-accdash__bottomBox:last-child {
-  min-height: 620px;
+.gk-accdash__tab-content-placeholder {
+  display: none;
 }
 
 /* MAIN GRID */
@@ -585,12 +588,17 @@ body.woocommerce-account.logged-in {
   background: var(--gk-bg, #1a193f);
 }
 
-body.woocommerce-account.logged-in #masthead {
-  background: #1a193f;
+body.gk-account-dashboard-page .site-main.site-main--account {
+  padding-top: 8rem;
 }
 
 body.woocommerce-account.logged-in .site-main {
   padding: 200px 0 0;
+}
+
+/* Scroll-Kompensation: Header 4rem kürzer → padding-top +4rem (sync mit Header-Transition) */
+body.gk-header-scrolled.woocommerce-account.logged-in .site-main {
+  padding-top: 4rem !important;
 }
 
 /* =========================================================
@@ -793,9 +801,6 @@ body.woocommerce-account.logged-in .site-main {
     grid-template-columns: 1fr;
   }
 
-  .gk-accdash__bottomRow {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (max-width: 600px) {

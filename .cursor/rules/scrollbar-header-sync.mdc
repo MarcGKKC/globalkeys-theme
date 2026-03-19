@@ -1,0 +1,56 @@
+---
+description: Scrollbar/Header-Sync – nicht ändern, verhindert Layout-Bug
+globs: style.css, js/header-scroll-blur.js, assets/css/account-dashboard.css
+alwaysApply: false
+---
+
+# Scrollbar & Header-Sync – NICHT ÄNDERN
+
+Dieser Fix verhindert, dass die Scrollbar beim Header-Umschalten (sticky/compact) springt oder länger wird.
+
+## Nie entfernen oder ändern
+
+### 1. CSS-Variablen auf Body (style.css)
+```css
+body {
+  --gk-main-padding-top: 8rem;
+  --gk-front-padding-top: 0;
+}
+body.gk-header-scrolled {
+  --gk-main-padding-top: 12rem;
+  --gk-front-padding-top: 4rem;
+}
+```
+
+### 2. site-main liest Variablen + Transition (style.css)
+```css
+.site-main {
+  padding-top: var(--gk-main-padding-top, 8rem);
+  transition: padding-top 0.16s ease-out;
+}
+.site-main--front {
+  padding-top: var(--gk-front-padding-top, 0);
+}
+```
+
+### 3. site-header-inner Transition (style.css)
+```css
+.site-header-inner {
+  transition: height 0.16s ease-out, min-height 0.16s ease-out;
+}
+```
+
+### 4. Header-Scroll Hysterese (header-scroll-blur.js)
+- `SCROLLED_PX = 24` – Hysterese, verhindert Hin-und-Her-Springen
+- `CONSECUTIVE_TICKS_SCROLLED = 2`
+- Wheel-Handler prüft `y >= SCROLLED_PX`
+
+### 5. Account Scroll-Kompensation (account-dashboard.css)
+```css
+body.gk-header-scrolled.woocommerce-account.logged-in .site-main {
+  padding-top: 4rem !important;
+}
+```
+
+## Regel
+Header-Höhe (8.5rem→4.5rem) und site-main padding-top (8rem→12rem) müssen **immer synchron** bleiben. Beide brauchen die gleiche Transition (0.16s ease-out).

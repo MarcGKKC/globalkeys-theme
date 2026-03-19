@@ -1,6 +1,6 @@
 <?php
 /**
- * My Account page – Custom layout (Hero, Tabs, 2-col grid)
+ * My Account page – Custom layout (Hero, Tabs, Content)
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
@@ -113,10 +113,30 @@ if ( function_exists( 'wc_get_orders' ) ) {
 		</nav>
 		<?php endif; ?>
 
-		<!-- Zwei untere Boxen (ohne Inhalt) -->
-		<div class="gk-accdash__bottomRow">
-			<div class="gk-accdash__bottomBox"></div>
-			<div class="gk-accdash__bottomBox"></div>
+		<!-- Content: Main Grid mit linker Sidebar + Content -->
+		<div class="gk-accdash__mainGrid">
+			<aside class="gk-accdash__leftBox">
+				<!-- Leer, nur Platzhalter-Box -->
+			</aside>
+			<div class="gk-accdash__rightBig">
+				<div class="woocommerce-MyAccount-content gk-accdash__content">
+					<?php
+					$tab_num = 1;
+					if ( ! empty( $menu_items ) ) {
+						foreach ( array_keys( $menu_items ) as $ep ) {
+							if ( function_exists( 'wc_is_current_account_menu_item' ) && wc_is_current_account_menu_item( $ep ) ) {
+								break;
+							}
+							$tab_num++;
+						}
+					}
+					?>
+					<div class="gk-accdash__tab-num"><?php echo (int) $tab_num; ?></div>
+					<div class="gk-accdash__tab-content-placeholder">
+						<?php do_action( 'woocommerce_account_content' ); ?>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 </section>

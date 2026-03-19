@@ -255,6 +255,30 @@ function globalkeys_nav_section_template_include( $template ) {
 }
 add_filter( 'template_include', 'globalkeys_nav_section_template_include', 5 );
 
+/**
+ * My Account (eingeloggt): Eigenes Template mit gleicher Struktur wie Plattform.
+ * Verhindert Header-Bugs durch identischen DOM-Aufbau.
+ */
+function globalkeys_my_account_template_include( $template ) {
+	if ( function_exists( 'is_account_page' ) && is_account_page() && is_user_logged_in() ) {
+		$account_template = get_template_directory() . '/template-my-account.php';
+		if ( file_exists( $account_template ) ) {
+			return $account_template;
+		}
+	}
+	return $template;
+}
+add_filter( 'template_include', 'globalkeys_my_account_template_include', 6 );
+
+function globalkeys_my_account_body_class( $classes ) {
+	if ( function_exists( 'is_account_page' ) && is_account_page() && is_user_logged_in() ) {
+		$classes[] = 'gk-account-dashboard-page';
+	}
+	return $classes;
+}
+add_filter( 'body_class', 'globalkeys_my_account_body_class' );
+
+
 function globalkeys_nav_section_body_class( $classes ) {
 	if ( get_query_var( 'gk_nav_section' ) !== '' && get_query_var( 'gk_nav_section' ) !== false ) {
 		$classes[] = 'gk-nav-section-page';
@@ -505,11 +529,9 @@ function globalkeys_scripts() {
 			border-color: #b32d2e;
 			box-shadow: 0 0 0 1px #b32d2e;
 		}
-		/* My Account (Login + Dashboard): Sidebar und Footer ausblenden */
+		/* My Account Login: Sidebar und Footer ausblenden (Dashboard zeigt Footer) */
 		body.gk-account-login #secondary,
-		body.gk-account-login #colophon,
-		body.woocommerce-account #secondary,
-		body.woocommerce-account #colophon {
+		body.gk-account-login #colophon {
 			display: none !important;
 		}
 		html.gk-account-login-page {
@@ -1501,6 +1523,14 @@ function globalkeys_scripts() {
 			'ajaxUrl' => admin_url( 'admin-ajax.php' ),
 			'nonce'   => wp_create_nonce( 'gk_upload_avatar' ),
 		) );
+		$tabs_scroll_js = get_template_directory() . '/js/gk-account-tabs-preserve-scroll.js';
+		wp_enqueue_script(
+			'globalkeys-account-tabs-preserve-scroll',
+			get_template_directory_uri() . '/js/gk-account-tabs-preserve-scroll.js',
+			array(),
+			file_exists( $tabs_scroll_js ) ? filemtime( $tabs_scroll_js ) : _S_VERSION,
+			true
+		);
 	}
 
 	if ( function_exists( 'is_account_page' ) && is_account_page() && ! is_user_logged_in() ) {

@@ -11,10 +11,10 @@
 (function () {
 	'use strict';
 
-	var SCROLLED_PX = 1;
-	var AT_TOP_PX = 2;   /* nur bei echt 0–2px = ganz oben wechseln, sonst Stop kurz vor oben */
-	var CONSECUTIVE_TICKS_AT_TOP = 1;   /* scrolled → top: sofort wenn y<=2, keine Wartezeit */
-	var CONSECUTIVE_TICKS_SCROLLED = 1; /* top → scrolled: 1 Tick mit y>1 reicht, Animation früher */
+	var SCROLLED_PX = 24;  /* Hysterese: erst nach ~1.5rem Scroll runter wechseln, verhindert Springen an der Grenze */
+	var AT_TOP_PX = 2;     /* nur bei echt 0–2px = ganz oben wechseln */
+	var CONSECUTIVE_TICKS_AT_TOP = 1;
+	var CONSECUTIVE_TICKS_SCROLLED = 2; /* 2 Ticks nötig, weniger empfindlich an der Grenze */
 	var LOCK_MS_AFTER_SCROLLED = 450;
 	var LOCK_MS_AFTER_TOP = 400;   /* nur kurz, damit sofortiges Runterscrollen nicht blockiert wird */
 	var POLL_MS = 150;
@@ -129,7 +129,8 @@
 		window.addEventListener('resize', onScroll, { passive: true });
 		document.addEventListener('wheel', function (e) {
 			if (e.deltaY > 0 && state === 'top' && document.body && document.querySelector('.site-header')) {
-				applyState('scrolled');
+				var y = getScrollTop();
+				if (y >= SCROLLED_PX) applyState('scrolled'); /* gleicher Schwellwert wie Poll */
 			}
 		}, { passive: true, capture: true });
 		setInterval(tick, POLL_MS);

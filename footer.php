@@ -71,21 +71,46 @@ $privacy_url   = get_privacy_policy_url();
 		<div class="gk-footer-payment-bar">
 			<div class="gk-footer-payment-inner">
 				<span class="gk-footer-payment-label"><?php esc_html_e( 'ACCEPTED PAYMENT CHANNELS', 'globalkeys' ); ?></span>
-				<div class="gk-footer-payment-logos" aria-hidden="true">
-					<span class="gk-footer-payment-logo" title="Amex">Amex</span>
-					<span class="gk-footer-payment-logo" title="Apple Pay">Apple Pay</span>
-					<span class="gk-footer-payment-logo" title="Bancontact">Bancontact</span>
-					<span class="gk-footer-payment-logo" title="EPS">EPS</span>
-					<span class="gk-footer-payment-logo" title="Google Pay">Google Pay</span>
-					<span class="gk-footer-payment-logo" title="Klarna">Klarna</span>
-					<span class="gk-footer-payment-logo" title="Maestro">Maestro</span>
-					<span class="gk-footer-payment-logo" title="Mastercard">Mastercard</span>
-					<?php if ( file_exists( get_template_directory() . '/Pictures/PayPal.svg' ) ) : ?>
-					<img src="<?php echo esc_url( $template_uri . '/Pictures/PayPal.svg' ); ?>" alt="PayPal" class="gk-footer-payment-logo-img" width="48" height="24" />
-					<?php else : ?><span class="gk-footer-payment-logo" title="PayPal">PayPal</span><?php endif; ?>
-					<span class="gk-footer-payment-logo" title="Shop Pay">Shop Pay</span>
-					<span class="gk-footer-payment-logo" title="UnionPay">UnionPay</span>
-					<span class="gk-footer-payment-logo" title="Visa">Visa</span>
+				<div class="gk-footer-payment-logos" role="list" aria-label="<?php esc_attr_e( 'Accepted payment methods', 'globalkeys' ); ?>">
+					<?php
+					$gk_pictures_dir = get_template_directory() . '/Pictures/';
+					$gk_footer_payment_items = array(
+						array( 'src' => 'payments/amex.svg', 'alt' => __( 'American Express', 'globalkeys' ), 'mono' => false ),
+						array( 'src' => 'payments/applepay.svg', 'alt' => __( 'Apple Pay', 'globalkeys' ), 'mono' => true ),
+						array( 'src' => 'payments/googlepay.svg', 'alt' => __( 'Google Pay', 'globalkeys' ), 'mono' => true ),
+						array( 'src' => 'payments/ideal.svg', 'alt' => __( 'iDEAL', 'globalkeys' ), 'mono' => false ),
+						array( 'src' => 'payments/klarna.svg', 'alt' => __( 'Klarna', 'globalkeys' ), 'mono' => true ),
+						array( 'src' => 'payments/maestro.svg', 'alt' => __( 'Maestro', 'globalkeys' ), 'mono' => false ),
+						array( 'src' => 'payments/mastercard.svg', 'alt' => __( 'Mastercard', 'globalkeys' ), 'mono' => false ),
+						array( 'src' => 'PayPal.svg', 'alt' => __( 'PayPal', 'globalkeys' ), 'mono' => false ),
+						array( 'src' => 'payments/unionpay.svg', 'alt' => __( 'UnionPay', 'globalkeys' ), 'mono' => false ),
+						array( 'src' => 'payments/visa.svg', 'alt' => __( 'Visa', 'globalkeys' ), 'mono' => false ),
+						array( 'src' => 'payments/discover.svg', 'alt' => __( 'Discover', 'globalkeys' ), 'mono' => false ),
+					);
+					foreach ( $gk_footer_payment_items as $gk_pay ) :
+						if ( ! empty( $gk_pay['text'] ) ) :
+							?>
+					<span class="gk-footer-payment-pill gk-footer-payment-pill--text" role="listitem">
+						<span class="gk-footer-payment-logo" title="<?php echo esc_attr( $gk_pay['title'] ); ?>"><?php echo esc_html( $gk_pay['text'] ); ?></span>
+					</span>
+							<?php
+							continue;
+						endif;
+						$gk_pay_path = $gk_pictures_dir . $gk_pay['src'];
+						if ( ! file_exists( $gk_pay_path ) ) {
+							continue;
+						}
+						$gk_pay_classes = 'gk-footer-payment-logo-img';
+						if ( ! empty( $gk_pay['mono'] ) ) {
+							$gk_pay_classes .= ' gk-footer-payment-logo-img--mono';
+						}
+						?>
+					<span class="gk-footer-payment-pill" role="listitem">
+						<img src="<?php echo esc_url( $template_uri . '/Pictures/' . $gk_pay['src'] ); ?>" alt="<?php echo esc_attr( $gk_pay['alt'] ); ?>" width="40" height="24" class="<?php echo esc_attr( $gk_pay_classes ); ?>" loading="lazy" decoding="async" />
+					</span>
+						<?php
+					endforeach;
+					?>
 				</div>
 				<span class="gk-footer-payment-label"><?php esc_html_e( 'PROTECTED WITH 256-BIT SSL', 'globalkeys' ); ?></span>
 			</div>
@@ -95,10 +120,19 @@ $privacy_url   = get_privacy_policy_url();
 			<div class="gk-footer-bottom-inner">
 				<p class="gk-footer-copyright">© <?php echo (int) date( 'Y' ); ?> GlobalKeys — <?php esc_html_e( 'All rights reserved.', 'globalkeys' ); ?></p>
 				<div class="gk-footer-trustpilot">
-					<p class="gk-footer-trustpilot-text"><?php esc_html_e( 'We are new on Trustpilot. We would love to hear back from you!', 'globalkeys' ); ?></p>
-					<?php if ( file_exists( get_template_directory() . '/Pictures/Trustpilot_Logo__2022.svg' ) ) : ?>
-					<a href="https://www.trustpilot.com" rel="noopener noreferrer" class="gk-footer-trustpilot-badge" aria-label="Trustpilot">
-						<img src="<?php echo esc_url( $template_uri . '/Pictures/Trustpilot_Logo__2022.svg' ); ?>" alt="Trustpilot" width="120" height="32" />
+					<div class="gk-footer-trustpilot-copy">
+						<p class="gk-footer-trustpilot-line1"><?php esc_html_e( 'We are new on Trustpilot.', 'globalkeys' ); ?></p>
+						<p class="gk-footer-trustpilot-line2"><?php esc_html_e( 'We would love to hear back from you!', 'globalkeys' ); ?></p>
+					</div>
+					<?php
+					$gk_tp_logo = 'Trustpilot_Logo_footer-darkbtn.svg';
+					if ( ! file_exists( get_template_directory() . '/Pictures/' . $gk_tp_logo ) ) {
+						$gk_tp_logo = 'Trustpilot_Logo__2022.svg';
+					}
+					if ( file_exists( get_template_directory() . '/Pictures/' . $gk_tp_logo ) ) :
+						?>
+					<a href="https://www.trustpilot.com" rel="noopener noreferrer" class="gk-footer-trustpilot-badge" target="_blank">
+						<img src="<?php echo esc_url( $template_uri . '/Pictures/' . $gk_tp_logo ); ?>" alt="<?php echo esc_attr__( 'Trustpilot', 'globalkeys' ); ?>" class="gk-footer-trustpilot-badge-img" width="112" height="28" loading="lazy" decoding="async" />
 					</a>
 					<?php endif; ?>
 				</div>
