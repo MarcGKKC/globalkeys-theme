@@ -40,10 +40,11 @@ $gk_pictures_uri = get_template_directory_uri() . '/Pictures/';
 			<?php foreach ( $gk_gift_cards as $card ) :
 				$img_url   = ! empty( $card['image'] ) ? $gk_pictures_uri . rawurlencode( $card['image'] ) : '';
 				$bg_size   = ! empty( $card['zoom'] ) ? ( (float) $card['zoom'] * 100 ) . '%' : 'cover';
-				$box_style = $img_url ? 'background-image: url(\'' . esc_url( $img_url ) . '\'); background-size: ' . esc_attr( $bg_size ) . '; background-position: center; background-repeat: no-repeat;' : '';
+				$box_class = 'gk-gift-card-box' . ( $img_url ? ' gk-gift-card-box--bg' : '' );
+				$box_style = $img_url ? '--gk-card-bg: url(\'' . esc_url( $img_url ) . '\'); --gk-card-bg-size: ' . esc_attr( $bg_size ) . ';' : '';
 			?>
 			<div class="gk-gift-card">
-				<div class="gk-gift-card-box"<?php echo $box_style ? ' style="' . esc_attr( $box_style ) . '"' : ''; ?>></div>
+				<div class="<?php echo esc_attr( $box_class ); ?>"<?php echo $box_style ? ' style="' . esc_attr( $box_style ) . '"' : ''; ?>></div>
 				<span class="gk-gift-card-title"><?php echo esc_html( $card['title'] ); ?></span>
 			</div>
 			<?php endforeach; ?>

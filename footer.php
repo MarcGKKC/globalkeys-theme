@@ -16,10 +16,10 @@ $privacy_url   = get_privacy_policy_url();
 			<div class="gk-footer-top">
 				<div class="gk-footer-left">
 					<p class="gk-footer-logo">
-						<span class="gk-footer-logo-green">Gaming. Global</span><span class="gk-footer-logo-white">Keys.</span>
+						<span class="gk-footer-logo-green">G</span><span class="gk-footer-logo-white">aming. </span><span class="gk-footer-logo-green">G</span><span class="gk-footer-logo-white">lobalKeys</span><span class="gk-footer-logo-green">.</span>
 					</p>
 					<p class="gk-footer-desc">
-						<?php esc_html_e( 'Your trusted source for digital game keys. Fast delivery, secure payments, and the best prices for PC, PlayStation, Xbox, and Nintendo.', 'globalkeys' ); ?>
+						<?php esc_html_e( 'GlobalKeys provides instant access to digital game keys with secure checkout, fast worldwide delivery, and reliable support you can trust. Our goal is to make gaming more accessible by offering great prices, the latest releases, and exclusive deals across multiple platforms.', 'globalkeys' ); ?>
 					</p>
 					<div class="gk-footer-newsletter">
 						<p class="gk-footer-newsletter-heading"><?php esc_html_e( 'Get launch deals first', 'globalkeys' ); ?></p>
@@ -33,8 +33,8 @@ $privacy_url   = get_privacy_policy_url();
 					<div class="gk-footer-community">
 						<p class="gk-footer-community-heading"><?php esc_html_e( 'Join our community', 'globalkeys' ); ?></p>
 						<div class="gk-footer-social">
-							<a href="#" class="gk-footer-social-link" aria-label="Instagram"><span class="gk-footer-social-icon">IG</span></a>
-							<a href="#" class="gk-footer-social-link" aria-label="Discord"><img src="<?php echo esc_url( $template_uri . '/Pictures/social-discord.svg' ); ?>" alt="" width="24" height="24" /></a>
+							<a href="#" class="gk-footer-social-link" aria-label="Instagram"><img src="<?php echo esc_url( $template_uri . '/Pictures/Instagram-gk.svg' ); ?>" alt="" width="24" height="24" /></a>
+							<a href="#" class="gk-footer-social-link" aria-label="Discord"><img src="<?php echo esc_url( $template_uri . '/Pictures/Discord1.1-gk.svg' ); ?>" alt="" width="24" height="24" /></a>
 							<a href="#" class="gk-footer-social-link" aria-label="X"><img src="<?php echo esc_url( $template_uri . '/Pictures/Twitter-gk.svg' ); ?>" alt="" width="24" height="24" /></a>
 							<a href="#" class="gk-footer-social-link" aria-label="Twitch"><img src="<?php echo esc_url( $template_uri . '/Pictures/social-twitch.svg' ); ?>" alt="" width="24" height="24" /></a>
 							<a href="#" class="gk-footer-social-link" aria-label="TikTok"><img src="<?php echo esc_url( $template_uri . '/Pictures/tiktok-gk.svg' ); ?>" alt="" width="24" height="24" /></a>

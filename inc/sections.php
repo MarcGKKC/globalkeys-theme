@@ -38,18 +38,6 @@ function globalkeys_get_front_page_sections() {
 			'aria_label' => __( 'Produktbereich', 'globalkeys' ),
 		),
 		array(
-			'id'        => 'section-preorders',
-			'slug'      => 'preorders',
-			'label'     => __( 'Pre-orders', 'globalkeys' ),
-			'aria_label' => __( 'Pre-orders', 'globalkeys' ),
-		),
-		array(
-			'id'        => 'section-trust-strip',
-			'slug'      => 'trust-strip',
-			'label'     => __( 'Trust Strip', 'globalkeys' ),
-			'aria_label' => __( 'Vertrauen & Service', 'globalkeys' ),
-		),
-		array(
 			'id'        => 'section-bestsellers',
 			'slug'      => 'bestsellers',
 			'label'     => __( 'Bestsellers', 'globalkeys' ),
@@ -66,6 +54,24 @@ function globalkeys_get_front_page_sections() {
 			'slug'      => 'gift-cards',
 			'label'     => __( 'Gift Cards', 'globalkeys' ),
 			'aria_label' => __( 'Gift Cards', 'globalkeys' ),
+		),
+		array(
+			'id'        => 'section-trust-strip',
+			'slug'      => 'trust-strip',
+			'label'     => __( 'Trust Strip', 'globalkeys' ),
+			'aria_label' => __( 'Vertrauen & Service', 'globalkeys' ),
+		),
+		array(
+			'id'        => 'section-budget-games',
+			'slug'      => 'budget-games',
+			'label'     => __( 'Spiele für jeden Geldbeutel', 'globalkeys' ),
+			'aria_label' => __( 'Spiele für jeden Geldbeutel', 'globalkeys' ),
+		),
+		array(
+			'id'        => 'section-preorders',
+			'slug'      => 'preorders',
+			'label'     => __( 'Pre-orders', 'globalkeys' ),
+			'aria_label' => __( 'Pre-orders', 'globalkeys' ),
 		),
 		array(
 			'id'        => 'section-reward',
@@ -102,24 +108,6 @@ function globalkeys_get_front_page_sections() {
 			'slug'      => 'weekly-deals',
 			'label'     => __( 'Weekly deals', 'globalkeys' ),
 			'aria_label' => __( 'Weekly deals', 'globalkeys' ),
-		),
-		array(
-			'id'        => 'section-budget-games',
-			'slug'      => 'budget-games',
-			'label'     => __( 'Spiele für jeden Geldbeutel', 'globalkeys' ),
-			'aria_label' => __( 'Spiele für jeden Geldbeutel', 'globalkeys' ),
-		),
-		array(
-			'id'        => 'section-reward',
-			'slug'      => 'reward',
-			'label'     => __( 'Reward-System', 'globalkeys' ),
-			'aria_label' => __( 'Reward-System', 'globalkeys' ),
-		),
-		array(
-			'id'        => 'section-house-members',
-			'slug'      => 'house-members',
-			'label'     => __( 'House Members', 'globalkeys' ),
-			'aria_label' => __( 'House Members', 'globalkeys' ),
 		),
 	);
 
