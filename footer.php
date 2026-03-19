@@ -31,7 +31,7 @@ $privacy_url   = get_privacy_policy_url();
 				</div>
 				<div class="gk-footer-right">
 					<div class="gk-footer-community">
-						<p class="gk-footer-community-heading"><?php esc_html_e( 'Join our community', 'globalkeys' ); ?></p>
+						<p class="gk-footer-community-heading"><?php esc_html_e( 'Join our community:', 'globalkeys' ); ?></p>
 						<div class="gk-footer-social">
 							<a href="#" class="gk-footer-social-link" aria-label="Instagram"><img src="<?php echo esc_url( $template_uri . '/Pictures/Instagram-gk.svg' ); ?>" alt="" width="24" height="24" /></a>
 							<a href="#" class="gk-footer-social-link" aria-label="Discord"><img src="<?php echo esc_url( $template_uri . '/Pictures/Discord1.1-gk.svg' ); ?>" alt="" width="24" height="24" /></a>

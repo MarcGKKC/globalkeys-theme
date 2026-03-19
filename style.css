@@ -863,7 +863,7 @@ body.gk-header-scrolled .site-header-inner {
 #masthead .header-nav-above a {
 	color: rgba(255, 255, 255, 0.92);
 	text-decoration: none;
-	font-size: 15px;
+	font-size: 15.5px;
 	padding: 0.15rem 0.3rem;
 	border-radius: 4px;
 	transition: color 0.2s, background 0.2s;
@@ -1010,7 +1010,7 @@ body.gk-header-scrolled .site-header-inner {
 }
 
 .header-pill-search-form .header-pill-search-input::placeholder {
-	color: rgba(255, 255, 255, 0.82);
+	color: rgba(255, 255, 255, 0.48);
 	font-size: 0.9375rem;
 	font-weight: 700;
 }
@@ -1081,7 +1081,7 @@ body.gk-header-scrolled .site-header-inner {
 	gap: 0.4rem;
 	color: #fff;
 	text-decoration: none;
-	font-size: 0.9375rem;
+	font-size: 1rem;
 	padding: 0.4rem 0.65rem;
 	border-radius: 6px;
 	transition: background 0.2s, color 0.2s, box-shadow 0.2s;
@@ -1140,8 +1140,8 @@ body.gk-header-scrolled .site-header-inner {
 
 
 .header-pill .platform-filter-icon {
-	width: 1.625rem;
-	height: 1.625rem;
+	width: 1.85rem;
+	height: 1.85rem;
 	flex-shrink: 0;
 }
 
@@ -1195,8 +1195,8 @@ body.gk-header-scrolled .site-header-inner {
 
 .header-pill .search-submit-icon,
 .header-pill-search-submit .search-submit-icon {
-	width: 1.2rem;
-	height: 1.2rem;
+	width: 1.35rem;
+	height: 1.35rem;
 	transition: transform 0.2s ease;
 }
 
@@ -1991,7 +1991,7 @@ body.gk-nav-section-page .site-main.site-main--nav-section {
 }
 
 .gk-footer-logo {
-	font-size: 1.75rem;
+	font-size: 1.875rem; /* 30px */
 	font-weight: 700;
 	line-height: 1.2;
 	margin: 0 0 1rem;
@@ -2000,7 +2000,7 @@ body.gk-nav-section-page .site-main.site-main--nav-section {
 .gk-footer-logo-green { color: #04DA8D; }
 .gk-footer-logo-white { color: #fff; }
 .gk-footer-desc {
-	font-size: 0.9375rem;
+	font-size: 1rem; /* 16px, +1px */
 	line-height: 1.55;
 	color: rgba(255, 255, 255, 0.9);
 	margin: 0 0 1.25rem;
@@ -2065,7 +2065,7 @@ body.gk-nav-section-page .site-main.site-main--nav-section {
 	box-sizing: border-box;
 }
 .gk-footer-community-heading {
-	font-size: 1.625rem;
+	font-size: 1.6875rem; /* 27px, +1px */
 	font-weight: 700;
 	margin: 0;
 	padding: 0;
@@ -2134,7 +2134,7 @@ body.gk-nav-section-page .site-main.site-main--nav-section {
 	}
 }
 .gk-footer-col-title {
-	font-size: 1.0625rem;
+	font-size: 1.1875rem; /* 19px */
 	font-weight: 700;
 	margin: 0 0 0.75rem;
 	color: #fff;
@@ -2143,7 +2143,7 @@ body.gk-nav-section-page .site-main.site-main--nav-section {
 }
 .gk-footer-col a {
 	display: block;
-	font-size: 0.875rem;
+	font-size: 1rem; /* 16px */
 	color: #5c6270;
 	margin-bottom: 0.5rem;
 	line-height: 1.45;
@@ -2291,9 +2291,9 @@ body.gk-nav-section-page .site-main.site-main--nav-section {
 	align-items: center;
 	justify-content: center;
 	width: fit-content;
-	max-width: 6.85rem;
+	max-width: 7.5rem;
 	padding: 0.5rem 0.5rem;
-	min-height: 2.5rem;
+	min-height: 2.8rem;
 	box-sizing: border-box;
 	border-radius: 6px;
 	background: transparent;
@@ -2312,7 +2312,7 @@ body.gk-nav-section-page .site-main.site-main--nav-section {
 	display: block;
 	width: 100%;
 	height: auto;
-	max-height: 1.55rem;
+	max-height: 1.7rem;
 	max-width: 100%;
 	object-fit: contain;
 	object-position: center;
