@@ -91,6 +91,18 @@ function globalkeys_get_front_page_sections() {
 			'label'     => __( 'Spiele für jeden Geldbeutel', 'globalkeys' ),
 			'aria_label' => __( 'Spiele für jeden Geldbeutel', 'globalkeys' ),
 		),
+		array(
+			'id'        => 'section-reward',
+			'slug'      => 'reward',
+			'label'     => __( 'Reward-System', 'globalkeys' ),
+			'aria_label' => __( 'Reward-System', 'globalkeys' ),
+		),
+		array(
+			'id'        => 'section-house-members',
+			'slug'      => 'house-members',
+			'label'     => __( 'House Members', 'globalkeys' ),
+			'aria_label' => __( 'House Members', 'globalkeys' ),
+		),
 	);
 
 	return apply_filters( 'globalkeys_front_page_sections', $sections );

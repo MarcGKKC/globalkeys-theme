@@ -2543,6 +2543,174 @@ body.home .gk-section-cta .gk-section-inner {
 	margin-bottom: 2.5rem;
 }
 
+/* House Members Section: gleiches Design wie Budget/Categories */
+.gk-section-house-members {
+	background: var(--gk-bg-color);
+	padding-top: 2.5rem;
+	padding-bottom: 2.5rem;
+}
+.gk-section-house-members-inner {
+	max-width: 72rem;
+	margin-left: auto;
+	margin-right: auto;
+	padding-left: 1.5rem;
+	padding-right: 1.5rem;
+}
+.gk-section-house-members .gk-featured-heading-wrap {
+	margin-bottom: 2.5rem;
+}
+
+/* Reward-System Section: volle Breite, beide Hälften würfelförmig (quadratisch) */
+.gk-section-reward {
+	background: var(--gk-bg-color);
+	padding: 0;
+	margin-left: calc(-50vw + 50%);
+	margin-right: calc(-50vw + 50%);
+	width: 100vw;
+	max-width: 100vw;
+	box-sizing: border-box;
+	overflow: hidden;
+}
+.gk-section-reward-inner {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 0;
+	max-width: none;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+}
+.gk-section-reward-image,
+.gk-section-reward-content {
+	position: relative;
+	overflow: hidden;
+	height: min(50vw, 29rem);
+	min-height: 21.5rem;
+}
+.gk-section-reward-image {
+	background: #2a2a2a;
+}
+.gk-section-reward-image img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+.gk-section-reward-content {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: flex-start;
+	gap: 0.75rem;
+	padding: 1.5rem 3rem 2rem;
+	box-sizing: border-box;
+	background: #13122a;
+}
+.gk-section-reward-title {
+	position: relative;
+	margin: 0 0 1.25rem;
+	padding-bottom: 0.5rem;
+	font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+	font-weight: 700;
+	line-height: 1.25;
+	color: #fff;
+}
+.gk-section-reward-title::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 35%;
+	height: 4px;
+	background: #00e599;
+	border-radius: 0;
+}
+.gk-section-reward-list {
+	margin: 0;
+	padding-left: 0;
+	list-style: none;
+	line-height: 1.5;
+	color: rgba(255, 255, 255, 0.92);
+	font-size: clamp(1.125rem, 1.4vw, 1.3125rem);
+	font-weight: 700;
+}
+.gk-section-reward-list li {
+	position: relative;
+	padding-left: 1.75rem;
+	margin-bottom: 1.5rem;
+}
+.gk-section-reward-list li:last-child {
+	margin-bottom: 0;
+}
+.gk-section-reward-list li::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 0.55em;
+	width: 0.35rem;
+	height: 0.35rem;
+	background: #fff;
+	border-radius: 50%;
+}
+.gk-section-reward-buttons {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 3rem;
+	margin-top: 1.25rem;
+	align-self: center;
+}
+.gk-section-reward-buttons-divider {
+	width: 1px;
+	height: 4.5rem;
+	background: rgba(255, 255, 255, 0.5);
+	flex-shrink: 0;
+}
+.gk-section-reward-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	height: 3.25rem;
+	padding: 0 1.6rem;
+	font-size: 1.0625rem;
+	font-weight: 600;
+	text-decoration: none;
+	border-radius: 6px;
+	transition: opacity 0.2s, background 0.2s, border-color 0.2s;
+	box-sizing: border-box;
+}
+.gk-section-reward-btn--green {
+	background: #04DA8D;
+	color: #fff !important;
+	letter-spacing: 0.04em;
+}
+.gk-section-reward-btn--outline {
+	background: #13122a;
+	color: #fff !important;
+	border: 2px solid #fff;
+	letter-spacing: 0.02em;
+}
+.gk-section-reward-btn--outline:hover {
+	color: #04DA8D !important;
+	border-color: #04DA8D;
+}
+.gk-section-reward-text {
+	margin: 0;
+	line-height: 1.6;
+	color: rgba(255, 255, 255, 0.9);
+}
+@media (max-width: 48rem) {
+	.gk-section-reward-inner {
+		grid-template-columns: 1fr;
+	}
+	.gk-section-reward-image {
+		order: -1;
+	}
+	.gk-section-reward-content {
+		padding: 2rem 1.5rem;
+	}
+}
+
 /* 3 Kästen (Our Categories): Wrapper bricht auf Viewport-Breite aus */
 .gk-test-boxes-wrapper {
 	width: 100vw;
