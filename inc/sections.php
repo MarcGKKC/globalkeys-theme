@@ -62,6 +62,24 @@ function globalkeys_get_front_page_sections() {
 			'aria_label' => __( 'Kategorien', 'globalkeys' ),
 		),
 		array(
+			'id'        => 'section-gift-cards',
+			'slug'      => 'gift-cards',
+			'label'     => __( 'Gift Cards', 'globalkeys' ),
+			'aria_label' => __( 'Gift Cards', 'globalkeys' ),
+		),
+		array(
+			'id'        => 'section-reward',
+			'slug'      => 'reward',
+			'label'     => __( 'Reward-System', 'globalkeys' ),
+			'aria_label' => __( 'Reward-System', 'globalkeys' ),
+		),
+		array(
+			'id'        => 'section-house-members',
+			'slug'      => 'house-members',
+			'label'     => __( 'House Members', 'globalkeys' ),
+			'aria_label' => __( 'House Members', 'globalkeys' ),
+		),
+		array(
 			'id'        => 'section-recently-viewed',
 			'slug'      => 'recently-viewed',
 			'label'     => __( 'Last seen', 'globalkeys' ),

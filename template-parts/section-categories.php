@@ -115,6 +115,17 @@ $gk_categories_bg_url = get_template_directory_uri() . '/Pictures/category-card-
 				dots[ idx ].addEventListener( 'click', function () { goTo( idx ); } );
 			} )( k );
 		}
+		var autoInterval = null;
+		function startAuto() {
+			if ( autoInterval ) clearInterval( autoInterval );
+			autoInterval = setInterval( function () { goTo( getCur() + 1 ); }, 5000 );
+		}
+		function stopAuto() {
+			if ( autoInterval ) { clearInterval( autoInterval ); autoInterval = null; }
+		}
+		startAuto();
+		root.addEventListener( 'mouseenter', stopAuto );
+		root.addEventListener( 'mouseleave', startAuto );
 	})();
 	</script>
 </section>
