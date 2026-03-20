@@ -13,6 +13,50 @@ if ( ! defined( '_S_VERSION' ) ) {
 }
 
 /**
+ * Checkout vorübergehend deaktivieren.
+ * Auf false setzen, um den Checkout wieder zu aktivieren.
+ */
+if ( ! defined( 'GLOBKEYS_CHECKOUT_DISABLED' ) ) {
+	define( 'GLOBKEYS_CHECKOUT_DISABLED', true );
+}
+
+/**
+ * Checkout deaktivieren: Von Checkout-Seite abfangen und Meldung anzeigen.
+ */
+function globalkeys_disable_checkout_if_set() {
+	if ( ! GLOBKEYS_CHECKOUT_DISABLED || ! function_exists( 'is_checkout' ) || ! function_exists( 'is_wc_endpoint_url' ) ) {
+		return;
+	}
+	if ( is_checkout() && ! is_wc_endpoint_url( 'order-received' ) ) {
+		wp_safe_redirect( wc_get_page_permalink( 'cart' ) );
+		wc_add_notice( __( 'Der Checkout ist vorübergehend nicht verfügbar. Wir arbeiten daran und sind bald wieder für dich da.', 'globalkeys' ), 'notice' );
+		exit;
+	}
+}
+add_action( 'template_redirect', 'globalkeys_disable_checkout_if_set', 5 );
+
+/**
+ * Hinweis auf der Warenkorb-Seite, wenn Checkout deaktiviert ist.
+ */
+function globalkeys_cart_checkout_disabled_notice() {
+	if ( ! GLOBKEYS_CHECKOUT_DISABLED || ! function_exists( 'is_cart' ) || ! is_cart() ) {
+		return;
+	}
+	wc_print_notice( __( 'Checkout ist derzeit deaktiviert. Wir sind in Kürze wieder für dich erreichbar.', 'globalkeys' ), 'notice' );
+}
+add_action( 'woocommerce_before_cart', 'globalkeys_cart_checkout_disabled_notice', 5 );
+
+/**
+ * Bestellung blockieren, falls jemand den Checkout doch erreicht.
+ */
+function globalkeys_prevent_order_if_checkout_disabled() {
+	if ( GLOBKEYS_CHECKOUT_DISABLED && function_exists( 'wc_add_notice' ) ) {
+		wc_add_notice( __( 'Der Checkout ist vorübergehend nicht verfügbar.', 'globalkeys' ), 'error' );
+	}
+}
+add_action( 'woocommerce_checkout_process', 'globalkeys_prevent_order_if_checkout_disabled', 1 );
+
+/**
  * Sets up theme defaults and registers support for various WordPress features.
  *
  * Note that this function is hooked into the after_setup_theme hook, which
@@ -44,7 +88,13 @@ function globalkeys_setup() {
 		*
 		* @link https://developer.wordpress.org/themes/functionality/featured-images-post-thumbnails/
 		*/
-	add_theme_support( 'post-thumbnails' );
+		add_theme_support( 'post-thumbnails' );
+
+		/*
+		 * Größere Produktkarten-Bilder (Bestseller & ähnliche Raster): weniger Hochskalieren, schärfere Darstellung.
+		 * Nach dem ersten Deploy ggf. Plugin „Regenerate Thumbnails“ ausführen, damit alte Uploads diese Größe erhalten.
+		 */
+		add_image_size( 'globalkeys-product-card', 1536, 1536, false );
 
 	// This theme uses wp_nav_menu() in one location.
 	register_nav_menus(

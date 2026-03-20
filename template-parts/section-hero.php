@@ -9,7 +9,7 @@ $section    = get_query_var( 'gk_section', array( 'id' => 'section-hero', 'aria_
 $id         = ! empty( $section['id'] ) ? $section['id'] : 'section-hero';
 $aria_label = ! empty( $section['aria_label'] ) ? $section['aria_label'] : __( 'Hero', 'globalkeys' );
 
-$hero_bg = get_template_directory_uri() . '/Pictures/testbild2-gk.jpg';
+$hero_bg = get_template_directory_uri() . '/Pictures/Elden Ring Key Art.jpeg.webp';
 
 $product = null;
 if ( function_exists( 'wc_get_products' ) ) {
