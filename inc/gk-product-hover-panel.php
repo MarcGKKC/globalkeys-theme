@@ -1,43 +1,13 @@
 <?php
 /**
- * Steam-ähnliches Hover-Info-Panel für Produktkarten (Bestseller etc.).
+ * Hover-Info-Panel für Produktkarten (Bestseller): Titel, Datum, Kurztext, Tags/Kategorien.
+ * Keine Shop-/Woo-Bewertungen (kein Steam-ähnlicher Rezensionsblock).
  *
  * @package globalkeys
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
-}
-
-/**
- * Deutsche Kurzbezeichnung aus WooCommerce-Sternschnitt (optional).
- *
- * @param float $average 0–5.
- * @param int   $count   Anzahl Bewertungen.
- * @return string Leer wenn keine Bewertungen.
- */
-function globalkeys_product_review_sentiment_label( $average, $count ) {
-	$count = (int) $count;
-	if ( $count < 1 ) {
-		return '';
-	}
-	$avg = (float) $average;
-	if ( $avg >= 4.5 ) {
-		return __( 'Äußerst positiv', 'globalkeys' );
-	}
-	if ( $avg >= 4.0 ) {
-		return __( 'Sehr positiv', 'globalkeys' );
-	}
-	if ( $avg >= 3.5 ) {
-		return __( 'Größtenteils positiv', 'globalkeys' );
-	}
-	if ( $avg >= 3.0 ) {
-		return __( 'Positiv', 'globalkeys' );
-	}
-	if ( $avg >= 2.0 ) {
-		return __( 'Gemischt', 'globalkeys' );
-	}
-	return __( 'Größtenteils negativ', 'globalkeys' );
 }
 
 /**
@@ -75,38 +45,49 @@ function globalkeys_render_product_hover_panel( $product ) {
 		$excerpt = wp_trim_words( wp_strip_all_tags( $raw_desc ), 42, '…' );
 	}
 
-	$review_count   = (int) $product->get_review_count();
-	$avg_rating     = (float) $product->get_average_rating();
-	$sentiment      = globalkeys_product_review_sentiment_label( $avg_rating, $review_count );
-	$review_formatted = $review_count > 0
-		? sprintf(
-			/* translators: %s: formatted number */
-			__( '(%s Bewertungen)', 'globalkeys' ),
-			number_format_i18n( $review_count )
-		)
-		: '';
-
-	$tags            = get_the_terms( $pid, 'product_tag' );
-	$tags_heading    = __( 'Schlagwörter:', 'globalkeys' );
+	$tags                   = get_the_terms( $pid, 'product_tag' );
+	$tags_heading           = __( 'Schlagwörter:', 'globalkeys' );
+	$terms_are_product_tags = true;
 	if ( is_wp_error( $tags ) || empty( $tags ) ) {
 		$tags = get_the_terms( $pid, 'product_cat' );
 		if ( is_wp_error( $tags ) ) {
 			$tags = array();
 		}
-		$tags_heading = __( 'Kategorien:', 'globalkeys' );
+		$tags_heading           = __( 'Kategorien:', 'globalkeys' );
+		$terms_are_product_tags = false;
 	}
 	if ( ! is_array( $tags ) ) {
 		$tags = array();
 	}
 	$tags = array_values(
 		array_filter(
-			array_slice( $tags, 0, 10 ),
+			$tags,
 			static function ( $term ) {
 				return $term && isset( $term->slug ) && $term->slug !== 'uncategorized';
 			}
 		)
 	);
-	$tags = array_slice( $tags, 0, 8 );
+
+	$tag_total      = count( $tags );
+	$tags_display   = array_slice( $tags, 0, 6 );
+	$tag_more_count = max( 0, $tag_total - 6 );
+
+	$tag_more_title = '';
+	if ( $tag_more_count > 0 ) {
+		if ( $terms_are_product_tags ) {
+			$tag_more_title = sprintf(
+				/* translators: %d: number of additional product tags */
+				_n( '%d weiteres Schlagwort', '%d weitere Schlagwörter', $tag_more_count, 'globalkeys' ),
+				$tag_more_count
+			);
+		} else {
+			$tag_more_title = sprintf(
+				/* translators: %d: number of additional product categories */
+				_n( '%d weitere Kategorie', '%d weitere Kategorien', $tag_more_count, 'globalkeys' ),
+				$tag_more_count
+			);
+		}
+	}
 
 	?>
 	<aside class="gk-product-hover-panel" aria-hidden="true">
@@ -118,24 +99,28 @@ function globalkeys_render_product_hover_panel( $product ) {
 			<?php if ( $excerpt !== '' ) : ?>
 				<p class="gk-product-hover-panel__excerpt"><?php echo esc_html( $excerpt ); ?></p>
 			<?php endif; ?>
-			<?php if ( $review_count > 0 && $sentiment !== '' ) : ?>
-				<div class="gk-product-hover-panel__reviews">
-					<p class="gk-product-hover-panel__reviews-heading"><?php esc_html_e( 'Bewertungen:', 'globalkeys' ); ?></p>
-					<p class="gk-product-hover-panel__reviews-body">
-						<span class="gk-product-hover-panel__reviews-sentiment"><?php echo esc_html( $sentiment ); ?></span>
-						<?php if ( $review_formatted !== '' ) : ?>
-							<span class="gk-product-hover-panel__reviews-count"><?php echo esc_html( ' ' . $review_formatted ); ?></span>
-						<?php endif; ?>
-					</p>
-				</div>
-			<?php endif; ?>
-			<?php if ( ! empty( $tags ) ) : ?>
+			<?php if ( ! empty( $tags_display ) ) : ?>
 				<div class="gk-product-hover-panel__tags">
 					<p class="gk-product-hover-panel__tags-heading"><?php echo esc_html( $tags_heading ); ?></p>
 					<ul class="gk-product-hover-panel__tag-list">
-						<?php foreach ( $tags as $term ) : ?>
+						<?php foreach ( $tags_display as $term ) : ?>
 							<li><span class="gk-product-hover-panel__tag"><?php echo esc_html( $term->name ); ?></span></li>
 						<?php endforeach; ?>
+						<?php if ( $tag_more_count > 0 ) : ?>
+							<li>
+								<span class="gk-product-hover-panel__tag" title="<?php echo esc_attr( $tag_more_title ); ?>">
+									<?php
+									echo esc_html(
+										sprintf(
+											/* translators: %d: count of additional tags/categories not shown */
+											__( '+%d', 'globalkeys' ),
+											$tag_more_count
+										)
+									);
+									?>
+								</span>
+							</li>
+						<?php endif; ?>
 					</ul>
 				</div>
 			<?php endif; ?>

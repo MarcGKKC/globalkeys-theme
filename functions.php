@@ -338,6 +338,14 @@ function globalkeys_nav_section_body_class( $classes ) {
 }
 add_filter( 'body_class', 'globalkeys_nav_section_body_class' );
 
+function globalkeys_search_results_body_class( $classes ) {
+	if ( is_search() && isset( $_GET['post_type'] ) && $_GET['post_type'] === 'product' ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$classes[] = 'gk-search-results-page';
+	}
+	return $classes;
+}
+add_filter( 'body_class', 'globalkeys_search_results_body_class' );
+
 function globalkeys_nav_section_maybe_flush_rewrites() {
 	if ( get_option( 'globalkeys_nav_section_rewrite_flushed' ) ) {
 		return;
@@ -402,6 +410,254 @@ require get_template_directory() . '/inc/woocommerce-registration.php';
 require get_template_directory() . '/inc/woocommerce-product-trailer.php';
 require get_template_directory() . '/inc/gk-product-hover-panel.php';
 require get_template_directory() . '/inc/woocommerce-account-endpoints.php';
+
+/**
+ * Produktsuche: is_search() für ?post_type=product (Suche oder Browse all).
+ * Wichtig für Header (Suche offen) und Script-Loading.
+ */
+function globalkeys_product_search_is_search( $query ) {
+	if ( ! $query->is_main_query() || is_admin() ) {
+		return;
+	}
+	if ( ! isset( $_GET['post_type'] ) || $_GET['post_type'] !== 'product' ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return;
+	}
+	$query->is_search = true;
+	$s = isset( $_GET['s'] ) ? trim( (string) $_GET['s'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	if ( $s !== '' ) {
+		$query->set( 's', sanitize_text_field( wp_unslash( $_GET['s'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+	}
+}
+add_action( 'pre_get_posts', 'globalkeys_product_search_is_search', 1 );
+
+/**
+ * Produktsuche/Browse: Bei ?post_type=product immer search.php laden.
+ */
+function globalkeys_force_search_template_for_product_search( $template ) {
+	if ( ! isset( $_GET['post_type'] ) || $_GET['post_type'] !== 'product' ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return $template;
+	}
+	$search_template = get_search_template();
+	return $search_template ?: $template;
+}
+add_filter( 'template_include', 'globalkeys_force_search_template_for_product_search', 20 );
+
+/**
+ * Produkte suchen (Name/SKU beginnt mit Begriff) – für Suche + Live-Dropdown.
+ *
+ * @param string $term Suchbegriff.
+ * @param int    $limit Max. Anzahl Produkte (0 = alle).
+ * @return array{ids: int[], products: array} IDs und Produktdaten für Dropdown.
+ */
+function globalkeys_search_products_starts_with( $term, $limit = 0 ) {
+	global $wpdb;
+	$term = trim( (string) $term );
+	if ( $term === '' || ! class_exists( 'WooCommerce' ) ) {
+		return array( 'ids' => array(), 'products' => array() );
+	}
+	$like = $wpdb->esc_like( $term ) . '%';
+
+	$title_ids = $wpdb->get_col(
+		$wpdb->prepare(
+			"SELECT ID FROM {$wpdb->posts} WHERE post_type = 'product' AND post_status = 'publish' AND post_title LIKE %s",
+			$like
+		)
+	);
+	$title_ids = array_map( 'intval', (array) $title_ids );
+
+	$sku_rows = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT p.ID, p.post_type, p.post_parent FROM {$wpdb->posts} p
+			INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sku' AND pm.meta_value LIKE %s
+			WHERE p.post_type IN ('product', 'product_variation') AND p.post_status = 'publish'",
+			$like
+		),
+		ARRAY_A
+	);
+	$sku_ids = array();
+	foreach ( (array) $sku_rows as $row ) {
+		$sku_ids[] = ( 'product_variation' === ( $row['post_type'] ?? '' ) ) ? (int) $row['post_parent'] : (int) $row['ID'];
+	}
+
+	$ids = array_unique( array_filter( array_merge( $title_ids, $sku_ids ) ) );
+	$total = count( $ids );
+
+	$products = array();
+	$take     = $limit > 0 ? min( $limit, count( $ids ) ) : count( $ids );
+	$ids_slice = array_slice( $ids, 0, $take );
+	foreach ( $ids_slice as $pid ) {
+		$product = wc_get_product( $pid );
+		if ( ! $product || ! $product->is_visible() ) {
+			continue;
+		}
+		$img_id = $product->get_image_id();
+		$img_url = $img_id ? wp_get_attachment_image_url( $img_id, 'globalkeys-search-dropdown' ) : wc_placeholder_img_src( 'woocommerce_thumbnail' );
+		if ( ! $img_url ) {
+			$img_url = wc_placeholder_img_src( 'woocommerce_thumbnail' );
+		}
+		$products[] = array(
+			'id'    => $product->get_id(),
+			'name'  => $product->get_name(),
+			'url'   => $product->get_permalink(),
+			'price' => wp_strip_all_tags( wc_price( $product->get_price() ) ),
+			'image' => $img_url,
+		);
+	}
+	return array( 'ids' => $ids, 'products' => $products, 'total' => $total );
+}
+
+/**
+ * AJAX: Live-Produktsuche für Header-Dropdown.
+ * Bei leerem Suchbegriff: 5 zufällige Produkte anzeigen.
+ */
+function globalkeys_ajax_search_products() {
+	check_ajax_referer( 'gk_search_products', 'nonce' );
+	$term = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : '';
+	$term = trim( $term );
+	if ( $term === '' && class_exists( 'WooCommerce' ) ) {
+		$products = wc_get_products( array(
+			'status'  => 'publish',
+			'limit'   => 5,
+			'orderby' => 'rand',
+		) );
+		$list = array();
+		foreach ( $products as $product ) {
+			if ( ! $product || ! $product->is_visible() ) {
+				continue;
+			}
+			$img_id  = $product->get_image_id();
+			$img_url = $img_id ? wp_get_attachment_image_url( $img_id, 'globalkeys-search-dropdown' ) : wc_placeholder_img_src( 'woocommerce_thumbnail' );
+			$list[] = array(
+				'id'    => $product->get_id(),
+				'name'  => $product->get_name(),
+				'url'   => $product->get_permalink(),
+				'price' => wp_strip_all_tags( wc_price( $product->get_price() ) ),
+				'image' => $img_url ?: wc_placeholder_img_src( 'woocommerce_thumbnail' ),
+			);
+		}
+		$total = function_exists( 'wc_get_products' ) ? count( wc_get_products( array( 'status' => 'publish', 'limit' => -1, 'return' => 'ids' ) ) ) : 0;
+		wp_send_json_success( array( 'ids' => array(), 'products' => $list, 'total' => $total ) );
+		return;
+	}
+	$result = globalkeys_search_products_starts_with( $term, 5 );
+	wp_send_json_success( $result );
+}
+add_action( 'wp_ajax_gk_search_products', 'globalkeys_ajax_search_products' );
+add_action( 'wp_ajax_nopriv_gk_search_products', 'globalkeys_ajax_search_products' );
+
+/**
+ * AJAX: Produktkarten-HTML für Live-Update auf der Suchseite.
+ */
+function globalkeys_ajax_search_results_html() {
+	check_ajax_referer( 'gk_search_products', 'nonce' );
+	$term = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : '';
+	if ( $term === '' || ! class_exists( 'WooCommerce' ) ) {
+		wp_send_json_success( array( 'html' => '', 'noResults' => true, 'total' => 0 ) );
+	}
+	$result  = globalkeys_search_products_starts_with( $term, 0 );
+	$ids     = isset( $result['ids'] ) ? $result['ids'] : array();
+	$total   = isset( $result['total'] ) ? $result['total'] : 0;
+	$no_res  = empty( $ids );
+	$html    = '';
+	if ( ! $no_res ) {
+		$query = new WP_Query(
+			array(
+				'post_type'      => 'product',
+				'post_status'    => 'publish',
+				'post__in'       => $ids,
+				'orderby'        => 'post_title',
+				'order'          => 'ASC',
+				'posts_per_page' => -1,
+			)
+		);
+		ob_start();
+		while ( $query->have_posts() ) {
+			$query->the_post();
+			$product = wc_get_product( get_the_ID() );
+			if ( $product && $product->is_visible() ) {
+				$GLOBALS['product'] = $product;
+				get_template_part( 'template-parts/product-card', 'bestseller' );
+			}
+		}
+		$html = ob_get_clean();
+		wp_reset_postdata();
+	}
+	wp_send_json_success( array( 'html' => $html, 'noResults' => $no_res, 'total' => $total ) );
+}
+add_action( 'wp_ajax_gk_search_results_html', 'globalkeys_ajax_search_results_html' );
+add_action( 'wp_ajax_nopriv_gk_search_results_html', 'globalkeys_ajax_search_results_html' );
+
+/**
+ * Produktdaten + Karten-HTML für sofortige clientseitige Filterung auf der Suchseite.
+ *
+ * @return array{index: array, cards: array}|null
+ */
+function globalkeys_get_search_products_data_for_js() {
+	if ( ! class_exists( 'WooCommerce' ) ) {
+		return null;
+	}
+	$ids = wc_get_products( array(
+		'status'  => 'publish',
+		'limit'   => -1,
+		'return'  => 'ids',
+		'type'    => array( 'simple', 'variable' ),
+	) );
+	if ( empty( $ids ) ) {
+		return array( 'index' => array(), 'cards' => array(), 'dropdown' => array() );
+	}
+	$index      = array();
+	$cards      = array();
+	$id_to_name = array();
+	$dropdown   = array();
+	$prices     = array();
+	foreach ( $ids as $pid ) {
+		$product = wc_get_product( $pid );
+		if ( ! $product || ! $product->is_visible() ) {
+			continue;
+		}
+		$name = $product->get_name();
+		$sku  = $product->get_sku();
+		$id_to_name[ (int) $pid ] = mb_strtolower( $name, 'UTF-8' );
+		$index[] = array(
+			'id' => (int) $pid,
+			'n'  => mb_strtolower( $name, 'UTF-8' ),
+			's'  => mb_strtolower( (string) $sku, 'UTF-8' ),
+		);
+		$img_id  = $product->get_image_id();
+		$img_url = $img_id ? wp_get_attachment_image_url( $img_id, 'globalkeys-search-dropdown' ) : ( function_exists( 'wc_placeholder_img_src' ) ? wc_placeholder_img_src( 'woocommerce_thumbnail' ) : '' );
+		$price_num = (float) $product->get_price();
+		$dropdown[ (int) $pid ] = array(
+			'id'    => (int) $pid,
+			'name'  => $name,
+			'url'   => $product->get_permalink(),
+			'price' => wp_strip_all_tags( wc_price( $product->get_price() ) ),
+			'image' => $img_url ?: ( function_exists( 'wc_placeholder_img_src' ) ? wc_placeholder_img_src( 'woocommerce_thumbnail' ) : '' ),
+		);
+		$prices[ (int) $pid ] = $price_num;
+		ob_start();
+		$GLOBALS['product'] = $product;
+		get_template_part( 'template-parts/product-card', 'bestseller' );
+		$cards[ (int) $pid ] = ob_get_clean();
+		if ( $product->is_type( 'variable' ) ) {
+			foreach ( $product->get_children() as $var_id ) {
+				$var = wc_get_product( $var_id );
+				if ( ! $var ) {
+					continue;
+				}
+				$var_sku = $var->get_sku();
+				if ( $var_sku !== '' && $var_sku !== null ) {
+					$index[] = array(
+						'id' => (int) $pid,
+						'n'  => '',
+						's'  => mb_strtolower( (string) $var_sku, 'UTF-8' ),
+					);
+				}
+			}
+		}
+	}
+	return array( 'index' => $index, 'cards' => $cards, 'names' => $id_to_name, 'dropdown' => $dropdown, 'prices' => $prices );
+}
+
 require get_template_directory() . '/inc/profile-avatar.php';
 require get_template_directory() . '/inc/email-verification.php';
 
@@ -1540,6 +1796,19 @@ function globalkeys_scripts() {
 	wp_enqueue_script( 'globalkeys-navigation', get_template_directory_uri() . '/js/navigation.js', array(), _S_VERSION, true );
 	$gk_pill_search_ver = (string) filemtime( get_template_directory() . '/js/header-pill-search.js' );
 	wp_enqueue_script( 'globalkeys-header-pill-search', get_template_directory_uri() . '/js/header-pill-search.js', array(), $gk_pill_search_ver, true );
+	$gk_pill_search_vars = array(
+		'ajaxUrl'            => admin_url( 'admin-ajax.php' ),
+		'nonce'              => wp_create_nonce( 'gk_search_products' ),
+		'noResults'          => __( 'Keine Treffer', 'globalkeys' ),
+		'seeAllResults'      => __( 'See all %d results', 'globalkeys' ),
+		'seeAll'             => __( 'See all results', 'globalkeys' ),
+		'resultsCountOne'    => __( '1 result', 'globalkeys' ),
+		'resultsCountMany'   => __( '%d results', 'globalkeys' ),
+	);
+	if ( class_exists( 'WooCommerce' ) ) {
+		$gk_pill_search_vars['productsData'] = globalkeys_get_search_products_data_for_js();
+	}
+	wp_localize_script( 'globalkeys-header-pill-search', 'gkPillSearch', $gk_pill_search_vars );
 	$gk_drawer_ver = (string) filemtime( get_template_directory() . '/js/gk-account-drawer.js' );
 	wp_enqueue_script( 'globalkeys-account-drawer', get_template_directory_uri() . '/js/gk-account-drawer.js', array(), $gk_drawer_ver, true );
 	$gk_header_scroll_ver = (string) filemtime( get_template_directory() . '/js/header-scroll-blur.js' );
@@ -1550,7 +1819,8 @@ function globalkeys_scripts() {
 		wp_enqueue_script( 'globalkeys-hero-stats-bar-scroll', get_template_directory_uri() . '/js/hero-stats-bar-scroll.js', array(), _S_VERSION, true );
 	}
 	/* Bestseller-Trailer: überall wo Front-Sections (inkl. Bestseller) vorkommen – nicht nur strikt is_front_page() */
-	$gk_load_bestseller_trailer = is_front_page() || ( function_exists( 'globalkeys_has_front_page_sections' ) && globalkeys_has_front_page_sections() );
+	$gk_product_search = is_search() && isset( $_GET['post_type'] ) && $_GET['post_type'] === 'product'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	$gk_load_bestseller_trailer = is_front_page() || is_shop() || $gk_product_search || ( function_exists( 'globalkeys_has_front_page_sections' ) && globalkeys_has_front_page_sections() );
 	if ( $gk_load_bestseller_trailer ) {
 		$gk_bestseller_trailer_js = get_template_directory() . '/js/gk-bestseller-trailer-hover.js';
 		wp_enqueue_script(

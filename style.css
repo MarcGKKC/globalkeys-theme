@@ -1098,6 +1098,13 @@ body.gk-search-open #masthead {
 	box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
 	overflow: hidden;
 	z-index: 10;
+	transition: transform 0.16s ease-out;
+}
+
+/* Sticky Header: Dropdown gleiche Skalierung wie Search-Bar (0.94) */
+body.gk-header-scrolled .header-pill-search-dropdown {
+	transform: scale(0.94);
+	transform-origin: top center;
 }
 
 .header-pill-search-dropdown[hidden] {
@@ -1879,6 +1886,152 @@ body.gk-drawer-open #masthead {
 
 .site-main--front {
 	padding-top: var(--gk-front-padding-top, 0);
+}
+
+/* Shop / Suchergebnisse-Seite */
+.site-main--shop {
+	padding: var(--gk-main-padding-top, 8rem) 1.25rem 3rem;
+}
+
+.gk-search-results-header {
+	margin-bottom: 1.5rem;
+}
+
+.gk-search-results-title {
+	margin: 0;
+	font-size: 1.5rem;
+	font-weight: 700;
+	color: #fff;
+}
+
+.gk-search-results-title span {
+	color: #04DA8D;
+}
+
+/* Suchergebnisse-Seite: Dropdown nie anzeigen */
+body.gk-search-results-page .header-pill-search-dropdown {
+	display: none !important;
+}
+
+/* Suchergebnisse: Anzahl-Anzeige – nur diese Anzeige, Karten bleiben unverändert */
+.gk-section-shop-results .gk-search-results-count {
+	margin: -0.25rem 0 1rem -6.5rem;
+	padding-left: 0;
+	font-size: calc( 1.5rem + 1.5px );
+	font-weight: 500;
+	color: #fff;
+	text-align: left;
+}
+
+/* Suchergebnisse: Filter-Bar mittig über den Karten */
+.gk-search-filter-bar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	gap: 1rem 1.5rem;
+	margin: 0 0 1.5rem;
+	padding: 0.75rem 1rem;
+}
+
+.gk-search-filter-platforms {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	gap: 0.35rem 0.6rem;
+}
+
+.gk-search-filter-platform {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	color: #fff;
+	text-decoration: none;
+	font-size: 0.875rem;
+	padding: 0.4rem 0.65rem;
+	border-radius: 6px;
+	transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.gk-search-filter-platform:hover {
+	background: rgba(90, 90, 95, 0.5);
+	color: #fff;
+}
+
+.gk-search-filter-platform.active {
+	color: #fff;
+}
+.gk-search-filter-platform.active[data-platform="pc"] {
+	background: #04DA8D;
+	box-shadow: 0 0 0 2px #04DA8D;
+}
+.gk-search-filter-platform.active[data-platform="playstation"] {
+	background: #1740c6;
+	box-shadow: 0 0 0 2px #1740c6;
+}
+.gk-search-filter-platform.active[data-platform="xbox"] {
+	background: #397a27;
+	box-shadow: 0 0 0 2px #397a27;
+}
+.gk-search-filter-platform.active[data-platform="nintendo"] {
+	background: #ff000b;
+	box-shadow: 0 0 0 2px #ff000b;
+}
+.gk-search-filter-platform.gk-search-filter-all.active {
+	background: rgba(255, 255, 255, 0.15);
+	box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+}
+
+.gk-search-filter-platform-icon {
+	width: 1.25rem;
+	height: 1.25rem;
+	flex-shrink: 0;
+	filter: brightness(0) invert(1);
+}
+
+.gk-search-filter-sort {
+	display: flex;
+	align-items: center;
+}
+
+.gk-search-sort-select {
+	background: rgba(255, 255, 255, 0.08);
+	color: #fff;
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	border-radius: 6px;
+	padding: 0.4rem 0.75rem;
+	font-size: 0.875rem;
+	cursor: pointer;
+}
+
+.gk-search-sort-select:hover {
+	background: rgba(255, 255, 255, 0.12);
+}
+
+.gk-search-sort-select option {
+	background: #1a193f;
+	color: #fff;
+}
+
+/* Shop/Suchergebnisse: Bestseller-Karten, 3 pro Zeile, keine Heading-Verschiebung */
+.gk-section-shop-results .gk-featured-products {
+	margin-left: 0;
+	margin-right: 0;
+	width: 100%;
+	grid-template-columns: repeat( 3, 1fr );
+}
+
+@media screen and (max-width: 1023px) {
+	.gk-section-shop-results .gk-featured-products {
+		grid-template-columns: repeat( 2, 1fr );
+	}
+}
+
+@media screen and (max-width: 599px) {
+	.gk-section-shop-results .gk-featured-products {
+		grid-template-columns: 1fr;
+	}
 }
 
 
@@ -4001,7 +4154,7 @@ body.home .gk-section-cta .gk-section-inner {
 	}
 }
 
-/* Steam-ähnliches Info-Panel rechts neben der Karte (Bestseller) */
+/* Info-Panel rechts neben der Bestseller-Karte (Farben wie Drawer / Site-Palette) */
 .gk-section-bestsellers {
 	overflow: visible;
 }
@@ -4011,8 +4164,9 @@ body.home .gk-section-cta .gk-section-inner {
 }
 
 .gk-section-bestsellers .gk-product-hover-panel {
-	--gk-hover-panel-bg: #2a3d52;
-	--gk-hover-panel-border: rgba(255, 255, 255, 0.08);
+	/* Wie Account-Drawer / Karten: gleiche Violett-Palette wie die Seite (#1a193f / #2a2744) */
+	--gk-hover-panel-bg: #2a2744;
+	--gk-hover-panel-border: rgba(232, 230, 240, 0.12);
 	position: absolute;
 	left: calc(100% + 12px);
 	top: 0;
@@ -4025,7 +4179,9 @@ body.home .gk-section-cta .gk-section-inner {
 	border-radius: 3px;
 	background: var(--gk-hover-panel-bg);
 	border: 1px solid var(--gk-hover-panel-border);
-	box-shadow: 0 14px 48px rgba(0, 0, 0, 0.55), 0 0 1px rgba(0, 0, 0, 0.4);
+	box-shadow:
+		0 14px 48px rgba(0, 0, 0, 0.45),
+		0 0 0 1px rgba(0, 0, 0, 0.2);
 	opacity: 0;
 	visibility: hidden;
 	transform: translateX(-6px);
@@ -4045,7 +4201,7 @@ body.home .gk-section-cta .gk-section-inner {
 	border-style: solid;
 	border-width: 7px 8px 7px 0;
 	border-color: transparent var(--gk-hover-panel-bg) transparent transparent;
-	filter: drop-shadow(-1px 0 0 rgba(0, 0, 0, 0.15));
+	filter: drop-shadow(-1px 0 0 rgba(0, 0, 0, 0.35));
 }
 
 .gk-section-bestsellers .gk-product-hover-panel--flip {
@@ -4059,7 +4215,7 @@ body.home .gk-section-cta .gk-section-inner {
 	left: 100%;
 	border-width: 7px 0 7px 8px;
 	border-color: transparent transparent transparent var(--gk-hover-panel-bg);
-	filter: drop-shadow(1px 0 0 rgba(0, 0, 0, 0.15));
+	filter: drop-shadow(1px 0 0 rgba(0, 0, 0, 0.35));
 }
 
 .gk-section-bestsellers .gk-featured-product:hover .gk-product-hover-panel,
@@ -4094,7 +4250,7 @@ body.home .gk-section-cta .gk-section-inner {
 	font-size: 0.78rem;
 	font-weight: 500;
 	line-height: 1.35;
-	color: rgba(198, 212, 223, 0.85);
+	color: rgba(232, 230, 240, 0.72);
 }
 
 .gk-section-bestsellers .gk-product-hover-panel__excerpt {
@@ -4102,42 +4258,7 @@ body.home .gk-section-cta .gk-section-inner {
 	padding: 0;
 	font-size: 0.8125rem;
 	line-height: 1.5;
-	color: #b8c5d0;
-}
-
-.gk-section-bestsellers .gk-product-hover-panel__reviews {
-	margin: 0 0 0.85rem;
-	padding: 0.65rem 0.75rem;
-	border-radius: 3px;
-	background: rgba(0, 0, 0, 0.22);
-	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-}
-
-.gk-section-bestsellers .gk-product-hover-panel__reviews-heading {
-	margin: 0 0 0.35rem;
-	padding: 0;
-	font-size: 0.72rem;
-	font-weight: 600;
-	text-transform: none;
-	color: rgba(198, 212, 223, 0.75);
-}
-
-.gk-section-bestsellers .gk-product-hover-panel__reviews-body {
-	margin: 0;
-	padding: 0;
-	font-size: 0.8125rem;
-	line-height: 1.4;
-	color: rgba(198, 212, 223, 0.9);
-}
-
-.gk-section-bestsellers .gk-product-hover-panel__reviews-sentiment {
-	color: #66c0f4;
-	font-weight: 600;
-}
-
-.gk-section-bestsellers .gk-product-hover-panel__reviews-count {
-	font-weight: 400;
-	color: rgba(198, 212, 223, 0.75);
+	color: rgba(232, 230, 240, 0.82);
 }
 
 .gk-section-bestsellers .gk-product-hover-panel__tags-heading {
@@ -4145,7 +4266,7 @@ body.home .gk-section-cta .gk-section-inner {
 	padding: 0;
 	font-size: 0.72rem;
 	font-weight: 600;
-	color: rgba(198, 212, 223, 0.75);
+	color: rgba(232, 230, 240, 0.65);
 }
 
 .gk-section-bestsellers .gk-product-hover-panel__tag-list {
@@ -4159,14 +4280,15 @@ body.home .gk-section-cta .gk-section-inner {
 
 .gk-section-bestsellers .gk-product-hover-panel__tag {
 	display: inline-block;
-	padding: 0.22rem 0.5rem;
+	padding: 0.25rem 0.55rem;
 	font-size: 0.72rem;
 	font-weight: 500;
 	line-height: 1.2;
-	color: #c6d4df;
-	background: rgba(103, 193, 245, 0.12);
+	color: rgba(232, 230, 240, 0.88);
+	background: rgba(255, 255, 255, 0.06);
 	border-radius: 2px;
-	border: 1px solid rgba(103, 193, 245, 0.18);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 @media (hover: none), (pointer: coarse) {
