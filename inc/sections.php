@@ -46,7 +46,7 @@ function globalkeys_get_front_page_sections() {
 		array(
 			'id'        => 'section-categories',
 			'slug'      => 'categories',
-			'label'     => __( 'Our Categories', 'globalkeys' ),
+			'label'     => __( 'All Categories', 'globalkeys' ),
 			'aria_label' => __( 'Kategorien', 'globalkeys' ),
 		),
 		array(

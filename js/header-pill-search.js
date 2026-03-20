@@ -1,6 +1,7 @@
 /**
  * Header Pill Search: Lupen-Button öffnet Such-Overlay (Animation von rechts).
  * X-Button rechts neben der Pill in eigenem Bereich (.header-pill-search-close-area).
+ * Dropdown mit Produktvorschau, Hintergrund-Overlay wie beim Account-Drawer.
  *
  * @package globalkeys
  */
@@ -20,47 +21,72 @@
 		}
 		var closeArea = outer.querySelector( '.header-pill-search-close-area' );
 		var closeBtn = closeArea ? closeArea.querySelector( '.header-pill-search-close' ) : null;
+		var dropdown = document.getElementById( 'gk-search-dropdown' );
+		var searchOverlay = null;
 
-		var closeFallbackTimeout = null;
-		var closeTransitionEndHandler = null;
 		var ANIMATION_MS = 260;
 
-		function cancelPendingClose() {
-			if ( closeFallbackTimeout ) {
-				clearTimeout( closeFallbackTimeout );
-				closeFallbackTimeout = null;
-			}
-			if ( overlay && closeTransitionEndHandler ) {
-				overlay.removeEventListener( 'transitionend', closeTransitionEndHandler );
-				closeTransitionEndHandler = null;
-			}
-		}
-
 		function openSearch() {
-			cancelPendingClose();
+			document.body.classList.add( 'gk-search-open' );
+			searchOverlay = document.createElement( 'div' );
+			searchOverlay.id = 'gk-search-overlay';
+			searchOverlay.className = 'gk-search-overlay';
+			searchOverlay.setAttribute( 'aria-hidden', 'true' );
+			searchOverlay.addEventListener( 'click', function() {
+				closeSearch();
+			} );
+			document.body.appendChild( searchOverlay );
 			if ( overlay ) {
-				overlay.removeAttribute( 'hidden' );
+				overlay.setAttribute( 'aria-hidden', 'false' );
 				void overlay.offsetHeight;
 			}
-			requestAnimationFrame( function() {
-				container.classList.add( 'is-search-open' );
-				outer.classList.add( 'is-search-open' );
-				if ( closeArea ) {
-					closeArea.setAttribute( 'aria-hidden', 'false' );
-				}
-			} );
+			container.classList.add( 'is-search-open' );
+			outer.classList.add( 'is-search-open' );
+			if ( closeArea ) {
+				closeArea.setAttribute( 'aria-hidden', 'false' );
+			}
 			if ( trigger ) {
 				trigger.setAttribute( 'aria-expanded', 'true' );
 			}
+			updateDropdownVisibility();
 			if ( searchInput ) {
 				setTimeout( function() {
-					searchInput.focus();
+					searchInput.focus( { preventScroll: true } );
 				}, ANIMATION_MS );
 			}
 		}
 
-		function closeSearch() {
-			cancelPendingClose();
+		function updateDropdownVisibility() {
+			if ( ! dropdown || ! searchInput ) return;
+			var val = ( searchInput.value || '' ).trim();
+			var allLink = document.getElementById( 'gk-search-dropdown-all-link' );
+			if ( val.length > 0 ) {
+				dropdown.removeAttribute( 'hidden' );
+				dropdown.setAttribute( 'aria-hidden', 'false' );
+				if ( allLink ) {
+					var base = allLink.getAttribute( 'data-base-url' ) || '';
+					var sep = base.indexOf( '?' ) >= 0 ? '&' : '?';
+					allLink.href = base + sep + 's=' + encodeURIComponent( val );
+				}
+			} else {
+				dropdown.setAttribute( 'hidden', '' );
+				dropdown.setAttribute( 'aria-hidden', 'true' );
+				if ( allLink ) {
+					allLink.href = allLink.getAttribute( 'data-base-url' ) || '#';
+				}
+			}
+		}
+
+		function forceClose() {
+			document.body.classList.remove( 'gk-search-open' );
+			if ( searchOverlay && searchOverlay.parentNode ) {
+				searchOverlay.parentNode.removeChild( searchOverlay );
+			}
+			searchOverlay = null;
+			if ( dropdown ) {
+				dropdown.setAttribute( 'hidden', '' );
+				dropdown.setAttribute( 'aria-hidden', 'true' );
+			}
 			container.classList.remove( 'is-search-open' );
 			outer.classList.remove( 'is-search-open' );
 			if ( closeArea ) {
@@ -70,24 +96,34 @@
 				trigger.setAttribute( 'aria-expanded', 'false' );
 			}
 			if ( overlay ) {
-				closeFallbackTimeout = setTimeout( function() {
-					closeFallbackTimeout = null;
-					closeTransitionEndHandler = null;
-					overlay.setAttribute( 'hidden', '' );
-				}, ANIMATION_MS );
-				closeTransitionEndHandler = function onTransitionEnd( e ) {
-					if ( e.propertyName !== 'transform' ) {
-						return;
-					}
-					overlay.removeEventListener( 'transitionend', closeTransitionEndHandler );
-					closeTransitionEndHandler = null;
-					if ( closeFallbackTimeout ) {
-						clearTimeout( closeFallbackTimeout );
-						closeFallbackTimeout = null;
-					}
-					overlay.setAttribute( 'hidden', '' );
-				};
-				overlay.addEventListener( 'transitionend', closeTransitionEndHandler );
+				overlay.setAttribute( 'aria-hidden', 'true' );
+			}
+		}
+
+		function closeSearch() {
+			try {
+				document.body.classList.remove( 'gk-search-open' );
+				if ( searchOverlay && searchOverlay.parentNode ) {
+					searchOverlay.parentNode.removeChild( searchOverlay );
+				}
+				searchOverlay = null;
+				if ( dropdown ) {
+					dropdown.setAttribute( 'hidden', '' );
+					dropdown.setAttribute( 'aria-hidden', 'true' );
+				}
+				container.classList.remove( 'is-search-open' );
+				outer.classList.remove( 'is-search-open' );
+				if ( closeArea ) {
+					closeArea.setAttribute( 'aria-hidden', 'true' );
+				}
+				if ( trigger ) {
+					trigger.setAttribute( 'aria-expanded', 'false' );
+				}
+				if ( overlay ) {
+					overlay.setAttribute( 'aria-hidden', 'true' );
+				}
+			} catch ( err ) {
+				forceClose();
 			}
 		}
 
@@ -103,7 +139,16 @@
 		}
 
 		if ( closeBtn ) {
-			closeBtn.addEventListener( 'click', closeSearch );
+			closeBtn.addEventListener( 'click', function( e ) {
+				e.preventDefault();
+				e.stopPropagation();
+				closeSearch();
+			} );
+		}
+
+		if ( searchInput ) {
+			searchInput.addEventListener( 'input', updateDropdownVisibility );
+			searchInput.addEventListener( 'keyup', updateDropdownVisibility );
 		}
 
 		document.addEventListener( 'keydown', function( e ) {
@@ -119,7 +164,11 @@
 			if ( closeArea && closeArea.contains( e.target ) ) {
 				return;
 			}
-			if ( ! container.contains( e.target ) ) {
+			if ( searchOverlay && e.target === searchOverlay ) {
+				closeSearch();
+				return;
+			}
+			if ( ! outer.contains( e.target ) ) {
 				closeSearch();
 			}
 		} );

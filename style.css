@@ -887,10 +887,11 @@ body.gk-header-scrolled .site-header-inner {
 	color: #04DA8D !important;
 }
 
-/* Äußerer Bereich: Pill + X-Bereich (X nur bei offener Suche sichtbar, absolut positioniert) */
+/* Äußerer Bereich: Pill + X-Bereich (X nur bei offener Suche sichtbar, absolut positioniert) + Dropdown */
 .header-pill-search-outer {
 	position: relative;
 	display: inline-block;
+	overflow: visible;
 }
 
 /* Eigenes Bereich für das X – bei geschlossener Suche kein Platz, bei offener Suche absolut rechts daneben */
@@ -937,7 +938,7 @@ body.gk-header-scrolled .site-header-inner {
 	max-width: 46rem;
 }
 
-/* Such-Overlay: Verlauf setzt am Button an (rechts #027a54) und wird nach links fortgeführt – kein eigener Verlauf */
+/* Such-Overlay: einheitliches Grün, keine Stufe */
 .header-pill-search-overlay {
 	position: absolute;
 	top: 0;
@@ -947,7 +948,7 @@ body.gk-header-scrolled .site-header-inner {
 	display: flex;
 	align-items: center;
 	padding: 0 1.35rem 0 1.35rem;
-	background: linear-gradient(to left, #04DA8D 0%, #04DA8D 25%, #03c47a 50%, #03b870 78%, #029a5e 100%);
+	background: #04DA8D;
 	border-radius: 10px;
 	transform: translateX(100%);
 	transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -956,6 +957,12 @@ body.gk-header-scrolled .site-header-inner {
 
 .header-pill-container.is-search-open .header-pill-search-overlay {
 	transform: translateX(0);
+	pointer-events: auto;
+}
+
+/* Geschlossen: Overlay außerhalb, keine Klicks abfangen */
+.header-pill-search-overlay {
+	pointer-events: none;
 }
 
 /* Lupen-Button ausblenden, wenn Such-Overlay offen ist */
@@ -964,11 +971,7 @@ body.gk-header-scrolled .site-header-inner {
 	pointer-events: none;
 }
 
-.header-pill-search-overlay[hidden] {
-	display: none !important;
-}
-
-/* In der zweiten Pill (Overlay): orangenen Such-Button ausblenden – Suche per Enter */
+/* Such-Button in der Overlay-Pill ausgeblendet – Suche per Enter abschicken */
 .header-pill-search-overlay .header-pill-search-submit {
 	display: none !important;
 }
@@ -985,7 +988,7 @@ body.gk-header-scrolled .site-header-inner {
 	flex: 1;
 	min-width: 0;
 	padding: 0.4rem 0.6rem;
-	font-size: 1rem;
+	font-size: calc(1rem + 3px);
 	font-weight: 700;
 	border: none;
 	border-radius: 10px;
@@ -1066,6 +1069,144 @@ body.gk-header-scrolled .site-header-inner {
 .header-pill-search-close:hover {
 	color: #04DA8D;
 	background: none;
+}
+
+/* Such-Overlay: dunkler Hintergrund wie beim Account-Drawer */
+body.gk-search-open #masthead {
+	z-index: 10001;
+}
+
+.gk-search-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 10000;
+	background: rgba(0, 0, 0, 0.45);
+	pointer-events: auto;
+	animation: gk-drawer-overlay-in 0.2s ease;
+}
+
+/* Dropdown: gleiche Breite wie Search-Bar, unter der Pill */
+.header-pill-search-dropdown {
+	position: absolute;
+	top: calc(100% + 1.2rem);
+	left: 0;
+	right: 0;
+	width: 100%;
+	min-width: 0;
+	background: #13122a;
+	border-radius: 12px;
+	box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+	overflow: hidden;
+	z-index: 10;
+}
+
+.header-pill-search-dropdown[hidden] {
+	display: none !important;
+}
+
+.header-pill-search-dropdown-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.header-pill-search-dropdown-item {
+	border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.header-pill-search-dropdown-item:last-of-type {
+	border-bottom: none;
+}
+
+.header-pill-search-dropdown-link,
+.header-pill-search-dropdown-link:link,
+.header-pill-search-dropdown-link:visited {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	padding: 0.85rem 1.1rem;
+	color: #fff !important;
+	text-decoration: none;
+	transition: background 0.15s;
+}
+
+.header-pill-search-dropdown-link:hover {
+	background: rgba(255, 255, 255, 0.06);
+	color: #fff !important;
+}
+
+/* Mini-Produktkarte wie Bestseller, gleiches 16:9-Verhältnis */
+.header-pill-search-dropdown-thumb {
+	flex-shrink: 0;
+	width: 6.25rem;
+	aspect-ratio: 16 / 9;
+	border-radius: 6px;
+	overflow: hidden;
+	background-color: var(--gk-bg-color, #1a193f);
+	position: relative;
+}
+
+.header-pill-search-dropdown-thumb img,
+.header-pill-search-dropdown-thumb .gk-search-dropdown-product-img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: center top;
+	display: block;
+	border-radius: 6px;
+}
+
+.header-pill-search-dropdown-info {
+	display: flex;
+	flex-direction: column;
+	gap: 0.2rem;
+	min-width: 0;
+	flex: 1;
+}
+
+.header-pill-search-dropdown-price {
+	margin-left: auto;
+	flex-shrink: 0;
+	font-size: 0.9375rem;
+	font-weight: 700;
+	color: #fff !important;
+	white-space: nowrap;
+}
+
+.header-pill-search-dropdown-title {
+	font-size: 15px;
+	font-weight: 600;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.header-pill-search-dropdown-platform {
+	font-size: 0.9375rem;
+	color: rgba(255, 255, 255, 0.55);
+}
+
+.header-pill-search-dropdown-footer {
+	padding: 0;
+}
+
+.header-pill-search-dropdown-all,
+.header-pill-search-dropdown-all:link,
+.header-pill-search-dropdown-all:visited {
+	display: block;
+	padding: 0.75rem 1.1rem;
+	text-align: center;
+	font-size: 1rem;
+	color: #04DA8D !important;
+	text-decoration: none;
+	transition: opacity 0.2s, background 0.2s;
+}
+
+.header-pill-search-dropdown-all:hover {
+	opacity: 0.9;
+	background: rgba(255, 255, 255, 0.04);
+	color: #04DA8D !important;
 }
 
 .header-pill-platforms {
@@ -1163,6 +1304,8 @@ body.gk-header-scrolled .site-header-inner {
 	height: 100%;
 	width: var(--gk-pill-height, 3.5rem);
 	min-width: var(--gk-pill-height, 3.5rem);
+	background: linear-gradient(to left, #04DA8D 0%, #04DA8D 65%, #03c47a 100%);
+	border-radius: 10px;
 }
 
 .header-pill-search-submit {
@@ -1174,7 +1317,7 @@ body.gk-header-scrolled .site-header-inner {
 	padding: 0;
 	border: none;
 	border-radius: 10px;
-	background: linear-gradient(to left, #04DA8D 0%, #04DA8D 65%, #03c47a 100%);
+	background: transparent;
 	color: #fff;
 	cursor: pointer;
 	transition: opacity 0.2s;
@@ -2495,7 +2638,7 @@ body.gk-nav-section-page .site-main.site-main--nav-section {
 	color: #fff;
 	font-size: 0.875rem;
 	font-weight: 700;
-	border-radius: 4px;
+	border-radius: 2px;
 }
 
 .gk-hero-product-price {
@@ -2863,7 +3006,7 @@ body.home .gk-section-cta .gk-section-inner {
 	font-weight: 700;
 	color: #0a0a0a;
 	background: #00e599;
-	border-radius: 4px;
+	border-radius: 2px;
 	line-height: 1.2;
 }
 
@@ -3636,13 +3779,15 @@ body.home .gk-section-cta .gk-section-inner {
 	margin: 0;
 }
 
-.gk-featured-product-link {
+.gk-featured-product-link,
+.gk-featured-product-link:link,
+.gk-featured-product-link:visited {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	text-align: center;
 	text-decoration: none;
-	color: #fff;
+	color: #fff !important;
 	background: rgba(255, 255, 255, 0.06);
 	border-radius: 10px;
 	padding: 1rem;
@@ -3651,7 +3796,7 @@ body.home .gk-section-cta .gk-section-inner {
 
 .gk-featured-product-link:hover {
 	background: rgba(255, 255, 255, 0.12);
-	color: #fff;
+	color: #fff !important;
 }
 
 .gk-featured-product-image {
@@ -3711,6 +3856,17 @@ body.home .gk-section-cta .gk-section-inner {
 	min-width: 0;
 }
 
+/* Beim Hover: Medienfläche über Nachbarn legen, damit vergrößerter Preview-Bereich nicht abgeschnitten wird */
+.gk-section-bestsellers .gk-featured-product {
+	position: relative;
+	z-index: 0;
+}
+
+.gk-section-bestsellers .gk-featured-product:has(.gk-featured-product-link:hover),
+.gk-section-bestsellers .gk-featured-product:focus-within {
+	z-index: 5;
+}
+
 .gk-section-bestsellers .gk-featured-product-link {
 	background: transparent;
 	padding: 0;
@@ -3721,13 +3877,21 @@ body.home .gk-section-cta .gk-section-inner {
 	flex-direction: column;
 }
 
+.gk-section-bestsellers .gk-featured-product-link,
+.gk-section-bestsellers .gk-featured-product-link:link,
+.gk-section-bestsellers .gk-featured-product-link:visited {
+	color: #fff !important;
+}
+
 .gk-section-bestsellers .gk-featured-product-link:hover {
 	background: transparent;
 	opacity: 0.88;
-	color: inherit;
+	color: #fff !important;
 }
 
+/* Medien-Wrapper: beim Hover sichtbar größer (ganzer 16:9-Bereich wächst), Ursprung oben → weniger Überlappung mit Titelzeile */
 .gk-section-bestsellers .gk-featured-product-image {
+	position: relative;
 	display: block;
 	aspect-ratio: 16 / 9;
 	margin-bottom: 0;
@@ -3738,6 +3902,50 @@ body.home .gk-section-cta .gk-section-inner {
 	background-color: var(--gk-bg-color, #1a193f);
 	/* Eigenes Stacking-Context – weniger Compositor-Glitches an den Rändern */
 	isolation: isolate;
+	transform: scale(1);
+	transform-origin: center top;
+	transition: transform 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.gk-section-bestsellers .gk-featured-product-link:hover .gk-featured-product-image {
+	transform: scale(1.018);
+}
+
+/* Hover-Preview-Video über dem Cover (Sichtbarkeit erst per JS .is-trailer-playing nach „playing“) */
+.gk-section-bestsellers .gk-bestseller-trailer {
+	position: absolute;
+	inset: 0;
+	z-index: 3;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: center top;
+	border-radius: inherit;
+	opacity: 0;
+	transform: scale(1);
+	transform-origin: center center;
+	transition: opacity 0.22s ease, transform 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+	pointer-events: none;
+}
+
+.gk-section-bestsellers .gk-featured-product-link:hover .gk-featured-product-image .gk-bestseller-trailer {
+	transform: scale(1);
+}
+
+.gk-section-bestsellers .gk-featured-product-image.has-trailer .gk-bestseller-product-img,
+.gk-section-bestsellers .gk-featured-product-image.has-trailer img {
+	position: relative;
+	z-index: 1;
+	transition: opacity 0.22s ease, transform 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.gk-section-bestsellers .gk-featured-product-image.has-trailer.is-trailer-playing .gk-bestseller-trailer {
+	opacity: 1;
+}
+
+.gk-section-bestsellers .gk-featured-product-image.has-trailer.is-trailer-playing .gk-bestseller-product-img,
+.gk-section-bestsellers .gk-featured-product-image.has-trailer.is-trailer-playing img {
+	opacity: 0;
 }
 
 .gk-section-bestsellers .gk-featured-product-image img,
@@ -3760,6 +3968,211 @@ body.home .gk-section-cta .gk-section-inner {
 	 */
 	transform: translate3d(0, 0, 0) scale(1.012);
 	transform-origin: center center;
+	transition: transform 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.gk-section-bestsellers .gk-featured-product-link:hover .gk-featured-product-image img,
+.gk-section-bestsellers .gk-featured-product-link:hover .gk-featured-product-image .gk-bestseller-product-img {
+	transform: translate3d(0, 0, 0) scale(1.022);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.gk-section-bestsellers .gk-featured-product-image {
+		transition: none;
+	}
+
+	.gk-section-bestsellers .gk-featured-product-link:hover .gk-featured-product-image {
+		transform: scale(1);
+	}
+
+	.gk-section-bestsellers .gk-featured-product-image img,
+	.gk-section-bestsellers .gk-bestseller-product-img,
+	.gk-section-bestsellers .gk-bestseller-trailer {
+		transition: none !important;
+	}
+
+	.gk-section-bestsellers .gk-featured-product-link:hover .gk-featured-product-image img,
+	.gk-section-bestsellers .gk-featured-product-link:hover .gk-featured-product-image .gk-bestseller-product-img {
+		transform: translate3d(0, 0, 0) scale(1.012);
+	}
+
+	.gk-section-bestsellers .gk-featured-product-link:hover .gk-featured-product-image .gk-bestseller-trailer {
+		transform: scale(1);
+	}
+}
+
+/* Steam-ähnliches Info-Panel rechts neben der Karte (Bestseller) */
+.gk-section-bestsellers {
+	overflow: visible;
+}
+
+.gk-section-bestsellers .gk-section-inner {
+	overflow: visible;
+}
+
+.gk-section-bestsellers .gk-product-hover-panel {
+	--gk-hover-panel-bg: #2a3d52;
+	--gk-hover-panel-border: rgba(255, 255, 255, 0.08);
+	position: absolute;
+	left: calc(100% + 12px);
+	top: 0;
+	z-index: 45;
+	width: min(22rem, calc(100vw - 1.5rem));
+	max-width: 340px;
+	box-sizing: border-box;
+	padding: 0;
+	margin: 0;
+	border-radius: 3px;
+	background: var(--gk-hover-panel-bg);
+	border: 1px solid var(--gk-hover-panel-border);
+	box-shadow: 0 14px 48px rgba(0, 0, 0, 0.55), 0 0 1px rgba(0, 0, 0, 0.4);
+	opacity: 0;
+	visibility: hidden;
+	transform: translateX(-6px);
+	transition: opacity 0.18s ease, visibility 0.18s ease, transform 0.2s ease;
+	pointer-events: none;
+	text-align: left;
+}
+
+/* Pfeil zur Karte (links am Panel) */
+.gk-section-bestsellers .gk-product-hover-panel::before {
+	content: '';
+	position: absolute;
+	right: 100%;
+	top: 1.35rem;
+	width: 0;
+	height: 0;
+	border-style: solid;
+	border-width: 7px 8px 7px 0;
+	border-color: transparent var(--gk-hover-panel-bg) transparent transparent;
+	filter: drop-shadow(-1px 0 0 rgba(0, 0, 0, 0.15));
+}
+
+.gk-section-bestsellers .gk-product-hover-panel--flip {
+	left: auto;
+	right: calc(100% + 12px);
+	transform: translateX(6px);
+}
+
+.gk-section-bestsellers .gk-product-hover-panel--flip::before {
+	right: auto;
+	left: 100%;
+	border-width: 7px 0 7px 8px;
+	border-color: transparent transparent transparent var(--gk-hover-panel-bg);
+	filter: drop-shadow(1px 0 0 rgba(0, 0, 0, 0.15));
+}
+
+.gk-section-bestsellers .gk-featured-product:hover .gk-product-hover-panel,
+.gk-section-bestsellers .gk-featured-product:focus-within .gk-product-hover-panel {
+	opacity: 1;
+	visibility: visible;
+	transform: translateX(0);
+}
+
+.gk-section-bestsellers .gk-featured-product:hover .gk-product-hover-panel--flip,
+.gk-section-bestsellers .gk-featured-product:focus-within .gk-product-hover-panel--flip {
+	transform: translateX(0);
+}
+
+.gk-section-bestsellers .gk-product-hover-panel__inner {
+	padding: 1rem 1.1rem 1.05rem;
+}
+
+.gk-section-bestsellers .gk-product-hover-panel__title {
+	margin: 0 0 0.35rem;
+	padding: 0;
+	font-size: clamp(1.05rem, 1.35vw, 1.35rem);
+	font-weight: 700;
+	line-height: 1.2;
+	color: #fff;
+	letter-spacing: -0.02em;
+}
+
+.gk-section-bestsellers .gk-product-hover-panel__released {
+	margin: 0 0 0.65rem;
+	padding: 0;
+	font-size: 0.78rem;
+	font-weight: 500;
+	line-height: 1.35;
+	color: rgba(198, 212, 223, 0.85);
+}
+
+.gk-section-bestsellers .gk-product-hover-panel__excerpt {
+	margin: 0 0 0.85rem;
+	padding: 0;
+	font-size: 0.8125rem;
+	line-height: 1.5;
+	color: #b8c5d0;
+}
+
+.gk-section-bestsellers .gk-product-hover-panel__reviews {
+	margin: 0 0 0.85rem;
+	padding: 0.65rem 0.75rem;
+	border-radius: 3px;
+	background: rgba(0, 0, 0, 0.22);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.gk-section-bestsellers .gk-product-hover-panel__reviews-heading {
+	margin: 0 0 0.35rem;
+	padding: 0;
+	font-size: 0.72rem;
+	font-weight: 600;
+	text-transform: none;
+	color: rgba(198, 212, 223, 0.75);
+}
+
+.gk-section-bestsellers .gk-product-hover-panel__reviews-body {
+	margin: 0;
+	padding: 0;
+	font-size: 0.8125rem;
+	line-height: 1.4;
+	color: rgba(198, 212, 223, 0.9);
+}
+
+.gk-section-bestsellers .gk-product-hover-panel__reviews-sentiment {
+	color: #66c0f4;
+	font-weight: 600;
+}
+
+.gk-section-bestsellers .gk-product-hover-panel__reviews-count {
+	font-weight: 400;
+	color: rgba(198, 212, 223, 0.75);
+}
+
+.gk-section-bestsellers .gk-product-hover-panel__tags-heading {
+	margin: 0 0 0.4rem;
+	padding: 0;
+	font-size: 0.72rem;
+	font-weight: 600;
+	color: rgba(198, 212, 223, 0.75);
+}
+
+.gk-section-bestsellers .gk-product-hover-panel__tag-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.35rem 0.4rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.gk-section-bestsellers .gk-product-hover-panel__tag {
+	display: inline-block;
+	padding: 0.22rem 0.5rem;
+	font-size: 0.72rem;
+	font-weight: 500;
+	line-height: 1.2;
+	color: #c6d4df;
+	background: rgba(103, 193, 245, 0.12);
+	border-radius: 2px;
+	border: 1px solid rgba(103, 193, 245, 0.18);
+}
+
+@media (hover: none), (pointer: coarse) {
+	.gk-section-bestsellers .gk-product-hover-panel {
+		display: none !important;
+	}
 }
 
 /* Titel links + Preisleiste rechts: Grid damit die Leiste wirklich am rechten Kartenrand endet */
@@ -3803,10 +4216,9 @@ body.home .gk-section-cta .gk-section-inner {
 	border-radius: 0;
 	box-sizing: border-box;
 	line-height: 1;
-	/* Passend zu --gk-bg-color: leichtes „Glass“, kein harter Schwarzton */
-	background: rgba(26, 25, 63, 0.82);
-	backdrop-filter: blur(10px);
-	-webkit-backdrop-filter: blur(10px);
+	background: transparent;
+	backdrop-filter: none;
+	-webkit-backdrop-filter: none;
 	border: none;
 	box-shadow: none;
 }
@@ -3823,7 +4235,7 @@ body.home .gk-section-cta .gk-section-inner {
 	line-height: 1;
 	color: #fff;
 	background: #04da8d;
-	border-radius: 0;
+	border-radius: 3px;
 	letter-spacing: -0.02em;
 }
 

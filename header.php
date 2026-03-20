@@ -105,12 +105,21 @@ if ( ! $gk_account_login ) {
 							</svg>
 						</button>
 					</div>
-					<div id="gk-pill-search-overlay" class="header-pill-search-overlay" role="dialog" aria-label="<?php esc_attr_e( 'Suchen', 'globalkeys' ); ?>" hidden>
-						<form role="search" method="get" class="header-pill-search-form" action="<?php echo esc_url( home_url( '/' ) ); ?>">
+					<div id="gk-pill-search-overlay" class="header-pill-search-overlay" role="dialog" aria-label="<?php esc_attr_e( 'Suchen', 'globalkeys' ); ?>" aria-hidden="true">
+						<?php
+						$gk_search_action = home_url( '/' );
+						if ( class_exists( 'WooCommerce' ) && function_exists( 'wc_get_page_permalink' ) ) {
+							$gk_search_action = wc_get_page_permalink( 'shop' );
+							if ( ! $gk_search_action ) {
+								$gk_search_action = home_url( '/' );
+							}
+						}
+						?>
+						<form role="search" method="get" class="header-pill-search-form" action="<?php echo esc_url( $gk_search_action ); ?>">
 							<label for="gk-pill-search-input" class="screen-reader-text"><?php esc_html_e( 'Suchen', 'globalkeys' ); ?></label>
 							<input type="search" id="gk-pill-search-input" class="header-pill-search-input" placeholder="PSN Cards, Multiplayer, ARC Raiders..." value="<?php echo get_search_query(); ?>" name="s" autocomplete="off" />
 							<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="header-pill-browse-link"><?php esc_html_e( 'Browse all Games', 'globalkeys' ); ?></a>
-							<button type="submit" class="header-pill-search-submit" aria-label="<?php esc_attr_e( 'Suchen', 'globalkeys' ); ?>">
+							<button type="submit" class="header-pill-search-submit header-pill-search-submit--visible" aria-label="<?php esc_attr_e( 'Suchen', 'globalkeys' ); ?>">
 								<svg class="search-submit-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 									<circle cx="11" cy="11" r="8"></circle>
 									<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -121,6 +130,60 @@ if ( ! $gk_account_login ) {
 				</div>
 				<div class="header-pill-search-close-area" aria-hidden="true">
 					<button type="button" class="header-pill-search-close" aria-label="<?php esc_attr_e( 'Suche schließen', 'globalkeys' ); ?>">&times;</button>
+				</div>
+				<?php
+				$gk_search_products = array();
+				if ( function_exists( 'wc_get_products' ) ) {
+					$gk_search_products = wc_get_products( array(
+						'status'  => 'publish',
+						'limit'   => 5,
+						'orderby' => 'rand',
+					) );
+				}
+				$gk_search_total = function_exists( 'wc_get_products' ) ? count( wc_get_products( array( 'status' => 'publish', 'limit' => -1, 'return' => 'ids' ) ) ) : 0;
+				?>
+				<div id="gk-search-dropdown" class="header-pill-search-dropdown" aria-hidden="true" hidden>
+					<ul class="header-pill-search-dropdown-list" role="list">
+						<?php foreach ( $gk_search_products as $gk_sp ) : ?>
+							<?php if ( ! $gk_sp || ! is_a( $gk_sp, 'WC_Product' ) ) { continue; } ?>
+							<li class="header-pill-search-dropdown-item">
+								<a href="<?php echo esc_url( $gk_sp->get_permalink() ); ?>" class="header-pill-search-dropdown-link">
+									<span class="header-pill-search-dropdown-thumb">
+										<?php
+										$gk_sp_img_id = $gk_sp->get_image_id();
+										if ( $gk_sp_img_id ) {
+											echo wp_get_attachment_image( (int) $gk_sp_img_id, 'globalkeys-search-dropdown', false, array( 'alt' => esc_attr( $gk_sp->get_name() ), 'class' => 'gk-search-dropdown-product-img', 'loading' => 'lazy' ) );
+										} else {
+											echo wc_placeholder_img( 'woocommerce_thumbnail' );
+										}
+										?>
+									</span>
+									<span class="header-pill-search-dropdown-info">
+										<span class="header-pill-search-dropdown-title"><?php echo esc_html( $gk_sp->get_name() ); ?></span>
+										<span class="header-pill-search-dropdown-platform"><?php esc_html_e( 'PC', 'globalkeys' ); ?></span>
+									</span>
+									<span class="header-pill-search-dropdown-price"><?php echo wp_kses_post( wc_price( $gk_sp->get_price() ) ); ?></span>
+								</a>
+							</li>
+						<?php endforeach; ?>
+					</ul>
+					<div class="header-pill-search-dropdown-footer">
+						<?php
+						$gk_search_url = home_url( '/' );
+						if ( function_exists( 'wc_get_page_id' ) ) {
+							$shop_id = wc_get_page_id( 'shop' );
+							if ( $shop_id > 0 ) {
+								$gk_search_url = get_permalink( $shop_id );
+							}
+						}
+						?>
+						<a href="<?php echo esc_url( $gk_search_url ); ?>" class="header-pill-search-dropdown-all" id="gk-search-dropdown-all-link" data-base-url="<?php echo esc_url( $gk_search_url ); ?>">
+							<?php
+							/* translators: %d: number of results */
+							echo esc_html( sprintf( __( 'See all %d results', 'globalkeys' ), max( 0, $gk_search_total ) ) );
+							?>
+						</a>
+					</div>
 				</div>
 			</div>
 			</div>

@@ -68,10 +68,17 @@ if ( function_exists( 'wc_get_products' ) ) {
 						/* translators: %d: discount percentage */
 						$aria_label_card .= ', ' . sprintf( __( '-%d%%', 'globalkeys' ), $sale_pct );
 					}
+					$gk_trailer_src = '';
+					if ( function_exists( 'globalkeys_get_product_trailer_url' ) && function_exists( 'globalkeys_resolve_product_trailer_url' ) ) {
+						$gk_trailer_raw = globalkeys_get_product_trailer_url( $product );
+						if ( $gk_trailer_raw !== '' ) {
+							$gk_trailer_src = globalkeys_resolve_product_trailer_url( $gk_trailer_raw );
+						}
+					}
 					?>
 					<li class="gk-featured-product">
 						<a href="<?php echo esc_url( $product->get_permalink() ); ?>" class="gk-featured-product-link" aria-label="<?php echo esc_attr( $aria_label_card ); ?>">
-							<span class="gk-featured-product-image">
+							<span class="gk-featured-product-image<?php echo $gk_trailer_src ? ' has-trailer' : ''; ?>">
 								<?php
 								$gk_bestseller_img_id = $product->get_image_id();
 								if ( $gk_bestseller_img_id ) {
@@ -89,7 +96,20 @@ if ( function_exists( 'wc_get_products' ) ) {
 								} else {
 									echo wc_placeholder_img( 'woocommerce_thumbnail' );
 								}
-								?>
+								if ( $gk_trailer_src ) :
+									?>
+								<video
+									class="gk-bestseller-trailer"
+									src="<?php echo esc_url( $gk_trailer_src ); ?>"
+									muted
+									playsinline
+									webkit-playsinline
+									loop
+									preload="metadata"
+									tabindex="-1"
+									aria-hidden="true"
+								></video>
+								<?php endif; ?>
 							</span>
 							<span class="gk-bestseller-meta-row" aria-hidden="true">
 								<span class="gk-bestseller-title"><?php echo esc_html( $product->get_name() ); ?></span>
@@ -102,6 +122,11 @@ if ( function_exists( 'wc_get_products' ) ) {
 								</span>
 							</span>
 						</a>
+						<?php
+						if ( function_exists( 'globalkeys_render_product_hover_panel' ) ) {
+							globalkeys_render_product_hover_panel( $product );
+						}
+						?>
 					</li>
 				<?php endforeach; ?>
 			</ul>

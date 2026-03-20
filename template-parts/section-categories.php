@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $section    = get_query_var( 'gk_section', array( 'id' => 'section-categories', 'aria_label' => __( 'Kategorien', 'globalkeys' ) ) );
 $id         = ! empty( $section['id'] ) ? $section['id'] : 'section-categories';
-$aria_label = ! empty( $section['aria_label'] ) ? $section['aria_label'] : __( 'Our Categories', 'globalkeys' );
+$aria_label = ! empty( $section['aria_label'] ) ? $section['aria_label'] : __( 'All Categories', 'globalkeys' );
 
 $gk_category_collection_names = array(
 	__( 'Survival', 'globalkeys' ),
@@ -39,7 +39,7 @@ $gk_categories_bg_url = get_template_directory_uri() . '/Pictures/category-card-
 		<div class="gk-featured-heading-wrap">
 			<h2 id="<?php echo esc_attr( $id ); ?>-title" class="gk-section-title gk-featured-heading">
 				<span class="gk-featured-heading-text-wrap">
-					<span class="gk-featured-heading-text"><?php esc_html_e( 'Our Categories', 'globalkeys' ); ?></span>
+					<span class="gk-featured-heading-text"><?php esc_html_e( 'All Categories', 'globalkeys' ); ?></span>
 					<span class="gk-featured-title-underline" aria-hidden="true"></span>
 				</span>
 				<span class="gk-featured-heading-arrow" aria-hidden="true"></span>

@@ -95,6 +95,7 @@ function globalkeys_setup() {
 		 * Nach dem ersten Deploy ggf. Plugin „Regenerate Thumbnails“ ausführen, damit alte Uploads diese Größe erhalten.
 		 */
 		add_image_size( 'globalkeys-product-card', 1536, 1536, false );
+		add_image_size( 'globalkeys-search-dropdown', 320, 180, true );
 
 	// This theme uses wp_nav_menu() in one location.
 	register_nav_menus(
@@ -398,6 +399,8 @@ add_action( 'init', 'globalkeys_enable_customer_registration', 1 );
  * WooCommerce-Registrierung: Vorname und Nachname.
  */
 require get_template_directory() . '/inc/woocommerce-registration.php';
+require get_template_directory() . '/inc/woocommerce-product-trailer.php';
+require get_template_directory() . '/inc/gk-product-hover-panel.php';
 require get_template_directory() . '/inc/woocommerce-account-endpoints.php';
 require get_template_directory() . '/inc/profile-avatar.php';
 require get_template_directory() . '/inc/email-verification.php';
@@ -1546,6 +1549,27 @@ function globalkeys_scripts() {
 		wp_enqueue_script( 'globalkeys-hero-stats-count', get_template_directory_uri() . '/js/hero-stats-count.js', array(), _S_VERSION, true );
 		wp_enqueue_script( 'globalkeys-hero-stats-bar-scroll', get_template_directory_uri() . '/js/hero-stats-bar-scroll.js', array(), _S_VERSION, true );
 	}
+	/* Bestseller-Trailer: überall wo Front-Sections (inkl. Bestseller) vorkommen – nicht nur strikt is_front_page() */
+	$gk_load_bestseller_trailer = is_front_page() || ( function_exists( 'globalkeys_has_front_page_sections' ) && globalkeys_has_front_page_sections() );
+	if ( $gk_load_bestseller_trailer ) {
+		$gk_bestseller_trailer_js = get_template_directory() . '/js/gk-bestseller-trailer-hover.js';
+		wp_enqueue_script(
+			'globalkeys-bestseller-trailer-hover',
+			get_template_directory_uri() . '/js/gk-bestseller-trailer-hover.js',
+			array(),
+			file_exists( $gk_bestseller_trailer_js ) ? (string) filemtime( $gk_bestseller_trailer_js ) : _S_VERSION,
+			true
+		);
+		$gk_hover_panel_js = get_template_directory() . '/js/gk-product-hover-panel.js';
+		wp_enqueue_script(
+			'globalkeys-product-hover-panel',
+			get_template_directory_uri() . '/js/gk-product-hover-panel.js',
+			array(),
+			file_exists( $gk_hover_panel_js ) ? (string) filemtime( $gk_hover_panel_js ) : _S_VERSION,
+			true
+		);
+	}
+
 	/* Carousel: immer auf der Startseite laden (Hero-Sections + Test; unabhängig von strikter has_front_page_sections-Bedingung) */
 	if ( is_front_page() ) {
 		wp_enqueue_script( 'globalkeys-categories-carousel', get_template_directory_uri() . '/js/gk-categories-carousel.js', array(), _S_VERSION, true );
