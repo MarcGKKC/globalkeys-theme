@@ -110,6 +110,11 @@ function globalkeys_get_default_product_trailer_url( $product ) {
 		'elden-ring-nightreign-steam'       => 'elden-ring-n-preview-gk.webm',
 		'elden-ring-nightreign-pc'          => 'elden-ring-n-preview-gk.webm',
 		'elden-ring-nightreign-pc-steam'    => 'elden-ring-n-preview-gk.webm',
+		'life-is-strange-reunion'              => 'life-is-strange-r-steam-preview.webm',
+		'life-is-strange-reunion-steam'        => 'life-is-strange-r-steam-preview.webm',
+		'life-is-strange-reunion-pc'           => 'life-is-strange-r-steam-preview.webm',
+		'life-is-strange-reunion-pc-steam'     => 'life-is-strange-r-steam-preview.webm',
+		'life-is-strange-r-steam'          => 'life-is-strange-r-steam-preview.webm',
 	);
 
 	if ( isset( $trailers_by_slug[ $slug ] ) ) {
@@ -145,6 +150,11 @@ function globalkeys_get_default_product_trailer_url( $product ) {
 	/* Pokémon / Pokemon Pokopia */
 	if ( $title !== '' && stripos( $title, 'pokopia' ) !== false ) {
 		return get_template_directory_uri() . '/Previews/pokemon-pokopia-gk.webm';
+	}
+
+	/* Life is Strange: Reunion */
+	if ( $title !== '' && stripos( $title, 'life is strange' ) !== false && stripos( $title, 'reunion' ) !== false ) {
+		return get_template_directory_uri() . '/Previews/life-is-strange-r-steam-preview.webm';
 	}
 
 	/* Elden Ring Nightreign – vor Shadow of the Erdtree (beides „Elden Ring“) */
