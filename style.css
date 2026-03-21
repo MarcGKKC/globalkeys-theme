@@ -748,7 +748,7 @@ body.gk-header-scrolled .header-pill-wrapper .header-nav-above {
 
 .header-pill-wrapper {
 	gap: 0.4rem;
-	transition: gap 0.16s ease-out;
+	transition: gap 0.16s ease-out, margin-left 0.3s ease;
 }
 
 body.gk-header-scrolled .header-pill-wrapper {
@@ -808,6 +808,7 @@ body.gk-header-scrolled .site-header-inner {
 	flex: 0 0 auto;
 	display: flex;
 	align-items: center;
+	transition: margin-left 0.3s ease;
 }
 
 .site-branding .custom-logo,
@@ -1915,6 +1916,175 @@ body.gk-search-results-page .header-pill-search-dropdown {
 	display: none !important;
 }
 
+/* Suchergebnisse: Filter-Sidebar links über volle Höhe (wie Instant Gaming) */
+:root {
+	--gk-filter-sidebar-width: 260px;
+	--gk-filter-content-gap: 1.5rem;
+}
+
+/* Push-Effekt: ganze Seite rutscht nach rechts; Filter-Kante = Hauptrand, symmetrischer Rand links/rechts für die ganze Seite */
+body.gk-filter-sidebar-open #page {
+	margin-left: var( --gk-filter-sidebar-width );
+	width: calc( 100% - var( --gk-filter-sidebar-width ) );
+	padding-left: var( --gk-filter-content-gap );
+	padding-right: var( --gk-filter-content-gap );
+	box-sizing: border-box;
+	transition: margin-left 0.3s ease, width 0.3s ease, padding 0.3s ease;
+}
+
+body.gk-search-results-page #page {
+	transition: margin-left 0.3s ease, width 0.3s ease, padding 0.3s ease;
+}
+
+/* Pill und Nav-Punkte darüber: weniger nach rechts beim Öffnen */
+body.gk-filter-sidebar-open .header-pill-wrapper {
+	margin-left: -6rem;
+}
+
+/* Logo: leicht nach links beim Öffnen */
+body.gk-filter-sidebar-open .site-branding {
+	margin-left: -1.5rem;
+}
+
+/* Produktkarten: symmetrischer Rand, minimal größere Karten durch leicht reduzierten Gap */
+body.gk-filter-sidebar-open .gk-section-shop-results .gk-featured-products {
+	max-width: 100%;
+	box-sizing: border-box;
+	gap: calc( 1rem + 4px );
+}
+
+body.gk-filter-sidebar-open .gk-section-shop-results .gk-search-results-count {
+	margin-left: 0;
+}
+
+body.gk-filter-sidebar-open .gk-search-sort-by-wrap {
+	margin-right: 0;
+}
+
+/* Footer: bei geöffneter Filter-Bar kein Viewport-Breakout – gleicher Rand links/rechts wie Rest der Seite */
+body.gk-filter-sidebar-open .site-footer.gk-footer,
+body.gk-filter-sidebar-open #colophon.gk-footer {
+	margin-left: 0;
+	margin-right: 0;
+	width: 100%;
+	max-width: 100%;
+}
+
+body.gk-filter-sidebar-open .gk-footer-inner,
+body.gk-filter-sidebar-open .gk-footer-payment-inner,
+body.gk-filter-sidebar-open .gk-footer-bottom-inner {
+	margin-left: 0;
+	margin-right: 0;
+	max-width: 100%;
+	padding-left: calc( var( --gk-filter-content-gap ) + 1.25rem );
+	padding-right: calc( var( --gk-filter-content-gap ) + 1.25rem );
+}
+
+body.gk-filter-sidebar-open .gk-footer-payment-bar {
+	padding-left: calc( var( --gk-filter-content-gap ) + 1.25rem );
+	padding-right: calc( var( --gk-filter-content-gap ) + 1.25rem );
+}
+
+body.gk-filter-sidebar-open .gk-footer-bottom {
+	padding-left: calc( var( --gk-filter-content-gap ) + 1.25rem );
+	padding-right: calc( var( --gk-filter-content-gap ) + 1.25rem );
+}
+
+.gk-search-filter-sidebar {
+	position: fixed;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	width: 0;
+	overflow: hidden;
+	background: #1a1828;
+	z-index: 10001;
+	transition: width 0.3s ease;
+}
+
+.gk-search-layout.is-sidebar-open .gk-search-filter-sidebar {
+	width: var( --gk-filter-sidebar-width );
+}
+
+.gk-search-layout {
+	position: relative;
+	width: 100%;
+}
+
+.gk-search-filter-sidebar-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 1.25rem 1.25rem 1rem;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.gk-search-filter-sidebar-title {
+	margin: 0;
+	font-size: 1.25rem;
+	font-weight: 700;
+	color: #fff;
+}
+
+.gk-search-filter-sidebar-close {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 2rem;
+	height: 2rem;
+	padding: 0;
+	background: transparent;
+	border: none;
+	border-radius: 4px;
+	color: #fff;
+	cursor: pointer;
+	transition: background 0.2s, color 0.2s;
+}
+
+.gk-search-filter-sidebar-close:hover {
+	background: rgba(255, 255, 255, 0.1);
+	color: #fff;
+}
+
+.gk-search-filter-sidebar-content {
+	padding: 1.25rem;
+}
+
+.gk-search-main {
+	width: 100%;
+}
+
+.gk-search-filters-toggle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	padding: 0 1rem;
+	height: 3.2rem;
+	box-sizing: border-box;
+	background: #13122a;
+	border: 1px solid rgba(255, 255, 255, 0.38);
+	border-radius: 7px;
+	color: #fff;
+	font-size: 1.0625rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: background 0.2s, border-color 0.2s;
+}
+
+.gk-search-filters-toggle:hover {
+	background: #1a1835;
+	border-color: #04DA8D;
+}
+
+.gk-search-layout.is-sidebar-open .gk-search-filters-toggle {
+	border-color: #04DA8D;
+}
+
+.gk-search-filters-toggle svg {
+	flex-shrink: 0;
+}
+
 /* Suchergebnisse: Zeile über Karten mit Count links + Sort by rechts */
 .gk-search-results-header {
 	display: flex;
@@ -1933,44 +2103,12 @@ body.gk-search-results-page .header-pill-search-dropdown {
 	text-align: left;
 }
 
-/* Suchergebnisse: Sort by + Filters rechts, bündig mit rechtem Kartenrand */
+/* Suchergebnisse: Sort by rechts, bündig mit rechtem Kartenrand */
 .gk-search-sort-by-wrap {
 	display: flex;
 	align-items: center;
 	gap: 0.6rem;
 	margin-right: -6.6rem;
-}
-
-.gk-search-filters-btn {
-	margin-left: -0.35rem;
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	gap: 0.5rem;
-	padding: 0 1rem;
-	height: 3.2rem;
-	box-sizing: border-box;
-	background: #13122a;
-	border: 1px solid rgba(255, 255, 255, 0.38);
-	border-radius: 7px;
-	color: #fff;
-	font-size: 1.0625rem;
-	font-weight: 500;
-	cursor: pointer;
-	transition: background 0.2s, border-color 0.2s;
-}
-
-.gk-search-filters-btn:hover {
-	background: #1a1835;
-	border-color: #04DA8D;
-}
-
-.gk-search-filters-btn.is-active {
-	border-color: #04DA8D;
-}
-
-.gk-search-filters-btn img {
-	filter: brightness(0) invert(1);
 }
 
 .gk-search-sort-by-label {
@@ -2004,111 +2142,6 @@ body.gk-search-results-page .header-pill-search-dropdown {
 }
 
 .gk-search-sort-by-wrap .gk-search-sort-select option {
-	background: #1a193f;
-	color: #fff;
-}
-
-/* Suchergebnisse: Filter-Bar weit oben, klappt ein/aus */
-.gk-search-filter-bar {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: flex-end;
-	gap: 1rem;
-	min-height: 0;
-	max-height: 0;
-	opacity: 0;
-	overflow: hidden;
-	margin: 0;
-	padding: 0 1rem;
-	pointer-events: none;
-	visibility: hidden;
-	transition: max-height 0.35s ease, opacity 0.3s ease, margin 0.35s ease, padding 0.35s ease, visibility 0s linear 0.35s;
-}
-
-.gk-search-filter-bar.is-visible {
-	max-height: 6rem;
-	opacity: 1;
-	margin: -8.5rem 0 4rem;
-	padding: 1.25rem 1rem;
-	pointer-events: auto;
-	visibility: visible;
-	transition: max-height 0.35s ease, opacity 0.3s ease, margin 0.35s ease, padding 0.35s ease, visibility 0s;
-}
-
-.gk-search-filter-row {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	justify-content: flex-end;
-	gap: 0.5rem 0.75rem;
-	min-height: 0;
-}
-
-.gk-search-filter-box {
-	display: inline-flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 0.5rem;
-	width: 12.5rem;
-	min-width: 12.5rem;
-	height: 3.4rem;
-	min-height: 3.4rem;
-	padding: 0 1.9rem 0 1.2rem;
-	box-sizing: border-box;
-	background: #13122a;
-	border: 1px solid rgba(255, 255, 255, 0.12);
-	border-radius: 6px;
-	color: #fff;
-	font-size: 1.0625rem;
-	line-height: 1;
-	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 12 12'%3E%3Cpath stroke='%23fff' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round' d='M3 5l3 3 3-3'/%3E%3C/svg%3E");
-	background-repeat: no-repeat;
-	background-position: right 0.65rem center;
-	transition: background-color 0.2s, border-color 0.2s;
-}
-
-.gk-search-filter-box:hover {
-	background-color: #1a1935;
-	border-color: rgba(255, 255, 255, 0.2);
-}
-
-.gk-search-filter-label {
-	flex: 1;
-}
-
-.gk-search-filter-chevron {
-	display: none;
-}
-
-.gk-search-filter-box-select {
-	width: 12.5rem;
-	min-width: 12.5rem;
-	height: 3.4rem;
-	min-height: 3.4rem;
-	padding: 0;
-}
-
-.gk-search-filter-box-select .gk-search-filter-select {
-	width: 100%;
-	height: 100%;
-	padding: 0 1.9rem 0 1.2rem;
-	margin: 0;
-	background: transparent;
-	border: none;
-	border-radius: 0;
-	color: #fff;
-	font-size: 1.0625rem;
-	line-height: 3.4rem;
-	cursor: pointer;
-	appearance: none;
-	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 12 12'%3E%3Cpath stroke='%23fff' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round' d='M3 5l3 3 3-3'/%3E%3C/svg%3E");
-	background-repeat: no-repeat;
-	background-position: right 0.65rem center;
-	box-sizing: border-box;
-}
-
-.gk-search-filter-select option {
 	background: #1a193f;
 	color: #fff;
 }
@@ -4495,12 +4528,14 @@ body.home .gk-section-cta .gk-section-inner {
 	}
 }
 
-/* Titel links + Preisleiste rechts: Grid damit die Leiste wirklich am rechten Kartenrand endet */
+/* Titel links, Preisleiste rechts (eine Zeile); Pre-order-Zeile darunter über volle Breite */
 .gk-section-bestsellers .gk-bestseller-meta-row {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) auto;
+	grid-template-rows: auto auto;
 	align-items: center;
 	column-gap: 0.45rem;
+	row-gap: 0.28rem;
 	width: 100%;
 	min-width: 0;
 	margin: 0;
@@ -4509,6 +4544,8 @@ body.home .gk-section-cta .gk-section-inner {
 }
 
 .gk-section-bestsellers .gk-bestseller-title {
+	grid-column: 1;
+	grid-row: 1;
 	min-width: 0;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -4520,7 +4557,50 @@ body.home .gk-section-cta .gk-section-inner {
 	line-height: 1.25;
 }
 
+/* Pre-order badge + release date (blue outline, date same color) */
+.gk-section-bestsellers .gk-preorder-meta {
+	grid-column: 1 / -1;
+	grid-row: 2;
+	display: inline-flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.45rem 0.65rem;
+	margin: 0;
+	padding: 0;
+	min-width: 0;
+	--gk-preorder-accent: #4d8cff;
+}
+
+.gk-section-bestsellers .gk-preorder-badge {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.2rem 0.5rem;
+	margin: 0;
+	font-size: clamp(0.62rem, 0.95vw, 0.72rem);
+	font-weight: 700;
+	line-height: 1.2;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--gk-preorder-accent, #4d8cff);
+	border: 1px solid var(--gk-preorder-accent, #4d8cff);
+	border-radius: 5px;
+	background: transparent;
+	box-sizing: border-box;
+}
+
+.gk-section-bestsellers .gk-preorder-date {
+	font-size: clamp(0.72rem, 1.05vw, 0.875rem);
+	font-weight: 600;
+	line-height: 1.2;
+	color: var(--gk-preorder-accent, #4d8cff);
+	letter-spacing: 0.01em;
+}
+
 .gk-section-bestsellers .gk-bestseller-price-bar {
+	grid-column: 2;
+	grid-row: 1;
 	display: flex;
 	flex-direction: row;
 	flex-wrap: nowrap;
@@ -4530,7 +4610,6 @@ body.home .gk-section-cta .gk-section-inner {
 	gap: 0.35rem 0.45rem;
 	width: max-content;
 	max-width: 100%;
-	/* kein Padding rechts: Ende der Leiste = Kartenrand */
 	padding: 0.4rem 0 0.4rem 0.55rem;
 	margin: 0;
 	border-radius: 0;

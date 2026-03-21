@@ -55,37 +55,26 @@ if ( $gk_product_search && class_exists( 'WooCommerce' ) ) {
 			<?php
 			$gk_total_count = ( $gk_product_query && $gk_product_query->found_posts >= 0 ) ? (int) $gk_product_query->found_posts : 0;
 			?>
+			<div id="gk-search-layout" class="gk-search-layout">
+				<aside id="gk-search-filter-sidebar" class="gk-search-filter-sidebar" role="complementary" aria-label="<?php esc_attr_e( 'Filters', 'globalkeys' ); ?>">
+					<div class="gk-search-filter-sidebar-header">
+						<h2 class="gk-search-filter-sidebar-title"><?php esc_html_e( 'Filters', 'globalkeys' ); ?></h2>
+						<button type="button" class="gk-search-filter-sidebar-close" aria-label="<?php esc_attr_e( 'Close filters', 'globalkeys' ); ?>">
+							<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+						</button>
+					</div>
+					<div class="gk-search-filter-sidebar-content">
+						<?php /* Filter-Inhalte werden später eingefügt */ ?>
+					</div>
+				</aside>
+				<div class="gk-search-main">
 			<section id="gk-search-results-grid" class="gk-section gk-section-bestsellers gk-section-shop-results" role="region" aria-label="<?php esc_attr_e( 'Produkte', 'globalkeys' ); ?>">
 				<div class="gk-section-inner gk-section-featured-inner">
-					<div id="gk-search-filter-bar" class="gk-search-filter-bar">
-						<div class="gk-search-filter-row">
-							<div class="gk-search-filter-box">
-								<span class="gk-search-filter-label"><?php esc_html_e( 'Platform', 'globalkeys' ); ?></span>
-								<span class="gk-search-filter-chevron" aria-hidden="true">▾</span>
-							</div>
-							<div class="gk-search-filter-box">
-								<span class="gk-search-filter-label"><?php esc_html_e( 'Region', 'globalkeys' ); ?></span>
-								<span class="gk-search-filter-chevron" aria-hidden="true">▾</span>
-							</div>
-							<div class="gk-search-filter-box">
-								<span class="gk-search-filter-label"><?php esc_html_e( 'Price', 'globalkeys' ); ?></span>
-								<span class="gk-search-filter-chevron" aria-hidden="true">▾</span>
-							</div>
-							<div class="gk-search-filter-box">
-								<span class="gk-search-filter-label"><?php esc_html_e( 'Product Type', 'globalkeys' ); ?></span>
-								<span class="gk-search-filter-chevron" aria-hidden="true">▾</span>
-							</div>
-							<div class="gk-search-filter-box">
-								<span class="gk-search-filter-label"><?php esc_html_e( 'Genre', 'globalkeys' ); ?></span>
-								<span class="gk-search-filter-chevron" aria-hidden="true">▾</span>
-							</div>
-						</div>
-					</div>
 					<div class="gk-search-results-header">
 						<p id="gk-search-results-count" class="gk-search-results-count"><?php echo esc_html( sprintf( _n( '%d result', '%d results', $gk_total_count, 'globalkeys' ), $gk_total_count ) ); ?></p>
 						<div class="gk-search-sort-by-wrap">
-							<button type="button" class="gk-search-filters-btn" aria-label="<?php esc_attr_e( 'Filters', 'globalkeys' ); ?>">
-								<img src="<?php echo esc_url( get_template_directory_uri() . '/Pictures/Design ohne Titel (51).svg' ); ?>" alt="" width="18" height="18" aria-hidden="true" />
+							<button type="button" class="gk-search-filters-toggle" aria-label="<?php esc_attr_e( 'Open filters', 'globalkeys' ); ?>" aria-expanded="false" aria-controls="gk-search-filter-sidebar">
+								<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
 								<span><?php esc_html_e( 'Filters', 'globalkeys' ); ?></span>
 							</button>
 							<label for="gk-search-sort" class="gk-search-sort-by-label"><?php esc_html_e( 'Sort by:', 'globalkeys' ); ?></label>
@@ -128,6 +117,8 @@ if ( $gk_product_search && class_exists( 'WooCommerce' ) ) {
 					?>
 				</div>
 			</section>
+				</div><!-- .gk-search-main -->
+			</div><!-- .gk-search-layout -->
 		<?php elseif ( have_posts() ) : ?>
 			<?php
 			while ( have_posts() ) :

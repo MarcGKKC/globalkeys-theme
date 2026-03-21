@@ -46,6 +46,15 @@ if ( $sale_pct > 0 ) {
 	/* translators: %d: discount percentage */
 	$aria_label_card .= ', ' . sprintf( __( '-%d%%', 'globalkeys' ), $sale_pct );
 }
+if ( function_exists( 'globalkeys_is_preorder_product' ) && globalkeys_is_preorder_product( $product ) ) {
+	$aria_label_card .= ', ' . __( 'Pre-order', 'globalkeys' );
+	if ( function_exists( 'globalkeys_format_product_release_date_display' ) ) {
+		$gk_po_date = globalkeys_format_product_release_date_display( $product );
+		if ( $gk_po_date !== '' ) {
+			$aria_label_card .= ', ' . $gk_po_date;
+		}
+	}
+}
 $gk_trailer_src = '';
 if ( function_exists( 'globalkeys_get_product_trailer_url' ) && function_exists( 'globalkeys_resolve_product_trailer_url' ) ) {
 	$gk_trailer_raw = globalkeys_get_product_trailer_url( $product );
@@ -121,6 +130,11 @@ if ( function_exists( 'globalkeys_get_product_trailer_url' ) && function_exists(
 		</span>
 		<span class="gk-bestseller-meta-row" aria-hidden="true">
 			<span class="gk-bestseller-title"><?php echo esc_html( $product->get_name() ); ?></span>
+			<?php
+			if ( function_exists( 'globalkeys_render_preorder_badge_row' ) ) {
+				globalkeys_render_preorder_badge_row( $product );
+			}
+			?>
 			<span class="gk-bestseller-price-bar">
 				<?php if ( $sale_pct > 0 && '' !== $regular_price_html ) : ?>
 					<span class="gk-bestseller-price-badge" aria-hidden="true"><?php echo esc_html( '-' . $sale_pct . '%' ); ?></span>

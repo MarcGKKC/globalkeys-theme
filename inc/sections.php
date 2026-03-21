@@ -251,29 +251,33 @@ function globalkeys_fallback_hero_product( $exclude_ids = array() ) {
 	}
 	$exclude_ids = array_values( array_unique( array_filter( array_map( 'intval', (array) $exclude_ids ) ) ) );
 
-	$products = wc_get_products(
-		array(
-			'featured'  => true,
-			'status'    => 'publish',
-			'limit'     => 12,
-			'orderby'   => 'menu_order title',
-			'order'     => 'ASC',
-			'exclude'   => $exclude_ids,
-			'return'    => 'objects',
-		)
+	$args_feat = array(
+		'featured' => true,
+		'status'   => 'publish',
+		'limit'    => 12,
+		'orderby'  => 'menu_order title',
+		'order'    => 'ASC',
+		'exclude'  => $exclude_ids,
+		'return'   => 'objects',
 	);
+	if ( function_exists( 'globalkeys_wc_product_args_exclude_preorders' ) ) {
+		$args_feat = globalkeys_wc_product_args_exclude_preorders( $args_feat );
+	}
+	$products = wc_get_products( $args_feat );
 	if ( ! empty( $products ) && is_a( $products[0], 'WC_Product' ) ) {
 		return $products[0];
 	}
 
-	$products = wc_get_products(
-		array(
-			'status'  => 'publish',
-			'limit'   => 12,
-			'exclude' => $exclude_ids,
-			'return'  => 'objects',
-		)
+	$args_all = array(
+		'status'  => 'publish',
+		'limit'   => 12,
+		'exclude' => $exclude_ids,
+		'return'  => 'objects',
 	);
+	if ( function_exists( 'globalkeys_wc_product_args_exclude_preorders' ) ) {
+		$args_all = globalkeys_wc_product_args_exclude_preorders( $args_all );
+	}
+	$products = wc_get_products( $args_all );
 	if ( ! empty( $products ) && is_a( $products[0], 'WC_Product' ) ) {
 		return $products[0];
 	}

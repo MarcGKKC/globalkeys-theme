@@ -25,15 +25,29 @@ function globalkeys_render_product_hover_panel( $product ) {
 
 	$released_display = '';
 	$created          = $product->get_date_created();
-	if ( $created && method_exists( $created, 'date' ) ) {
-		$ts = $created->getTimestamp();
-		if ( $ts ) {
-			/* translators: %s: formatted product publish date */
-			$released_display = sprintf(
-				/* translators: %s: formatted product release date */
-				__( 'Released: %s', 'globalkeys' ),
-				date_i18n( get_option( 'date_format' ), $ts )
-			);
+	$created_ts       = ( $created && method_exists( $created, 'getTimestamp' ) ) ? (int) $created->getTimestamp() : 0;
+	$release_ts       = function_exists( 'globalkeys_get_product_release_timestamp' ) ? globalkeys_get_product_release_timestamp( $product ) : 0;
+	$date_ts          = $release_ts > 0 ? $release_ts : $created_ts;
+
+	if ( $date_ts > 0 ) {
+		$df            = get_option( 'date_format' );
+		$date_formatted = wp_date( $df, $date_ts );
+		$today_ymd     = wp_date( 'Y-m-d', current_time( 'timestamp' ) );
+		$release_ymd   = $release_ts > 0 ? wp_date( 'Y-m-d', $release_ts ) : '';
+
+		$is_not_out_yet = false;
+		if ( $release_ts > 0 ) {
+			$is_not_out_yet = ( $release_ymd > $today_ymd );
+		} elseif ( function_exists( 'globalkeys_is_preorder_product' ) && globalkeys_is_preorder_product( $product ) ) {
+			$is_not_out_yet = true;
+		}
+
+		if ( $is_not_out_yet ) {
+			/* translators: %s: formatted release date (game not yet available) */
+			$released_display = sprintf( __( 'Release: %s', 'globalkeys' ), $date_formatted );
+		} else {
+			/* translators: %s: formatted release date */
+			$released_display = sprintf( __( 'Released: %s', 'globalkeys' ), $date_formatted );
 		}
 	}
 

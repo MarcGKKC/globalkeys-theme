@@ -13,25 +13,29 @@ $aria_label = ! empty( $section['aria_label'] ) ? $section['aria_label'] : __( '
 
 $products = array();
 if ( function_exists( 'wc_get_products' ) ) {
-	$products = wc_get_products(
-		array(
-			'featured' => true,
-			'status'   => 'publish',
-			'limit'    => 6,
-			'orderby'  => 'menu_order title',
-			'order'    => 'ASC',
-		)
+	$args_feat = array(
+		'featured' => true,
+		'status'   => 'publish',
+		'limit'    => 6,
+		'orderby'  => 'menu_order title',
+		'order'    => 'ASC',
 	);
+	if ( function_exists( 'globalkeys_wc_product_args_exclude_preorders' ) ) {
+		$args_feat = globalkeys_wc_product_args_exclude_preorders( $args_feat );
+	}
+	$products = wc_get_products( $args_feat );
 	// Fallback: wenn keine Featured-Produkte, zeigen wir Bestseller
 	if ( empty( $products ) ) {
-		$products = wc_get_products(
-			array(
-				'status'  => 'publish',
-				'limit'   => 6,
-				'orderby' => 'popularity',
-				'order'   => 'DESC',
-			)
+		$args_pop = array(
+			'status'  => 'publish',
+			'limit'   => 6,
+			'orderby' => 'popularity',
+			'order'   => 'DESC',
 		);
+		if ( function_exists( 'globalkeys_wc_product_args_exclude_preorders' ) ) {
+			$args_pop = globalkeys_wc_product_args_exclude_preorders( $args_pop );
+		}
+		$products = wc_get_products( $args_pop );
 	}
 }
 ?>

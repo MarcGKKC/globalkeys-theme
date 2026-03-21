@@ -408,6 +408,7 @@ add_action( 'init', 'globalkeys_enable_customer_registration', 1 );
  */
 require get_template_directory() . '/inc/woocommerce-registration.php';
 require get_template_directory() . '/inc/woocommerce-product-trailer.php';
+require get_template_directory() . '/inc/woocommerce-product-preorder.php';
 require get_template_directory() . '/inc/woocommerce-product-elden-nightreign.php';
 require get_template_directory() . '/inc/woocommerce-product-hero-image.php';
 require get_template_directory() . '/inc/gk-product-hover-panel.php';
@@ -483,6 +484,12 @@ function globalkeys_search_products_starts_with( $term, $limit = 0 ) {
 	}
 
 	$ids = array_unique( array_filter( array_merge( $title_ids, $sku_ids ) ) );
+	if ( function_exists( 'globalkeys_get_preorder_list_product_ids' ) ) {
+		$pre = globalkeys_get_preorder_list_product_ids();
+		if ( ! empty( $pre ) ) {
+			$ids = array_values( array_diff( $ids, $pre ) );
+		}
+	}
 	$total = count( $ids );
 
 	$products = array();
@@ -519,11 +526,15 @@ function globalkeys_ajax_search_products() {
 	$term = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : '';
 	$term = trim( $term );
 	if ( $term === '' && class_exists( 'WooCommerce' ) ) {
-		$products = wc_get_products( array(
+		$rand_args = array(
 			'status'  => 'publish',
 			'limit'   => 5,
 			'orderby' => 'rand',
-		) );
+		);
+		if ( function_exists( 'globalkeys_wc_product_args_exclude_preorders' ) ) {
+			$rand_args = globalkeys_wc_product_args_exclude_preorders( $rand_args );
+		}
+		$products = wc_get_products( $rand_args );
 		$list = array();
 		foreach ( $products as $product ) {
 			if ( ! $product || ! $product->is_visible() ) {
@@ -610,12 +621,16 @@ function globalkeys_get_search_products_data_for_js() {
 	if ( empty( $ids ) ) {
 		return array( 'index' => array(), 'cards' => array(), 'dropdown' => array() );
 	}
+	$pre_ids = function_exists( 'globalkeys_get_preorder_list_product_ids' ) ? globalkeys_get_preorder_list_product_ids() : array();
 	$index      = array();
 	$cards      = array();
 	$id_to_name = array();
 	$dropdown   = array();
 	$prices     = array();
 	foreach ( $ids as $pid ) {
+		if ( ! empty( $pre_ids ) && in_array( (int) $pid, $pre_ids, true ) ) {
+			continue;
+		}
 		$product = wc_get_product( $pid );
 		if ( ! $product || ! $product->is_visible() ) {
 			continue;

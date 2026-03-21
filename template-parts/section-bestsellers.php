@@ -13,14 +13,16 @@ $aria_label = ! empty( $section['aria_label'] ) ? $section['aria_label'] : __( '
 
 $products = array();
 if ( function_exists( 'wc_get_products' ) ) {
-	$products = wc_get_products(
-		array(
-			'status'  => 'publish',
-			'limit'   => 9,
-			'orderby' => 'popularity',
-			'order'   => 'DESC',
-		)
+	$args = array(
+		'status'  => 'publish',
+		'limit'   => 9,
+		'orderby' => 'popularity',
+		'order'   => 'DESC',
 	);
+	if ( function_exists( 'globalkeys_wc_product_args_exclude_preorders' ) ) {
+		$args = globalkeys_wc_product_args_exclude_preorders( $args );
+	}
+	$products = wc_get_products( $args );
 }
 ?>
 
