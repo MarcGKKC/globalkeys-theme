@@ -58,21 +58,51 @@ if ( function_exists( 'globalkeys_get_product_trailer_url' ) && function_exists(
 	<a href="<?php echo esc_url( $product->get_permalink() ); ?>" class="gk-featured-product-link" aria-label="<?php echo esc_attr( $aria_label_card ); ?>">
 		<span class="gk-featured-product-image<?php echo $gk_trailer_src ? ' has-trailer' : ''; ?>">
 			<?php
-			$gk_bestseller_img_id = $product->get_image_id();
-			if ( $gk_bestseller_img_id ) {
-				echo wp_get_attachment_image(
-					(int) $gk_bestseller_img_id,
-					'globalkeys-product-card',
-					false,
-					array(
-						'alt'      => '',
-						'class'    => 'gk-bestseller-product-img',
-						'loading'  => 'lazy',
-						'decoding' => 'async',
-					)
+			$gk_platform_key = function_exists( 'globalkeys_get_product_platform_key' ) ? globalkeys_get_product_platform_key( $product ) : null;
+			$gk_platform_url = ( $gk_platform_key && function_exists( 'globalkeys_get_product_platform_icon_url' ) )
+				? globalkeys_get_product_platform_icon_url( $gk_platform_key )
+				: '';
+			if ( $gk_platform_url ) :
+				$labels = array(
+					'playstation' => __( 'PlayStation', 'globalkeys' ),
+					'xbox'        => __( 'Xbox', 'globalkeys' ),
+					'nintendo'    => __( 'Nintendo', 'globalkeys' ),
+					'steam'       => __( 'Steam', 'globalkeys' ),
 				);
+				$gk_platform_label = isset( $labels[ $gk_platform_key ] ) ? $labels[ $gk_platform_key ] : $gk_platform_key;
+				?>
+			<span class="gk-product-platform-badge" title="<?php echo esc_attr( $gk_platform_label ); ?>">
+				<img
+					class="gk-product-platform-badge__icon"
+					src="<?php echo esc_url( $gk_platform_url ); ?>"
+					width="32"
+					height="32"
+					alt=""
+					decoding="async"
+					loading="lazy"
+				/>
+			</span>
+			<?php endif; ?>
+			<?php
+			if ( function_exists( 'globalkeys_output_product_card_featured_image' ) ) {
+				globalkeys_output_product_card_featured_image( $product, 'globalkeys-product-card' );
 			} else {
-				echo wc_placeholder_img( 'woocommerce_thumbnail' );
+				$gk_bestseller_img_id = $product->get_image_id();
+				if ( $gk_bestseller_img_id ) {
+					echo wp_get_attachment_image(
+						(int) $gk_bestseller_img_id,
+						'globalkeys-product-card',
+						false,
+						array(
+							'alt'      => '',
+							'class'    => 'gk-bestseller-product-img',
+							'loading'  => 'lazy',
+							'decoding' => 'async',
+						)
+					);
+				} else {
+					echo wc_placeholder_img( 'woocommerce_thumbnail' );
+				}
 			}
 			if ( $gk_trailer_src ) :
 				?>

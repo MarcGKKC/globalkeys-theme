@@ -13,17 +13,123 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Veröffentlichte Produkt-ID anhand des WooCommerce-Slugs.
+ *
+ * @param string $slug post_name des Produkts.
+ * @return int 0 wenn nicht gefunden.
+ */
+function globalkeys_get_product_id_by_slug( $slug ) {
+	if ( ! is_string( $slug ) || $slug === '' ) {
+		return 0;
+	}
+	// get_page_by_path(post_name) – zuverlässiger als wc_get_products( 'slug' ) in manchen WC-Versionen.
+	$post = get_page_by_path( $slug, OBJECT, 'product' );
+	if ( ! $post || $post->post_status !== 'publish' ) {
+		return 0;
+	}
+	return (int) $post->ID;
+}
+
+/**
+ * Erstes Produkt aus Slug-Liste (Reihenfolge = Priorität).
+ *
+ * @param string[] $slugs Kandidaten-Slugs.
+ * @param int      $exclude_id Diese ID überspringen (z. B. bereits großes Hero).
+ * @return int
+ */
+function globalkeys_get_first_product_id_by_slugs( array $slugs, $exclude_id = 0 ) {
+	$exclude_id = (int) $exclude_id;
+	foreach ( $slugs as $slug ) {
+		$id = globalkeys_get_product_id_by_slug( $slug );
+		if ( $id > 0 && $id !== $exclude_id ) {
+			return $id;
+		}
+	}
+	return 0;
+}
+
+/**
+ * Standard: großer Hero oben = Elden Ring Nightreign (Customizer-ID 0).
+ *
+ * @return int
+ */
+function globalkeys_get_default_hero_main_product_id() {
+	$slugs = apply_filters(
+		'globalkeys_default_hero_main_product_slugs',
+		array(
+			'elden-ring-nightreign-steam',
+			'elden-ring-nightreign',
+			'elden-ring-nightreign-pc-steam',
+			'elden-ring-nightreign-pc',
+		)
+	);
+	return globalkeys_get_first_product_id_by_slugs( $slugs, 0 );
+}
+
+/**
+ * Standard: Banner-Hero unter Featured = Death Stranding 2 (Customizer-ID 0).
+ *
+ * @param int $main_hero_id Bereits gewähltes oberes Hero (nicht erneut verwenden).
+ * @return int
+ */
+function globalkeys_get_default_hero_banner_product_id( $main_hero_id = 0 ) {
+	$slugs = apply_filters(
+		'globalkeys_default_hero_banner_product_slugs',
+		array(
+			'death-stranding-2-on-the-beach-pc-steam',
+			'death-stranding-2-on-the-beach-steam',
+			'death-stranding-2-on-the-beach',
+			'death-stranding-2-pc-steam',
+			'death-stranding-2-steam',
+			'death-stranding-2',
+		)
+	);
+	return globalkeys_get_first_product_id_by_slugs( $slugs, $main_hero_id );
+}
+
+/**
+ * Effektive Hero-Produkt-ID: Customizer oder Theme-Standard per Slug.
+ *
+ * @param string $which 'main'|'banner'.
+ * @return int
+ */
+function globalkeys_get_effective_hero_product_id( $which ) {
+	$which = (string) $which;
+	if ( 'main' === $which ) {
+		$mod = (int) get_theme_mod( 'gk_hero_main_product_id', 0 );
+		if ( $mod > 0 ) {
+			return $mod;
+		}
+		return globalkeys_get_default_hero_main_product_id();
+	}
+	if ( 'banner' === $which ) {
+		$mod = (int) get_theme_mod( 'gk_hero_banner_product_id', 0 );
+		if ( $mod > 0 ) {
+			return $mod;
+		}
+		$main = globalkeys_get_effective_hero_product_id( 'main' );
+		return globalkeys_get_default_hero_banner_product_id( $main );
+	}
+	return 0;
+}
+
+/**
  * Gibt die konfigurierten Sections für die Startseite zurück.
  *
  * @return array Array mit Section-Definitionen: id, slug, label, aria_label
  */
 function globalkeys_get_front_page_sections() {
+	$main_hero_id   = globalkeys_get_effective_hero_product_id( 'main' );
+	$banner_hero_id = globalkeys_get_effective_hero_product_id( 'banner' );
+
 	$sections = array(
 		array(
-			'id'        => 'section-hero',
-			'slug'      => 'hero',
-			'label'     => __( 'Hero', 'globalkeys' ),
-			'aria_label' => __( 'Willkommensbereich', 'globalkeys' ),
+			'id'               => 'section-hero',
+			'slug'             => 'hero',
+			'label'            => __( 'Hero', 'globalkeys' ),
+			'aria_label'       => __( 'Willkommensbereich', 'globalkeys' ),
+			/* 0 im Customizer = Theme-Standard (Elden Ring Nightreign), sonst WooCommerce-Produkt-ID */
+			'hero_product_id'  => $main_hero_id,
 		),
 		array(
 			'id'        => 'section-featured',
@@ -32,10 +138,11 @@ function globalkeys_get_front_page_sections() {
 			'aria_label' => __( 'Empfohlene Produkte', 'globalkeys' ),
 		),
 		array(
-			'id'        => 'section-hero-product',
-			'slug'      => 'hero-product',
-			'label'     => __( 'Hero Product', 'globalkeys' ),
-			'aria_label' => __( 'Produktbereich', 'globalkeys' ),
+			'id'               => 'section-hero-product',
+			'slug'             => 'hero-product',
+			'label'            => __( 'Hero Product', 'globalkeys' ),
+			'aria_label'       => __( 'Produktbereich', 'globalkeys' ),
+			'hero_product_id'  => $banner_hero_id,
 		),
 		array(
 			'id'        => 'section-bestsellers',
@@ -112,6 +219,92 @@ function globalkeys_get_front_page_sections() {
 	);
 
 	return apply_filters( 'globalkeys_front_page_sections', $sections );
+}
+
+/**
+ * Produkt für ein Produkthero anhand festgelegter ID (Customizer o. Section).
+ *
+ * @param int $product_id WooCommerce-Produkt-ID, 0 = keins.
+ * @return WC_Product|null
+ */
+function globalkeys_resolve_hero_product_by_id( $product_id ) {
+	$product_id = (int) $product_id;
+	if ( $product_id < 1 || ! function_exists( 'wc_get_product' ) ) {
+		return null;
+	}
+	$product = wc_get_product( $product_id );
+	if ( ! $product || ! is_a( $product, 'WC_Product' ) || ! $product->is_visible() ) {
+		return null;
+	}
+	return $product;
+}
+
+/**
+ * Fallback-Produkt für Hero, optional bereits genutzte IDs ausschließen (zweites Hero).
+ *
+ * @param int[] $exclude_ids Produkt-IDs.
+ * @return WC_Product|null
+ */
+function globalkeys_fallback_hero_product( $exclude_ids = array() ) {
+	if ( ! function_exists( 'wc_get_products' ) ) {
+		return null;
+	}
+	$exclude_ids = array_values( array_unique( array_filter( array_map( 'intval', (array) $exclude_ids ) ) ) );
+
+	$products = wc_get_products(
+		array(
+			'featured'  => true,
+			'status'    => 'publish',
+			'limit'     => 12,
+			'orderby'   => 'menu_order title',
+			'order'     => 'ASC',
+			'exclude'   => $exclude_ids,
+			'return'    => 'objects',
+		)
+	);
+	if ( ! empty( $products ) && is_a( $products[0], 'WC_Product' ) ) {
+		return $products[0];
+	}
+
+	$products = wc_get_products(
+		array(
+			'status'  => 'publish',
+			'limit'   => 12,
+			'exclude' => $exclude_ids,
+			'return'  => 'objects',
+		)
+	);
+	if ( ! empty( $products ) && is_a( $products[0], 'WC_Product' ) ) {
+		return $products[0];
+	}
+	return null;
+}
+
+/**
+ * Merkt die ID des bereits gerenderten Hero-Produkts (für Ausschluss im zweiten Hero).
+ *
+ * @param WC_Product|null $product Produkt.
+ */
+function globalkeys_register_hero_product_used( $product ) {
+	if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
+		return;
+	}
+	if ( ! isset( $GLOBALS['gk_hero_used_product_ids'] ) ) {
+		$GLOBALS['gk_hero_used_product_ids'] = array();
+	}
+	$GLOBALS['gk_hero_used_product_ids'][] = (int) $product->get_id();
+}
+
+/**
+ * IDs, die bereits in einem Produkthero vorkamen.
+ *
+ * @return int[]
+ */
+function globalkeys_get_hero_used_product_ids() {
+	if ( empty( $GLOBALS['gk_hero_used_product_ids'] ) || ! is_array( $GLOBALS['gk_hero_used_product_ids'] ) ) {
+		return array();
+	}
+	return array_values( array_unique( array_map( 'intval', $GLOBALS['gk_hero_used_product_ids'] ) ) );
 }
 
 /**

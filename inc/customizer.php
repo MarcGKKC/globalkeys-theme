@@ -40,6 +40,56 @@ function globalkeys_customize_register( $wp_customize ) {
 		)
 	);
 
+	// Zwei Produktheroen auf der Startseite (oben + Banner unter Featured)
+	$wp_customize->add_section(
+		'gk_front_hero_products',
+		array(
+			'title'       => __( 'Startseite: Produktheroen', 'globalkeys' ),
+			'description' => __( 'Je eine WooCommerce-Produkt-ID pro Hero. Die ID findest du in der Produkt-URL (post=123) oder unter Produkte in der Adresszeile beim Bearbeiten. 0 = Theme-Standard: oben Elden Ring Nightreign, Banner Death Stranding 2 (per Slug im Shop). Sonst wie bisher Fallback über Featured.', 'globalkeys' ),
+			'priority'    => 125,
+		)
+	);
+	$wp_customize->add_setting(
+		'gk_hero_main_product_id',
+		array(
+			'default'           => 0,
+			'sanitize_callback' => 'absint',
+		)
+	);
+	$wp_customize->add_control(
+		'gk_hero_main_product_id',
+		array(
+			'label'       => __( 'Produkt-ID: großer Hero (oben)', 'globalkeys' ),
+			'description' => __( '0 = Elden Ring Nightreign (wenn Slug im Shop existiert), sonst Featured-Fallback', 'globalkeys' ),
+			'section'     => 'gk_front_hero_products',
+			'type'        => 'number',
+			'input_attrs' => array(
+				'min'  => 0,
+				'step' => 1,
+			),
+		)
+	);
+	$wp_customize->add_setting(
+		'gk_hero_banner_product_id',
+		array(
+			'default'           => 0,
+			'sanitize_callback' => 'absint',
+		)
+	);
+	$wp_customize->add_control(
+		'gk_hero_banner_product_id',
+		array(
+			'label'       => __( 'Produkt-ID: Banner-Hero (unter Featured)', 'globalkeys' ),
+			'description' => __( '0 = Death Stranding 2 (wenn Slug im Shop existiert), nie dasselbe wie der große Hero', 'globalkeys' ),
+			'section'     => 'gk_front_hero_products',
+			'type'        => 'number',
+			'input_attrs' => array(
+				'min'  => 0,
+				'step' => 1,
+			),
+		)
+	);
+
 	if ( isset( $wp_customize->selective_refresh ) ) {
 		$wp_customize->selective_refresh->add_partial(
 			'blogname',

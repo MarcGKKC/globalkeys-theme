@@ -106,6 +106,10 @@ function globalkeys_get_default_product_trailer_url( $product ) {
 		'elden-ring-shadow-of-the-erdtree' => 'ERSotE-gk.webm',
 		'elden-ring-shadow-of-erdtree'      => 'ERSotE-gk.webm',
 		'elden-ring-erdtree'                => 'ERSotE-gk.webm',
+		'elden-ring-nightreign'             => 'elden-ring-n-preview-gk.webm',
+		'elden-ring-nightreign-steam'       => 'elden-ring-n-preview-gk.webm',
+		'elden-ring-nightreign-pc'          => 'elden-ring-n-preview-gk.webm',
+		'elden-ring-nightreign-pc-steam'    => 'elden-ring-n-preview-gk.webm',
 	);
 
 	if ( isset( $trailers_by_slug[ $slug ] ) ) {
@@ -141,6 +145,11 @@ function globalkeys_get_default_product_trailer_url( $product ) {
 	/* Pokémon / Pokemon Pokopia */
 	if ( $title !== '' && stripos( $title, 'pokopia' ) !== false ) {
 		return get_template_directory_uri() . '/Previews/pokemon-pokopia-gk.webm';
+	}
+
+	/* Elden Ring Nightreign – vor Shadow of the Erdtree (beides „Elden Ring“) */
+	if ( $title !== '' && stripos( $title, 'elden ring' ) !== false && stripos( $title, 'nightreign' ) !== false ) {
+		return get_template_directory_uri() . '/Previews/elden-ring-n-preview-gk.webm';
 	}
 
 	/* Elden Ring: Shadow of the Erdtree */

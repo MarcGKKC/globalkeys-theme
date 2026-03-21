@@ -36,6 +36,9 @@
 				searchOverlay.id = 'gk-search-overlay';
 				searchOverlay.className = 'gk-search-overlay';
 				searchOverlay.setAttribute( 'aria-hidden', 'true' );
+				searchOverlay.addEventListener( 'click', function() {
+					closeSearch();
+				} );
 				document.body.appendChild( searchOverlay );
 			}
 			if ( overlay ) {
@@ -59,6 +62,10 @@
 					searchInput.focus( { preventScroll: true } );
 					var len = ( searchInput.value || '' ).length;
 					searchInput.setSelectionRange( len, len );
+					if ( len > 0 ) {
+						drawerUserHasTyped = true;
+						updateDropdownContent();
+					}
 				}, ANIMATION_MS );
 			}
 		}
@@ -366,6 +373,25 @@
 
 		document.addEventListener( 'keydown', function( e ) {
 			if ( e.key === 'Escape' && container.classList.contains( 'is-search-open' ) ) {
+				closeSearch();
+			}
+		} );
+
+		document.addEventListener( 'click', function( e ) {
+			if ( ! container.classList.contains( 'is-search-open' ) ) {
+				return;
+			}
+			if ( document.body.classList.contains( 'gk-search-results-page' ) ) {
+				return;
+			}
+			if ( closeArea && closeArea.contains( e.target ) ) {
+				return;
+			}
+			if ( searchOverlay && e.target === searchOverlay ) {
+				closeSearch();
+				return;
+			}
+			if ( ! outer.contains( e.target ) ) {
 				closeSearch();
 			}
 		} );

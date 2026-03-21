@@ -33,6 +33,7 @@
 			overlay.id = 'gk-drawer-overlay';
 			overlay.className = 'gk-drawer-overlay';
 			overlay.setAttribute( 'aria-hidden', 'true' );
+			overlay.addEventListener( 'click', function() { close(); } );
 			document.body.appendChild( overlay );
 			document.body.appendChild( drawer );
 			drawer.classList.add( 'gk-account-drawer--portal' );

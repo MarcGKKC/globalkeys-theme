@@ -1587,10 +1587,15 @@ body.gk-drawer-open #masthead {
 .gk-drawer-overlay {
 	position: fixed;
 	inset: 0;
-	z-index: 10000;
+	z-index: 10002;
 	background: rgba(0, 0, 0, 0.45);
 	pointer-events: auto;
+	cursor: pointer;
 	animation: gk-drawer-overlay-in 0.2s ease;
+}
+
+.gk-account-drawer.gk-account-drawer--portal {
+	z-index: 10003;
 }
 
 @keyframes gk-drawer-overlay-in {
@@ -1634,10 +1639,7 @@ body.gk-drawer-open #masthead {
 	z-index: 10000;
 }
 
-/* Drawer im Body (Portal): kein transform-Vorfahre = Glas bleibt beim Scrollen */
-.gk-account-drawer.gk-account-drawer--portal {
-	z-index: 10000;
-}
+/* Drawer im Body (Portal): z-index in gk-drawer-overlay-Regel */
 
 .gk-account-drawer[hidden] {
 	display: none !important;
@@ -2832,23 +2834,46 @@ body.gk-nav-section-page .site-main.site-main--nav-section {
 	color: #fff;
 }
 
-/* Produkthero-Inhalt (Titel, Preis, Badge) – als Overlay mittig links, Hero-Bild/Layout unverändert */
+/* Volle Hero-Fläche klickbar (liegt unter dem Text-Overlay) */
+.gk-hero-fullclick {
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 1;
+	text-decoration: none;
+	color: transparent;
+}
+
+.gk-hero-fullclick:focus {
+	outline: none;
+}
+
+.gk-hero-fullclick:focus-visible {
+	outline: 3px solid #04da8d;
+	outline-offset: -3px;
+	z-index: 3;
+}
+
+/*
+ * Produkthero-Inhalt: linke Kante wie erste Produktkarte
+ * (.gk-section-featured-inner max-width 72rem + padding 1.5rem − .gk-bestsellers-heading-shift 6.5rem+8px).
+ * Nicht mit % – auf Ultrawide würde sonst der Text zu weit links stehen.
+ */
 .gk-hero-product-overlay {
 	position: absolute;
 	left: 0;
 	top: 0;
 	right: 0;
 	bottom: 0;
+	z-index: 2;
 	display: flex;
 	align-items: center;
-	padding-left: 12%;
+	padding-left: max(1.25rem, calc((100% - min(72rem, 100%)) / 2 + 1.5rem - 6.5rem - 8px));
 	padding-right: 2rem;
 	box-sizing: border-box;
 	pointer-events: none;
-}
-.gk-hero-product-overlay .gk-hero-product-block,
-.gk-hero-product-overlay .gk-hero-product-link {
-	pointer-events: auto;
 }
 
 .gk-section-hero {
@@ -2861,13 +2886,8 @@ body.gk-nav-section-page .site-main.site-main--nav-section {
 	gap: 0.75rem;
 }
 
-.gk-hero-product-link {
-	text-decoration: none;
-	color: inherit;
-}
-
 .gk-hero-product-title {
-	font-size: clamp(1.5rem, 3.5vw, 2.25rem);
+	font-size: clamp(1.32rem, 3.15vw, 2.05rem);
 	font-weight: 700;
 	line-height: 1.2;
 	color: #fff;
@@ -2884,11 +2904,13 @@ body.gk-nav-section-page .site-main.site-main--nav-section {
 .gk-hero-product-badge {
 	display: inline-block;
 	padding: 0.25rem 0.6rem;
-	background: #e63946;
+	background: #04da8d;
 	color: #fff;
 	font-size: 0.875rem;
 	font-weight: 700;
-	border-radius: 2px;
+	border-radius: 3px;
+	line-height: 1.2;
+	letter-spacing: -0.02em;
 }
 
 .gk-hero-product-price {
@@ -2900,12 +2922,31 @@ body.gk-nav-section-page .site-main.site-main--nav-section {
 }
 
 .gk-hero-product-price del {
-	opacity: 0.85;
+	font-size: 0.82em;
+	font-weight: 600;
+	opacity: 0.88;
 	margin-right: 0.35em;
+	color: rgba(255, 255, 255, 0.88);
+	text-decoration: line-through;
+	text-decoration-thickness: 1px;
+	text-decoration-color: rgba(255, 255, 255, 0.45);
+	vertical-align: baseline;
 }
 
-.gk-hero-product-price ins {
+/* Global normalize „ins“ = gelber Hintergrund (#fff9c0) – hier zurücksetzen */
+.gk-hero-product-price ins,
+.gk-hero-product-price ins .woocommerce-Price-amount,
+.gk-hero-product-price ins .woocommerce-Price-currencySymbol {
+	font-size: 1em;
+	font-weight: 700;
 	text-decoration: none;
+	background: transparent;
+	background-color: transparent;
+	color: #fff;
+	padding: 0;
+	margin: 0;
+	border: 0;
+	box-shadow: none;
 }
 
 /* Infobar: oben unter Hero, beim Scrollen nach oben wegrücken, unten fest erscheinen – Seitenlänge gleich */
@@ -3192,11 +3233,12 @@ body.home .gk-section-cta .gk-section-inner {
 	background-color: transparent;
 }
 
+/* Unteres Produkthero: gleiche linke Kante wie großes Hero / Produktkarten */
 .gk-section-hero-product-inner {
 	display: flex;
 	align-items: center;
 	min-height: 32rem;
-	padding: 2rem 3rem 2rem 22%;
+	padding: 2rem 2rem 2rem max(1.25rem, calc((100% - min(72rem, 100%)) / 2 + 1.5rem - 6.5rem - 8px));
 	box-sizing: border-box;
 }
 
@@ -3213,28 +3255,28 @@ body.home .gk-section-cta .gk-section-inner {
 .gk-section-hero-product-content {
 	display: flex;
 	flex-direction: column;
-	gap: 0.5rem;
-	max-width: 20rem;
+	gap: 0.75rem;
+	max-width: min(32rem, 100%);
 }
 
 .gk-section-hero-product-title {
-	font-size: 1.5rem;
+	font-size: clamp(1.5rem, 2.35vw, 2rem);
 	font-weight: 700;
-	line-height: 1.25;
+	line-height: 1.2;
 	color: #fff;
 }
 
 .gk-section-hero-product-price-row {
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
-	gap: 0.75rem;
+	justify-content: flex-start;
+	gap: 0.85rem;
 	flex-wrap: wrap;
 }
 
 .gk-section-hero-product-price {
-	font-size: 1.25rem;
-	font-weight: 600;
+	font-size: clamp(1.35rem, 2.15vw, 1.85rem);
+	font-weight: 700;
 	color: #fff;
 	font-variant-numeric: proportional-nums;
 	letter-spacing: -0.02em;
@@ -3245,19 +3287,47 @@ body.home .gk-section-cta .gk-section-inner {
 }
 
 .gk-section-hero-product-price del {
-	opacity: 0.8;
-	color: rgba(255, 255, 255, 0.85);
+	font-size: 0.82em;
+	font-weight: 600;
+	opacity: 0.88;
+	color: rgba(255, 255, 255, 0.88);
+	text-decoration: line-through;
+	text-decoration-thickness: 1px;
+	text-decoration-color: rgba(255, 255, 255, 0.45);
+	vertical-align: baseline;
+}
+
+.gk-section-hero-product-price ins,
+.gk-section-hero-product-price ins .woocommerce-Price-amount,
+.gk-section-hero-product-price ins .woocommerce-Price-currencySymbol {
+	font-size: 1em;
+	font-weight: 700;
+	text-decoration: none;
+	background: transparent;
+	background-color: transparent;
+	color: #fff;
+	padding: 0;
+	margin: 0;
+	border: 0;
+	box-shadow: none;
 }
 
 .gk-section-hero-product-badge {
 	display: inline-block;
-	padding: 0.25rem 0.5rem;
-	font-size: 0.875rem;
+	padding: 0.3rem 0.65rem;
+	font-size: 0.9375rem;
 	font-weight: 700;
-	color: #0a0a0a;
-	background: #00e599;
-	border-radius: 2px;
+	color: #fff;
+	background: #04da8d;
+	border-radius: 3px;
 	line-height: 1.2;
+	letter-spacing: -0.02em;
+}
+
+@media (max-width: 48rem) {
+	.gk-section-hero-product-inner {
+		padding-right: max(1.25rem, 4vw);
+	}
 }
 
 /* Featured Products (unter der Hero-Stats-Bar) – Design wie Referenz */
@@ -4050,6 +4120,7 @@ body.home .gk-section-cta .gk-section-inner {
 }
 
 .gk-featured-product-image {
+	position: relative;
 	display: block;
 	width: 100%;
 	aspect-ratio: 1;
@@ -4058,11 +4129,41 @@ body.home .gk-section-cta .gk-section-inner {
 	margin-bottom: 0.75rem;
 }
 
-.gk-featured-product-image img {
+/* Produktbild – nicht das Plattform-Badge-Icon */
+.gk-featured-product-image img:not(.gk-product-platform-badge__icon) {
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
 	display: block;
+}
+
+/* Plattform (PlayStation / Xbox / Nintendo / Steam) oben rechts */
+.gk-product-platform-badge {
+	position: absolute;
+	top: 0.45rem;
+	right: 0.45rem;
+	z-index: 6;
+	line-height: 0;
+	pointer-events: none;
+	opacity: 1;
+	transition: opacity 0.22s ease;
+}
+
+.gk-product-platform-badge__icon {
+	display: block;
+	width: clamp(1.45rem, 3.8vw, 1.9rem);
+	height: clamp(1.45rem, 3.8vw, 1.9rem);
+	object-fit: contain;
+	object-position: center;
+	filter: brightness(0) invert(1);
+	opacity: 0.98;
+	-webkit-backface-visibility: hidden;
+	backface-visibility: hidden;
+}
+
+/* Während Hover-Preview (Trailer) läuft: Icon ausblenden */
+.gk-featured-product-image.has-trailer.is-trailer-playing .gk-product-platform-badge {
+	opacity: 0;
 }
 
 .gk-featured-product-title {
@@ -4194,11 +4295,11 @@ body.home .gk-section-cta .gk-section-inner {
 }
 
 .gk-section-bestsellers .gk-featured-product-image.has-trailer.is-trailer-playing .gk-bestseller-product-img,
-.gk-section-bestsellers .gk-featured-product-image.has-trailer.is-trailer-playing img {
+.gk-section-bestsellers .gk-featured-product-image.has-trailer.is-trailer-playing img:not(.gk-product-platform-badge__icon) {
 	opacity: 0;
 }
 
-.gk-section-bestsellers .gk-featured-product-image img,
+.gk-section-bestsellers .gk-featured-product-image img:not(.gk-product-platform-badge__icon),
 .gk-section-bestsellers .gk-bestseller-product-img {
 	width: 100%;
 	height: 100%;
@@ -4221,7 +4322,7 @@ body.home .gk-section-cta .gk-section-inner {
 	transition: transform 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.gk-section-bestsellers .gk-featured-product-link:hover .gk-featured-product-image img,
+.gk-section-bestsellers .gk-featured-product-link:hover .gk-featured-product-image img:not(.gk-product-platform-badge__icon),
 .gk-section-bestsellers .gk-featured-product-link:hover .gk-featured-product-image .gk-bestseller-product-img {
 	transform: translate3d(0, 0, 0) scale(1.022);
 }
@@ -4235,13 +4336,13 @@ body.home .gk-section-cta .gk-section-inner {
 		transform: scale(1);
 	}
 
-	.gk-section-bestsellers .gk-featured-product-image img,
+	.gk-section-bestsellers .gk-featured-product-image img:not(.gk-product-platform-badge__icon),
 	.gk-section-bestsellers .gk-bestseller-product-img,
 	.gk-section-bestsellers .gk-bestseller-trailer {
 		transition: none !important;
 	}
 
-	.gk-section-bestsellers .gk-featured-product-link:hover .gk-featured-product-image img,
+	.gk-section-bestsellers .gk-featured-product-link:hover .gk-featured-product-image img:not(.gk-product-platform-badge__icon),
 	.gk-section-bestsellers .gk-featured-product-link:hover .gk-featured-product-image .gk-bestseller-product-img {
 		transform: translate3d(0, 0, 0) scale(1.012);
 	}

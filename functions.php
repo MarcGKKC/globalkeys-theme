@@ -408,7 +408,10 @@ add_action( 'init', 'globalkeys_enable_customer_registration', 1 );
  */
 require get_template_directory() . '/inc/woocommerce-registration.php';
 require get_template_directory() . '/inc/woocommerce-product-trailer.php';
+require get_template_directory() . '/inc/woocommerce-product-elden-nightreign.php';
+require get_template_directory() . '/inc/woocommerce-product-hero-image.php';
 require get_template_directory() . '/inc/gk-product-hover-panel.php';
+require get_template_directory() . '/inc/gk-product-platform-badge.php';
 require get_template_directory() . '/inc/woocommerce-account-endpoints.php';
 
 /**
@@ -490,8 +493,9 @@ function globalkeys_search_products_starts_with( $term, $limit = 0 ) {
 		if ( ! $product || ! $product->is_visible() ) {
 			continue;
 		}
-		$img_id = $product->get_image_id();
-		$img_url = $img_id ? wp_get_attachment_image_url( $img_id, 'globalkeys-search-dropdown' ) : wc_placeholder_img_src( 'woocommerce_thumbnail' );
+		$img_url = function_exists( 'globalkeys_get_product_listing_thumbnail_url' )
+			? globalkeys_get_product_listing_thumbnail_url( $product, 'globalkeys-search-dropdown' )
+			: ( $product->get_image_id() ? wp_get_attachment_image_url( $product->get_image_id(), 'globalkeys-search-dropdown' ) : wc_placeholder_img_src( 'woocommerce_thumbnail' ) );
 		if ( ! $img_url ) {
 			$img_url = wc_placeholder_img_src( 'woocommerce_thumbnail' );
 		}
@@ -525,8 +529,9 @@ function globalkeys_ajax_search_products() {
 			if ( ! $product || ! $product->is_visible() ) {
 				continue;
 			}
-			$img_id  = $product->get_image_id();
-			$img_url = $img_id ? wp_get_attachment_image_url( $img_id, 'globalkeys-search-dropdown' ) : wc_placeholder_img_src( 'woocommerce_thumbnail' );
+			$img_url = function_exists( 'globalkeys_get_product_listing_thumbnail_url' )
+				? globalkeys_get_product_listing_thumbnail_url( $product, 'globalkeys-search-dropdown' )
+				: ( $product->get_image_id() ? wp_get_attachment_image_url( $product->get_image_id(), 'globalkeys-search-dropdown' ) : wc_placeholder_img_src( 'woocommerce_thumbnail' ) );
 			$list[] = array(
 				'id'    => $product->get_id(),
 				'name'  => $product->get_name(),
@@ -623,8 +628,9 @@ function globalkeys_get_search_products_data_for_js() {
 			'n'  => mb_strtolower( $name, 'UTF-8' ),
 			's'  => mb_strtolower( (string) $sku, 'UTF-8' ),
 		);
-		$img_id  = $product->get_image_id();
-		$img_url = $img_id ? wp_get_attachment_image_url( $img_id, 'globalkeys-search-dropdown' ) : ( function_exists( 'wc_placeholder_img_src' ) ? wc_placeholder_img_src( 'woocommerce_thumbnail' ) : '' );
+		$img_url = function_exists( 'globalkeys_get_product_listing_thumbnail_url' )
+			? globalkeys_get_product_listing_thumbnail_url( $product, 'globalkeys-search-dropdown' )
+			: ( $product->get_image_id() ? wp_get_attachment_image_url( $product->get_image_id(), 'globalkeys-search-dropdown' ) : ( function_exists( 'wc_placeholder_img_src' ) ? wc_placeholder_img_src( 'woocommerce_thumbnail' ) : '' ) );
 		$price_num = (float) $product->get_price();
 		$dropdown[ (int) $pid ] = array(
 			'id'    => (int) $pid,
