@@ -93,15 +93,26 @@
 			toggle();
 		} );
 
-		// Videovorschau-Toggle: Zustand aus localStorage, beim Ändern speichern
+		// Videovorschau-Toggle: Standard AN; beim Ändern speichern und Body-Klasse setzen
 		var videovorschauInput = document.getElementById( 'gk-drawer-videovorschau' );
 		if ( videovorschauInput ) {
+			function updateVideovorschauUI( isOn ) {
+				try {
+					document.body.classList.toggle( 'gk-videovorschau-off', ! isOn );
+					if ( typeof window.CustomEvent === 'function' ) {
+						document.dispatchEvent( new CustomEvent( 'gk-videovorschau-change', { detail: { enabled: isOn } } ) );
+					}
+				} catch ( err ) {}
+			}
 			try {
-				videovorschauInput.checked = localStorage.getItem( 'gk_videovorschau' ) === '1';
+				var stored = localStorage.getItem( 'gk_videovorschau' );
+				videovorschauInput.checked = stored !== '0';
+				updateVideovorschauUI( videovorschauInput.checked );
 			} catch ( err ) {}
 			videovorschauInput.addEventListener( 'change', function() {
 				try {
 					localStorage.setItem( 'gk_videovorschau', this.checked ? '1' : '0' );
+					updateVideovorschauUI( this.checked );
 				} catch ( err ) {}
 			} );
 		}

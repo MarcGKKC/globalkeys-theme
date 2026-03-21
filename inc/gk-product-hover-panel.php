@@ -30,7 +30,8 @@ function globalkeys_render_product_hover_panel( $product ) {
 		if ( $ts ) {
 			/* translators: %s: formatted product publish date */
 			$released_display = sprintf(
-				__( 'Veröffentlicht: %s', 'globalkeys' ),
+				/* translators: %s: formatted product release date */
+				__( 'Released: %s', 'globalkeys' ),
 				date_i18n( get_option( 'date_format' ), $ts )
 			);
 		}
@@ -46,7 +47,7 @@ function globalkeys_render_product_hover_panel( $product ) {
 	}
 
 	$tags                   = get_the_terms( $pid, 'product_tag' );
-	$tags_heading           = __( 'Schlagwörter:', 'globalkeys' );
+	$tags_heading           = __( 'Tags:', 'globalkeys' );
 	$terms_are_product_tags = true;
 	if ( is_wp_error( $tags ) || empty( $tags ) ) {
 		$tags = get_the_terms( $pid, 'product_cat' );
@@ -77,7 +78,7 @@ function globalkeys_render_product_hover_panel( $product ) {
 		if ( $terms_are_product_tags ) {
 			$tag_more_title = sprintf(
 				/* translators: %d: number of additional product tags */
-				_n( '%d weiteres Schlagwort', '%d weitere Schlagwörter', $tag_more_count, 'globalkeys' ),
+				_n( '%d more tag', '%d more tags', $tag_more_count, 'globalkeys' ),
 				$tag_more_count
 			);
 		} else {

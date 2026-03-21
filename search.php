@@ -57,41 +57,44 @@ if ( $gk_product_search && class_exists( 'WooCommerce' ) ) {
 			?>
 			<section id="gk-search-results-grid" class="gk-section gk-section-bestsellers gk-section-shop-results" role="region" aria-label="<?php esc_attr_e( 'Produkte', 'globalkeys' ); ?>">
 				<div class="gk-section-inner gk-section-featured-inner">
-					<p id="gk-search-results-count" class="gk-search-results-count"><?php echo esc_html( sprintf( _n( '%d result', '%d results', $gk_total_count, 'globalkeys' ), $gk_total_count ) ); ?></p>
 					<div id="gk-search-filter-bar" class="gk-search-filter-bar">
-						<div class="gk-search-filter-row gk-search-filter-row-1">
-							<div class="gk-search-filter-box">
-								<select id="gk-search-sort" class="gk-search-filter-select" aria-label="<?php esc_attr_e( 'Relevance', 'globalkeys' ); ?>">
-									<option value="name-asc"><?php esc_html_e( 'Relevance', 'globalkeys' ); ?></option>
-									<option value="name-asc"><?php esc_html_e( 'Name A-Z', 'globalkeys' ); ?></option>
-									<option value="name-desc"><?php esc_html_e( 'Name Z-A', 'globalkeys' ); ?></option>
-									<option value="price-asc"><?php esc_html_e( 'Price: Low to High', 'globalkeys' ); ?></option>
-									<option value="price-desc"><?php esc_html_e( 'Price: High to Low', 'globalkeys' ); ?></option>
-								</select>
-								<span class="gk-search-filter-chevron" aria-hidden="true">▼</span>
-							</div>
+						<div class="gk-search-filter-row">
 							<div class="gk-search-filter-box">
 								<span class="gk-search-filter-label"><?php esc_html_e( 'Platform', 'globalkeys' ); ?></span>
-								<span class="gk-search-filter-chevron" aria-hidden="true">▼</span>
+								<span class="gk-search-filter-chevron" aria-hidden="true">▾</span>
 							</div>
 							<div class="gk-search-filter-box">
 								<span class="gk-search-filter-label"><?php esc_html_e( 'Region', 'globalkeys' ); ?></span>
-								<span class="gk-search-filter-chevron" aria-hidden="true">▼</span>
+								<span class="gk-search-filter-chevron" aria-hidden="true">▾</span>
 							</div>
 							<div class="gk-search-filter-box">
 								<span class="gk-search-filter-label"><?php esc_html_e( 'Price', 'globalkeys' ); ?></span>
-								<span class="gk-search-filter-chevron" aria-hidden="true">▼</span>
+								<span class="gk-search-filter-chevron" aria-hidden="true">▾</span>
 							</div>
-						</div>
-						<div class="gk-search-filter-row gk-search-filter-row-2">
 							<div class="gk-search-filter-box">
-								<span class="gk-search-filter-label"><?php esc_html_e( 'Language', 'globalkeys' ); ?></span>
-								<span class="gk-search-filter-chevron" aria-hidden="true">▼</span>
+								<span class="gk-search-filter-label"><?php esc_html_e( 'Product Type', 'globalkeys' ); ?></span>
+								<span class="gk-search-filter-chevron" aria-hidden="true">▾</span>
 							</div>
 							<div class="gk-search-filter-box">
 								<span class="gk-search-filter-label"><?php esc_html_e( 'Genre', 'globalkeys' ); ?></span>
-								<span class="gk-search-filter-chevron" aria-hidden="true">▼</span>
+								<span class="gk-search-filter-chevron" aria-hidden="true">▾</span>
 							</div>
+						</div>
+					</div>
+					<div class="gk-search-results-header">
+						<p id="gk-search-results-count" class="gk-search-results-count"><?php echo esc_html( sprintf( _n( '%d result', '%d results', $gk_total_count, 'globalkeys' ), $gk_total_count ) ); ?></p>
+						<div class="gk-search-sort-by-wrap">
+							<button type="button" class="gk-search-filters-btn" aria-label="<?php esc_attr_e( 'Filters', 'globalkeys' ); ?>">
+								<img src="<?php echo esc_url( get_template_directory_uri() . '/Pictures/Design ohne Titel (51).svg' ); ?>" alt="" width="18" height="18" aria-hidden="true" />
+								<span><?php esc_html_e( 'Filters', 'globalkeys' ); ?></span>
+							</button>
+							<label for="gk-search-sort" class="gk-search-sort-by-label"><?php esc_html_e( 'Sort by:', 'globalkeys' ); ?></label>
+							<select id="gk-search-sort" class="gk-search-sort-select" aria-label="<?php esc_attr_e( 'Sort by', 'globalkeys' ); ?>">
+								<option value="name-asc"><?php esc_html_e( 'Relevance', 'globalkeys' ); ?></option>
+								<option value="name-desc"><?php esc_html_e( 'Name Z-A', 'globalkeys' ); ?></option>
+								<option value="price-asc"><?php esc_html_e( 'Price: Low to High', 'globalkeys' ); ?></option>
+								<option value="price-desc"><?php esc_html_e( 'Price: High to Low', 'globalkeys' ); ?></option>
+							</select>
 						</div>
 					</div>
 					<ul class="gk-featured-products gk-featured-products--shop" aria-label="<?php esc_attr_e( 'Produkte', 'globalkeys' ); ?>">

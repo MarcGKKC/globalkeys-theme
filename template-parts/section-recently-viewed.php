@@ -35,11 +35,11 @@ if ( ! empty( $product_ids ) && function_exists( 'wc_get_products' ) ) {
 		$pos_b = isset( $order[ $b->get_id() ] ) ? $order[ $b->get_id() ] : 999;
 		return $pos_a - $pos_b;
 	} );
-	$products = array_slice( $products, 0, 8 );
+	$products = array_slice( $products, 0, 3 );
 }
 ?>
 
-<section id="<?php echo esc_attr( $id ); ?>" class="gk-section gk-section-recently-viewed" role="region" aria-labelledby="<?php echo esc_attr( $id ); ?>-title">
+<section id="<?php echo esc_attr( $id ); ?>" class="gk-section gk-section-bestsellers gk-section-recently-viewed" role="region" aria-labelledby="<?php echo esc_attr( $id ); ?>-title">
 	<div class="gk-section-inner gk-section-featured-inner">
 		<div class="gk-featured-heading-wrap">
 			<h2 id="<?php echo esc_attr( $id ); ?>-title" class="gk-section-title gk-featured-heading">
@@ -53,16 +53,13 @@ if ( ! empty( $product_ids ) && function_exists( 'wc_get_products' ) ) {
 		<?php if ( ! empty( $products ) ) : ?>
 			<ul class="gk-featured-products" aria-label="<?php echo esc_attr( $aria_label ); ?>">
 				<?php foreach ( $products as $product ) : ?>
-					<?php if ( ! $product || ! is_a( $product, 'WC_Product' ) ) { continue; } ?>
-					<li class="gk-featured-product">
-						<a href="<?php echo esc_url( $product->get_permalink() ); ?>" class="gk-featured-product-link">
-							<span class="gk-featured-product-image">
-								<?php echo $product->get_image( 'woocommerce_thumbnail', array( 'alt' => esc_attr( $product->get_name() ) ) ); ?>
-							</span>
-							<span class="gk-featured-product-title"><?php echo esc_html( $product->get_name() ); ?></span>
-							<span class="gk-featured-product-price"><?php echo $product->get_price_html(); ?></span>
-						</a>
-					</li>
+					<?php
+					if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
+						continue;
+					}
+					set_query_var( 'product', $product );
+					get_template_part( 'template-parts/product-card', 'bestseller' );
+					?>
 				<?php endforeach; ?>
 			</ul>
 		<?php else : ?>

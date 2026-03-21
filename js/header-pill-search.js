@@ -36,9 +36,6 @@
 				searchOverlay.id = 'gk-search-overlay';
 				searchOverlay.className = 'gk-search-overlay';
 				searchOverlay.setAttribute( 'aria-hidden', 'true' );
-				searchOverlay.addEventListener( 'click', function() {
-					closeSearch();
-				} );
 				document.body.appendChild( searchOverlay );
 			}
 			if ( overlay ) {
@@ -372,27 +369,28 @@
 				closeSearch();
 			}
 		} );
+	}
 
-		document.addEventListener( 'click', function( e ) {
-			if ( ! container.classList.contains( 'is-search-open' ) ) {
-				return;
-			}
-			if ( closeArea && closeArea.contains( e.target ) ) {
-				return;
-			}
-			if ( searchOverlay && e.target === searchOverlay ) {
-				closeSearch();
-				return;
-			}
-			if ( ! outer.contains( e.target ) ) {
-				closeSearch();
-			}
-		} );
+		function initFiltersButton() {
+		var filtersBtn = document.querySelector( '.gk-search-filters-btn' );
+		var filterBar = document.getElementById( 'gk-search-filter-bar' );
+		if ( filtersBtn && filterBar ) {
+			filtersBtn.addEventListener( 'click', function() {
+				var isVisible = ! filterBar.classList.contains( 'is-visible' );
+				filterBar.classList.toggle( 'is-visible' );
+				filtersBtn.classList.toggle( 'is-active', isVisible );
+				filtersBtn.setAttribute( 'aria-expanded', isVisible );
+			} );
+		}
 	}
 
 	if ( document.readyState === 'loading' ) {
-		document.addEventListener( 'DOMContentLoaded', init );
+		document.addEventListener( 'DOMContentLoaded', function() {
+			init();
+			initFiltersButton();
+		} );
 	} else {
 		init();
+		initFiltersButton();
 	}
 }() );

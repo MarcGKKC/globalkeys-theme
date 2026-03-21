@@ -65,6 +65,107 @@ function globalkeys_save_product_trailer_url( $product ) {
 add_action( 'woocommerce_admin_process_product_object', 'globalkeys_save_product_trailer_url', 10, 1 );
 
 /**
+ * Theme-Standard-Preview, wenn am Produkt kein eigenes Video hinterlegt ist.
+ *
+ * @param WC_Product $product Produkt.
+ * @return string Volle URL, sonst leer.
+ */
+function globalkeys_get_default_product_trailer_url( $product ) {
+	if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
+		return '';
+	}
+
+	$slug = $product->get_slug();
+	/** @var array<string, string> Slug (Woo) → Theme-Datei unter Previews/ */
+	$trailers_by_slug = array(
+		'ready-or-not-boiling-point' => 'ron-gk.webm',
+		'ready-or-not'               => 'ron-game-gk.webm',
+		'ready-or-not-pc'            => 'ron-game-gk.webm',
+		'ready-or-not-steam'         => 'ron-game-gk.webm',
+		'ready-or-not-pc-steam'      => 'ron-game-gk.webm',
+		'arc-raiders'                  => 'arc-raiders-pc-steam-preview.webm',
+		'arc-raiders-pc'               => 'arc-raiders-pc-steam-preview.webm',
+		'arc-raiders-pc-steam'         => 'arc-raiders-pc-steam-preview.webm',
+		'arc-raiders-steam'            => 'arc-raiders-pc-steam-preview.webm',
+		'resident-evil-requiem'        => 'rer-gk.webm',
+		'resident-evil-requiem-pc'    => 'rer-gk.webm',
+		'resident-evil-requiem-steam' => 'rer-gk.webm',
+		'marathon'                    => 'marathon-gk.webm',
+		'marathon-pc'                 => 'marathon-gk.webm',
+		'marathon-steam'              => 'marathon-gk.webm',
+		'marathon-pc-steam'           => 'marathon-gk.webm',
+		'pokemon-pokopia'             => 'pokemon-pokopia-gk.webm',
+		'pokemon-pokopia-pc'          => 'pokemon-pokopia-gk.webm',
+		'pokemon-pokopia-steam'       => 'pokemon-pokopia-gk.webm',
+		'pokemon-pokopia-pc-steam'    => 'pokemon-pokopia-gk.webm',
+		'ea-sports-fc-26'             => 'eafc26-gk.webm',
+		'ea-fc-26'                    => 'eafc26-gk.webm',
+		'fc-26'                       => 'eafc26-gk.webm',
+		'eafc-26'                     => 'eafc26-gk.webm',
+		'eafc26'                      => 'eafc26-gk.webm',
+		'elden-ring-shadow-of-the-erdtree' => 'ERSotE-gk.webm',
+		'elden-ring-shadow-of-erdtree'      => 'ERSotE-gk.webm',
+		'elden-ring-erdtree'                => 'ERSotE-gk.webm',
+	);
+
+	if ( isset( $trailers_by_slug[ $slug ] ) ) {
+		return get_template_directory_uri() . '/Previews/' . $trailers_by_slug[ $slug ];
+	}
+
+	/* Ready or Not: Boiling Point (DLC) – vor dem Basisspiel prüfen */
+	$title = $product->get_name();
+	if ( $title !== '' && stripos( $title, 'ready or not' ) !== false && stripos( $title, 'boiling point' ) !== false ) {
+		return get_template_directory_uri() . '/Previews/ron-gk.webm';
+	}
+
+	/* Ready or Not (Hauptspiel) – ohne Boiling Point im Titel */
+	if ( $title !== '' && stripos( $title, 'ready or not' ) !== false ) {
+		return get_template_directory_uri() . '/Previews/ron-game-gk.webm';
+	}
+
+	/* ARC Raiders – Titel-Match falls der Slug nicht in der Map steht */
+	if ( $title !== '' && stripos( $title, 'arc raiders' ) !== false ) {
+		return get_template_directory_uri() . '/Previews/arc-raiders-pc-steam-preview.webm';
+	}
+
+	/* Resident Evil Requiem */
+	if ( $title !== '' && stripos( $title, 'resident evil' ) !== false && stripos( $title, 'requiem' ) !== false ) {
+		return get_template_directory_uri() . '/Previews/rer-gk.webm';
+	}
+
+	/* Marathon (Bungie) – Titel enthält „Marathon“ */
+	if ( $title !== '' && stripos( $title, 'marathon' ) !== false ) {
+		return get_template_directory_uri() . '/Previews/marathon-gk.webm';
+	}
+
+	/* Pokémon / Pokemon Pokopia */
+	if ( $title !== '' && stripos( $title, 'pokopia' ) !== false ) {
+		return get_template_directory_uri() . '/Previews/pokemon-pokopia-gk.webm';
+	}
+
+	/* Elden Ring: Shadow of the Erdtree */
+	if ( $title !== '' && (
+		( stripos( $title, 'elden ring' ) !== false && stripos( $title, 'erdtree' ) !== false )
+		|| stripos( $title, 'shadow of the erdtree' ) !== false
+	) ) {
+		return get_template_directory_uri() . '/Previews/ERSotE-gk.webm';
+	}
+
+	/* EA SPORTS FC 26 / EA FC 26 (nicht FC 262 o. Ä.) */
+	if ( $title !== '' ) {
+		if (
+			preg_match( '/\bfc\W*26(?!\d)/iu', $title )
+			|| preg_match( '/\beafc\W*26(?!\d)/iu', $title )
+			|| preg_match( '/\beafc26\b/iu', $title )
+		) {
+			return get_template_directory_uri() . '/Previews/eafc26-gk.webm';
+		}
+	}
+
+	return '';
+}
+
+/**
  * Hilfsfunktion: Trailer-URL eines Produkts (für Templates).
  *
  * @param WC_Product|int $product Produkt oder Post-ID.
@@ -78,7 +179,12 @@ function globalkeys_get_product_trailer_url( $product ) {
 		return '';
 	}
 	$url = $product->get_meta( '_gk_product_trailer_url' );
-	return is_string( $url ) ? trim( $url ) : '';
+	$url = is_string( $url ) ? trim( $url ) : '';
+	if ( $url !== '' ) {
+		return $url;
+	}
+
+	return globalkeys_get_default_product_trailer_url( $product );
 }
 
 /**

@@ -4,12 +4,15 @@
 (function () {
 	'use strict';
 
-	var section = document.querySelector('.gk-section-bestsellers');
-	if (!section) {
+	var sections = document.querySelectorAll('.gk-section-bestsellers');
+	if (!sections.length) {
 		return;
 	}
 
-	var items = section.querySelectorAll('.gk-featured-product');
+	var items = [];
+	sections.forEach(function (section) {
+		items = items.concat(Array.prototype.slice.call(section.querySelectorAll('.gk-featured-product')));
+	});
 	if (!items.length) {
 		return;
 	}
