@@ -382,8 +382,8 @@ function globalkeys_get_front_page_sections() {
 		array(
 			'id'        => 'section-house-members',
 			'slug'      => 'house-members',
-			'label'     => __( 'House Rewards', 'globalkeys' ),
-			'aria_label' => __( 'House Rewards', 'globalkeys' ),
+			'label'     => __( 'Premium Discounts', 'globalkeys' ),
+			'aria_label' => __( 'Premium Discounts', 'globalkeys' ),
 		),
 		array(
 			'id'         => 'section-premium-member-cta',

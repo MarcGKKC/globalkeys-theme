@@ -1,50 +1,52 @@
 /**
  * Produkt-Hover-Panel: bei Platzmangel nach links spiegeln (Viewport-Kante).
+ * Flip basiert auf Karten-Position für zuverlässige Erkennung (auch bei hidden Panel).
  */
 (function () {
 	'use strict';
 
-	var sections = document.querySelectorAll('.gk-section-bestsellers');
-	if (!sections.length) {
-		return;
-	}
-
-	var items = [];
-	sections.forEach(function (section) {
-		items = items.concat(Array.prototype.slice.call(section.querySelectorAll('.gk-featured-product')));
-	});
-	if (!items.length) {
-		return;
-	}
+	var PANEL_WIDTH = 340;
+	var GAP = 12;
+	var PAD = 12;
 
 	function updateFlip(li) {
 		var panel = li.querySelector('.gk-product-hover-panel');
 		if (!panel) {
 			return;
 		}
+		var cardRect = li.getBoundingClientRect();
+		var spaceRight = window.innerWidth - cardRect.right - GAP - PAD;
+		var spaceLeft = cardRect.left - GAP - PAD;
 		panel.classList.remove('gk-product-hover-panel--flip');
-		// Nach Anzeige messen (Hover-CSS aktiv)
-		requestAnimationFrame(function () {
-			requestAnimationFrame(function () {
-				var r = panel.getBoundingClientRect();
-				var pad = 12;
-				if (r.right > window.innerWidth - pad) {
-					panel.classList.add('gk-product-hover-panel--flip');
-				}
-				r = panel.getBoundingClientRect();
-				if (panel.classList.contains('gk-product-hover-panel--flip') && r.left < pad) {
-					panel.classList.remove('gk-product-hover-panel--flip');
-				}
-			});
-		});
+		if (spaceRight < PANEL_WIDTH && spaceLeft >= PANEL_WIDTH) {
+			panel.classList.add('gk-product-hover-panel--flip');
+		} else if (spaceRight < PANEL_WIDTH && spaceLeft < PANEL_WIDTH && spaceLeft > spaceRight) {
+			panel.classList.add('gk-product-hover-panel--flip');
+		}
 	}
 
-	items.forEach(function (li) {
+	function bindItem(li) {
 		li.addEventListener('mouseenter', function () {
 			updateFlip(li);
 		});
 		li.addEventListener('focusin', function () {
 			updateFlip(li);
 		});
+	}
+
+	function initSection(section) {
+		section.querySelectorAll('.gk-featured-product').forEach(bindItem);
+	}
+
+	var sections = document.querySelectorAll('.gk-section-bestsellers');
+	if (sections.length) {
+		sections.forEach(initSection);
+	}
+
+	document.body.addEventListener('gk_search_results_updated', function () {
+		var searchSection = document.getElementById('gk-search-results-grid') || document.querySelector('.gk-section-shop-results');
+		if (searchSection) {
+			initSection(searchSection);
+		}
 	});
 })();

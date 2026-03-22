@@ -12,9 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$section    = get_query_var( 'gk_section', array( 'id' => 'section-house-members', 'aria_label' => __( 'House Rewards', 'globalkeys' ) ) );
+$section    = get_query_var( 'gk_section', array( 'id' => 'section-house-members', 'aria_label' => __( 'Premium Discounts', 'globalkeys' ) ) );
 $id         = ! empty( $section['id'] ) ? $section['id'] : 'section-house-members';
-$aria_label = ! empty( $section['aria_label'] ) ? $section['aria_label'] : __( 'House Rewards', 'globalkeys' );
+$aria_label = ! empty( $section['aria_label'] ) ? $section['aria_label'] : __( 'Premium Discounts', 'globalkeys' );
 
 $products = array();
 $limit    = defined( 'GLOBALKEYS_HOUSE_REWARDS_MAX' ) ? (int) GLOBALKEYS_HOUSE_REWARDS_MAX : 6;
@@ -64,14 +64,14 @@ if ( function_exists( 'wc_get_products' ) ) {
 		<div class="gk-featured-heading-wrap">
 			<h2 id="<?php echo esc_attr( $id ); ?>-title" class="gk-section-title gk-featured-heading">
 				<span class="gk-featured-heading-text-wrap">
-					<span class="gk-featured-heading-text"><?php esc_html_e( 'House Rewards', 'globalkeys' ); ?></span>
+					<span class="gk-featured-heading-text"><?php esc_html_e( 'Premium Discounts', 'globalkeys' ); ?></span>
 					<span class="gk-featured-title-underline" aria-hidden="true"></span>
 				</span>
 				<span class="gk-featured-heading-arrow" aria-hidden="true"></span>
 			</h2>
 		</div>
 		<?php if ( ! empty( $products ) ) : ?>
-			<ul class="gk-featured-products" aria-label="<?php esc_attr_e( 'House Rewards Produkte', 'globalkeys' ); ?>">
+			<ul class="gk-featured-products" aria-label="<?php esc_attr_e( 'Premium Discounts products', 'globalkeys' ); ?>">
 				<?php foreach ( $products as $product ) : ?>
 					<?php
 					if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
@@ -96,7 +96,7 @@ if ( function_exists( 'wc_get_products' ) ) {
 				?>
 			</ul>
 		<?php else : ?>
-			<p class="gk-section-text gk-featured-empty"><?php esc_html_e( 'Aktuell sind keine House-Rewards-Produkte hinterlegt.', 'globalkeys' ); ?></p>
+			<p class="gk-section-text gk-featured-empty"><?php esc_html_e( 'Aktuell sind keine Premium-Discounts-Produkte hinterlegt.', 'globalkeys' ); ?></p>
 		<?php endif; ?>
 	</div>
 </section>

@@ -149,6 +149,13 @@
 
 	sections.forEach(initSection);
 
+	document.body.addEventListener('gk_search_results_updated', function () {
+		var searchSection = document.getElementById('gk-search-results-grid') || document.querySelector('.gk-section-shop-results');
+		if (searchSection) {
+			initSection(searchSection);
+		}
+	});
+
 	document.addEventListener('gk-videovorschau-change', function (e) {
 		if (e.detail && !e.detail.enabled) {
 			sections.forEach(function (section) {

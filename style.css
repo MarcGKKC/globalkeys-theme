@@ -1930,7 +1930,11 @@ body.gk-search-results-page .header-pill-search-dropdown {
 
 body.gk-search-results-page {
 	--gk-filter-offset: 0px;
+	--gk-main-padding-top: 3.5rem; /* Kompakter als Standard; Sync mit gk-header-scrolled verhindert Header-Sprung */
 	transition: --gk-filter-offset 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+body.gk-search-results-page.gk-header-scrolled {
+	--gk-main-padding-top: 7.5rem; /* 3.5rem + 4rem Kompensation für Header 8.5rem→4.5rem */
 }
 body.gk-filter-sidebar-open.gk-search-results-page {
 	--gk-filter-offset: var(--gk-filter-sidebar-width);
@@ -1963,7 +1967,8 @@ body.gk-search-results-page .site-main {
 
 /* Alle Werte über Variable – keine Snaps, Original-Werte wenn geschlossen */
 body.gk-search-results-page .site-main--shop {
-	padding-top: 3.5rem;
+	padding-top: var(--gk-main-padding-top, 3.5rem);
+	transition: padding-top 0.16s ease-out;
 	padding-left: calc(1.25rem + var(--gk-filter-offset) / var(--gk-filter-sidebar-width) * (0.25rem - 1.25rem));
 	padding-right: calc(1.25rem + var(--gk-filter-offset) / var(--gk-filter-sidebar-width) * (0.25rem - 1.25rem));
 }
@@ -2041,7 +2046,7 @@ body.gk-search-results-page .site-header-inner {
 .gk-search-layout.is-sidebar-open .gk-search-filter-sidebar {
 	transform: scaleX( 1 );
 	pointer-events: auto;
-	/* Höhe per JS: stoppt am Footer beim Scrollen */
+	/* Volle Höhe 100vh – Footer wird beim Öffnen ausgeblendet */
 }
 
 .gk-search-layout {
@@ -3015,6 +3020,9 @@ body.gk-search-results-page .site-header-inner {
 	width: 100%;
 	overflow-x: clip;
 }
+body.gk-search-results-page .gk-search-main {
+	overflow: visible;
+}
 
 .gk-search-filters-toggle-wrap {
 	position: relative;
@@ -3494,10 +3502,34 @@ body.gk-nav-section-page .site-main.site-main--nav-section {
 	padding: 0;
 }
 
-/* Suchergebnisse: Footer über Filter-Bar, damit diese nicht darüber liegt */
+/* Suchergebnisse: Footer über Filter-Bar */
 body.gk-search-results-page #colophon {
 	position: relative;
 	z-index: 10002;
+}
+
+/* Filter-Sidebar offen: nur unterste Zeile (Copyright + Trustpilot) ganz unten im Flow, ohne Gap zur Sidebar */
+body.gk-filter-sidebar-open.gk-search-results-page #colophon.gk-filter-sidebar-footer-compact .gk-footer-inner,
+body.gk-filter-sidebar-open.gk-search-results-page #colophon.gk-filter-sidebar-footer-compact .gk-footer-payment-bar {
+	display: none !important;
+}
+body.gk-filter-sidebar-open.gk-search-results-page #colophon.gk-filter-sidebar-footer-compact {
+	margin: 0 0 0 var(--gk-filter-offset);
+	width: calc(100% - var(--gk-filter-offset));
+	position: relative;
+	z-index: 10002;
+	background: #13122a;
+	border-top: 1px solid rgba(255, 255, 255, 0.06);
+	padding: 0;
+}
+body.gk-filter-sidebar-open.gk-search-results-page #colophon.gk-filter-sidebar-footer-compact .gk-footer-bottom {
+	padding: 1rem 1.5rem;
+	border-top: none;
+}
+body.gk-filter-sidebar-open.gk-search-results-page #colophon.gk-filter-sidebar-footer-compact .gk-footer-bottom-inner {
+	max-width: none;
+	margin: 0;
+	padding: 0;
 }
 .site-footer.gk-footer a {
 	color: #fff;

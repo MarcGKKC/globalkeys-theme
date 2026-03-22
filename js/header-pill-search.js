@@ -402,6 +402,7 @@
 					if ( typeof jQuery !== 'undefined' && jQuery.fn && jQuery.fn.ready ) {
 						jQuery( document.body ).trigger( 'gk_search_results_updated' );
 					}
+					document.body.dispatchEvent( new CustomEvent( 'gk_search_results_updated' ) );
 				} else {
 					if ( listEl ) listEl.innerHTML = '';
 					if ( noResultsEl ) noResultsEl.style.display = 'flex';
@@ -445,6 +446,7 @@
 				if ( typeof jQuery !== 'undefined' && jQuery.fn && jQuery.fn.ready ) {
 					jQuery( document.body ).trigger( 'gk_search_results_updated' );
 				}
+				document.body.dispatchEvent( new CustomEvent( 'gk_search_results_updated' ) );
 				return;
 			}
 			if ( typeof gkPillSearch === 'undefined' || ! gkPillSearch.ajaxUrl || ! gkPillSearch.nonce ) return;
@@ -504,6 +506,7 @@
 					if ( typeof jQuery !== 'undefined' && jQuery.fn && jQuery.fn.ready ) {
 						jQuery( document.body ).trigger( 'gk_search_results_updated' );
 					}
+					document.body.dispatchEvent( new CustomEvent( 'gk_search_results_updated' ) );
 				} )
 				.catch( function( err ) {
 					if ( err && err.name === 'AbortError' ) return;
@@ -772,7 +775,6 @@
 		var sidebar = document.getElementById( 'gk-search-filter-sidebar' );
 		var toggleBtn = document.querySelector( '.gk-search-filters-toggle' );
 		var closeBtn = document.querySelector( '.gk-search-filter-sidebar-close' );
-		var footer = document.getElementById( 'colophon' );
 		if ( ! layout || ! toggleBtn || ! sidebar ) {
 			return;
 		}
@@ -781,26 +783,18 @@
 				sidebar.style.height = '';
 				return;
 			}
-			var vh = window.innerHeight;
-			if ( footer ) {
-				var footerTop = footer.getBoundingClientRect().top;
-				var calcHeight = Math.min( vh, Math.max( 0, footerTop ) );
-				if ( window.scrollY < 150 && calcHeight < vh * 0.85 ) {
-					sidebar.style.height = vh + 'px';
-				} else {
-					sidebar.style.height = calcHeight + 'px';
-				}
-			} else {
-				sidebar.style.height = vh + 'px';
-			}
+			sidebar.style.height = window.innerHeight + 'px';
 		}
 
 		function setSidebarOpen( isOpen ) {
+			var footer = document.getElementById( 'colophon' );
 			if ( isOpen ) {
 				layout.classList.add( 'is-sidebar-open' );
 				document.body.classList.add( 'gk-filter-sidebar-open' );
+				if ( footer ) footer.classList.add( 'gk-filter-sidebar-footer-compact' );
 				updateSidebarHeight();
 			} else {
+				if ( footer ) footer.classList.remove( 'gk-filter-sidebar-footer-compact' );
 				toggleBtn.blur();
 				function clearHeightAfterClose( e ) {
 					if ( e && e.propertyName !== 'transform' ) return;
@@ -829,22 +823,7 @@
 				setSidebarOpen( false );
 			} );
 		}
-		var scrollTimeout;
-		window.addEventListener( 'scroll', function() {
-			if ( scrollTimeout ) {
-				window.cancelAnimationFrame( scrollTimeout );
-			}
-			scrollTimeout = window.requestAnimationFrame( function() {
-				updateSidebarHeight();
-				scrollTimeout = null;
-			} );
-		}, { passive: true } );
 		window.addEventListener( 'resize', updateSidebarHeight );
-		document.addEventListener( 'gk_search_filters_changed', function() {
-			requestAnimationFrame( function() {
-				requestAnimationFrame( updateSidebarHeight );
-			} );
-		} );
 
 		function initPriceSlider() {
 			var minInput = document.getElementById( 'gk-price-min' );
