@@ -12,6 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/** Maximale Anzahl Produkte in der Startseiten-Section „House Rewards“. */
+define( 'GLOBALKEYS_HOUSE_REWARDS_MAX', 6 );
+
 /**
  * Veröffentlichte Produkt-ID anhand des WooCommerce-Slugs.
  *
@@ -46,6 +49,196 @@ function globalkeys_get_first_product_id_by_slugs( array $slugs, $exclude_id = 0
 		}
 	}
 	return 0;
+}
+
+/**
+ * House-Rewards-Liste auf GLOBALKEYS_HOUSE_REWARDS_MAX auffüllen, wenn Slugs/Customizer-Lücken oder gelöschte IDs weniger liefern.
+ *
+ * Reihenfolge der übergebenen IDs bleibt; fehlende Slots: Tag „house-members“, dann Featured, dann Beliebtheit.
+ *
+ * @param int[] $ids Bereits gewählte Produkt-IDs.
+ * @return int[]
+ */
+function globalkeys_house_rewards_fill_curated_ids_to_limit( array $ids ) {
+	if ( ! function_exists( 'wc_get_products' ) ) {
+		$clean = array_values( array_unique( array_map( 'intval', $ids ) ) );
+		return array_slice( array_filter( $clean ), 0, (int) GLOBALKEYS_HOUSE_REWARDS_MAX );
+	}
+
+	$max = (int) GLOBALKEYS_HOUSE_REWARDS_MAX;
+	$ids = array_values( array_unique( array_map( 'intval', $ids ) ) );
+	$ids = array_values( array_filter( $ids ) );
+
+	$published = array();
+	if ( ! empty( $ids ) ) {
+		$valid = wc_get_products(
+			array(
+				'status'  => 'publish',
+				'limit'   => -1,
+				'return'  => 'ids',
+				'include' => $ids,
+			)
+		);
+		$valid = is_array( $valid ) ? array_map( 'intval', $valid ) : array();
+		foreach ( $ids as $id ) {
+			if ( in_array( (int) $id, $valid, true ) ) {
+				$published[] = (int) $id;
+			}
+		}
+	}
+	$ids = $published;
+
+	if ( count( $ids ) >= $max ) {
+		return array_slice( $ids, 0, $max );
+	}
+
+	$exclude = $ids;
+	$sources = array(
+		array(
+			'tag'     => array( 'house-members' ),
+			'orderby' => 'menu_order',
+			'order'   => 'ASC',
+		),
+		array(
+			'featured' => true,
+			'orderby'  => 'menu_order',
+			'order'    => 'ASC',
+		),
+		array(
+			'orderby' => 'popularity',
+			'order'   => 'DESC',
+		),
+	);
+
+	foreach ( $sources as $base_args ) {
+		if ( count( $ids ) >= $max ) {
+			break;
+		}
+		$need = $max - count( $ids );
+		$more = wc_get_products(
+			array_merge(
+				array(
+					'status'  => 'publish',
+					'limit'   => max( $need * 5, 12 ),
+					'return'  => 'ids',
+					'exclude' => $exclude,
+				),
+				$base_args
+			)
+		);
+		if ( ! is_array( $more ) ) {
+			continue;
+		}
+		foreach ( $more as $pid ) {
+			$pid = (int) $pid;
+			if ( $pid < 1 || in_array( $pid, $ids, true ) ) {
+				continue;
+			}
+			$ids[]     = $pid;
+			$exclude[] = $pid;
+			if ( count( $ids ) >= $max ) {
+				break;
+			}
+		}
+	}
+
+	return array_slice( $ids, 0, $max );
+}
+
+/**
+ * House Members / House Rewards: bis zu GLOBALKEYS_HOUSE_REWARDS_MAX Produkt-IDs für die Startseiten-Section.
+ *
+ * Customizer „gk_house_members_grid_product_ids“ (kommagetrennt) hat Vorrang.
+ * Sonst: erste Treffer pro Slug-Gruppe (Theme-Standard aus eurem Katalog).
+ *
+ * @return int[]
+ */
+function globalkeys_get_house_members_curated_product_ids() {
+	$raw = get_theme_mod( 'gk_house_members_grid_product_ids', '' );
+	if ( is_string( $raw ) && $raw !== '' ) {
+		$parts = preg_split( '/[\s,;]+/', $raw, -1, PREG_SPLIT_NO_EMPTY );
+		$ids   = array();
+		foreach ( $parts as $p ) {
+			$id = absint( $p );
+			if ( $id > 0 && ! in_array( $id, $ids, true ) ) {
+				$ids[] = $id;
+			}
+			if ( count( $ids ) >= GLOBALKEYS_HOUSE_REWARDS_MAX ) {
+				break;
+			}
+		}
+		if ( ! empty( $ids ) ) {
+			return globalkeys_house_rewards_fill_curated_ids_to_limit( $ids );
+		}
+	}
+
+	$groups = apply_filters(
+		'globalkeys_house_members_product_slug_groups',
+		array(
+			array(
+				'elden-ring-nightreign-pc-steam',
+				'elden-ring-nightreign-steam',
+				'elden-ring-nightreign',
+				'elden-ring-nightreign-pc',
+			),
+			array(
+				'arc-raiders-pc-steam',
+				'arc-raiders-steam',
+				'arc-raiders-pc',
+				'arc-raiders',
+				'arcraiders-pc-steam',
+				'arcraiders-steam',
+				'arc-raiders-key',
+				'arc-raiders-standard-edition-pc-steam',
+			),
+			array(
+				'resident-evil-requiem-steam',
+				'resident-evil-requiem-pc-steam',
+				'resident-evil-requiem-pc',
+				'resident-evil-requiem',
+			),
+			array(
+				'life-is-strange-reunion-pc-steam',
+				'life-is-strange-reunion-steam',
+				'life-is-strange-reunion-pc',
+				'life-is-strange-reunion',
+				'life-is-strange-r-steam',
+			),
+			array(
+				'lego-batman-legacy-of-the-dark-knight-pc-steam',
+				'lego-batman-legacy-of-the-dark-knight-steam',
+				'lego-batman-lotdk-steam',
+				'lego-batman-lotdk',
+				'lego-batman-legacy-of-the-dark-knight',
+			),
+			array(
+				'marathon-pc-steam',
+				'marathon-steam',
+				'marathon-pc',
+				'marathon',
+			),
+		)
+	);
+
+	if ( ! is_array( $groups ) ) {
+		return array();
+	}
+
+	$ids = array();
+	foreach ( $groups as $slugs ) {
+		if ( count( $ids ) >= GLOBALKEYS_HOUSE_REWARDS_MAX ) {
+			break;
+		}
+		if ( ! is_array( $slugs ) ) {
+			$slugs = array( $slugs );
+		}
+		$id = globalkeys_get_first_product_id_by_slugs( $slugs, 0 );
+		if ( $id > 0 && ! in_array( $id, $ids, true ) ) {
+			$ids[] = $id;
+		}
+	}
+
+	return globalkeys_house_rewards_fill_curated_ids_to_limit( $ids );
 }
 
 /**
@@ -189,8 +382,14 @@ function globalkeys_get_front_page_sections() {
 		array(
 			'id'        => 'section-house-members',
 			'slug'      => 'house-members',
-			'label'     => __( 'House Members', 'globalkeys' ),
-			'aria_label' => __( 'House Members', 'globalkeys' ),
+			'label'     => __( 'House Rewards', 'globalkeys' ),
+			'aria_label' => __( 'House Rewards', 'globalkeys' ),
+		),
+		array(
+			'id'         => 'section-premium-member-cta',
+			'slug'       => 'premium-member-cta',
+			'label'      => __( 'Premium Member CTA', 'globalkeys' ),
+			'aria_label' => __( 'Premium membership', 'globalkeys' ),
 		),
 		array(
 			'id'        => 'section-recently-viewed',

@@ -90,6 +90,96 @@ function globalkeys_customize_register( $wp_customize ) {
 		)
 	);
 
+	// House Members: freischaltende Abo-/Mitgliedschafts-Produkte (IDs) + CTA-Link
+	$wp_customize->add_section(
+		'gk_house_member',
+		array(
+			'title'       => __( 'House Members: Zugang', 'globalkeys' ),
+			'description' => __( 'House-Mitgliederpreis je Produkt unter WooCommerce → Produkt → „House-Mitgliederpreis“ (niedriger als normaler Preis). Alle kaufen; Mitglieder zahlen weniger. Zugang: Profil-Checkbox „Premium / House“, aktives Abo oder Kauf eines der hier eingetragenen Produkte (WooCommerce Subscriptions wird erkannt). Dreistufige Preise auf House-Rewards-Karten: siehe HOUSE_REWARDS_PRICING.md im Theme-Ordner.', 'globalkeys' ),
+			'priority'    => 126,
+		)
+	);
+	$wp_customize->add_setting(
+		'gk_house_subscription_product_ids',
+		array(
+			'default'           => '',
+			'sanitize_callback' => 'sanitize_text_field',
+		)
+	);
+	$wp_customize->add_control(
+		'gk_house_subscription_product_ids',
+		array(
+			'label'       => __( 'Produkt-IDs, die Zugang freischalten', 'globalkeys' ),
+			'description' => __( 'Kommagetrennt, z. B. 123, 456 (dein Abo-/Mitgliedschafts-Produkt).', 'globalkeys' ),
+			'section'     => 'gk_house_member',
+			'type'        => 'text',
+		)
+	);
+	$wp_customize->add_setting(
+		'gk_house_member_cta_url',
+		array(
+			'default'           => '',
+			'sanitize_callback' => 'esc_url_raw',
+		)
+	);
+	$wp_customize->add_control(
+		'gk_house_member_cta_url',
+		array(
+			'label'       => __( 'Link „Mitglied werden“ (gesperrte Karten)', 'globalkeys' ),
+			'description' => __( 'Leer = Startseiten-Pfad /subscriptions/.', 'globalkeys' ),
+			'section'     => 'gk_house_member',
+			'type'        => 'url',
+		)
+	);
+	$wp_customize->add_setting(
+		'gk_house_members_grid_product_ids',
+		array(
+			'default'           => '',
+			'sanitize_callback' => 'sanitize_text_field',
+		)
+	);
+	$wp_customize->add_control(
+		'gk_house_members_grid_product_ids',
+		array(
+			'label'       => __( 'House Rewards: Produkt-IDs (max. 6)', 'globalkeys' ),
+			'description' => __( 'Kommagetrennt. Leer lassen = 6 Standard-Produkte per Slug (Elden Ring Nightreign, ARC Raiders, Resident Evil Requiem, Life is Strange Reunion, LEGO Batman LOTDK, Marathon). Vorbesteller werden in dieser Section mit angezeigt.', 'globalkeys' ),
+			'section'     => 'gk_house_member',
+			'type'        => 'text',
+		)
+	);
+	$wp_customize->add_setting(
+		'gk_house_rewards_promo_badge',
+		array(
+			'default'           => '',
+			'sanitize_callback' => 'sanitize_text_field',
+		)
+	);
+	$wp_customize->add_control(
+		'gk_house_rewards_promo_badge',
+		array(
+			'label'       => __( 'House Rewards: Badge auf Produktkarten', 'globalkeys' ),
+			'description' => __( 'Leer = „Premium Discount“. Unter dem Kartentitel, rot (neben PRE-ORDER wenn Vorbestellung).', 'globalkeys' ),
+			'section'     => 'gk_house_member',
+			'type'        => 'text',
+		)
+	);
+	$wp_customize->add_setting(
+		'gk_house_rewards_promo_until',
+		array(
+			'default'           => '',
+			'sanitize_callback' => 'sanitize_text_field',
+		)
+	);
+	$wp_customize->add_control(
+		'gk_house_rewards_promo_until',
+		array(
+			'label'       => __( 'House Rewards: Text neben dem Badge', 'globalkeys' ),
+			'description' => __( 'Leer = „Ends April“ (englisch). Rot, auf derselben Zeile wie das Premium-Badge.', 'globalkeys' ),
+			'section'     => 'gk_house_member',
+			'type'        => 'text',
+		)
+	);
+
 	if ( isset( $wp_customize->selective_refresh ) ) {
 		$wp_customize->selective_refresh->add_partial(
 			'blogname',

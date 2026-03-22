@@ -1,7 +1,9 @@
 <?php
 /**
- * Template part: House Members Section
- * Zeigt Produkte für Members (Tag „house-members“), Design wie Featured/Bestsellers.
+ * Template part: House Rewards (Section-ID section-house-members)
+ * Bis zu 6 Produkte (GLOBALKEYS_HOUSE_REWARDS_MAX): Customizer-IDs oder Theme-Standard-Slugs; Fallback Tag „house-members“ / Featured.
+ * Kein globalkeys_wc_product_args_exclude_preorders – kuratierte Slots sollen auch Vorbesteller zeigen (sonst fehlen Karten).
+ * Mitgliederpreis optional über Feld „House-Mitgliederpreis“ am Produkt.
  *
  * @package globalkeys
  */
@@ -10,67 +12,97 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$section    = get_query_var( 'gk_section', array( 'id' => 'section-house-members', 'aria_label' => __( 'House Members', 'globalkeys' ) ) );
+$section    = get_query_var( 'gk_section', array( 'id' => 'section-house-members', 'aria_label' => __( 'House Rewards', 'globalkeys' ) ) );
 $id         = ! empty( $section['id'] ) ? $section['id'] : 'section-house-members';
-$aria_label = ! empty( $section['aria_label'] ) ? $section['aria_label'] : __( 'House Members', 'globalkeys' );
+$aria_label = ! empty( $section['aria_label'] ) ? $section['aria_label'] : __( 'House Rewards', 'globalkeys' );
 
 $products = array();
+$limit    = defined( 'GLOBALKEYS_HOUSE_REWARDS_MAX' ) ? (int) GLOBALKEYS_HOUSE_REWARDS_MAX : 6;
+
 if ( function_exists( 'wc_get_products' ) ) {
-	$args_tag = array(
-		'status'  => 'publish',
-		'limit'   => 8,
-		'tag'     => array( 'house-members' ),
-		'orderby' => 'menu_order title',
-		'order'   => 'ASC',
-	);
-	if ( function_exists( 'globalkeys_wc_product_args_exclude_preorders' ) ) {
-		$args_tag = globalkeys_wc_product_args_exclude_preorders( $args_tag );
+	$curated_ids = function_exists( 'globalkeys_get_house_members_curated_product_ids' )
+		? globalkeys_get_house_members_curated_product_ids()
+		: array();
+
+	if ( ! empty( $curated_ids ) ) {
+		$args     = array(
+			'status'  => 'publish',
+			'limit'   => $limit,
+			'include' => $curated_ids,
+			'orderby' => 'post__in',
+			'return'  => 'objects',
+		);
+		$products = wc_get_products( $args );
 	}
-	$products = wc_get_products( $args_tag );
+
+	if ( empty( $products ) ) {
+		$args_tag = array(
+			'status'  => 'publish',
+			'limit'   => $limit,
+			'tag'     => array( 'house-members' ),
+			'orderby' => 'menu_order title',
+			'order'   => 'ASC',
+		);
+		$products = wc_get_products( $args_tag );
+	}
+
 	if ( empty( $products ) ) {
 		$args_feat = array(
 			'featured' => true,
 			'status'   => 'publish',
-			'limit'    => 8,
+			'limit'    => $limit,
 			'orderby'  => 'menu_order title',
 			'order'    => 'ASC',
 		);
-		if ( function_exists( 'globalkeys_wc_product_args_exclude_preorders' ) ) {
-			$args_feat = globalkeys_wc_product_args_exclude_preorders( $args_feat );
-		}
-		$products = wc_get_products( $args_feat );
+		$products  = wc_get_products( $args_feat );
 	}
 }
 ?>
 
-<section id="<?php echo esc_attr( $id ); ?>" class="gk-section gk-section-house-members" role="region" aria-labelledby="<?php echo esc_attr( $id ); ?>-title">
-	<div class="gk-section-inner gk-section-house-members-inner gk-section-featured-inner">
+<section id="<?php echo esc_attr( $id ); ?>" class="gk-section gk-section-bestsellers gk-section-house-members" role="region" aria-labelledby="<?php echo esc_attr( $id ); ?>-title">
+	<div class="gk-section-inner gk-section-featured-inner">
 		<div class="gk-featured-heading-wrap">
 			<h2 id="<?php echo esc_attr( $id ); ?>-title" class="gk-section-title gk-featured-heading">
 				<span class="gk-featured-heading-text-wrap">
-					<span class="gk-featured-heading-text"><?php esc_html_e( 'House Members', 'globalkeys' ); ?></span>
+					<span class="gk-featured-heading-text"><?php esc_html_e( 'House Rewards', 'globalkeys' ); ?></span>
 					<span class="gk-featured-title-underline" aria-hidden="true"></span>
 				</span>
 				<span class="gk-featured-heading-arrow" aria-hidden="true"></span>
 			</h2>
 		</div>
 		<?php if ( ! empty( $products ) ) : ?>
-			<ul class="gk-featured-products" aria-label="<?php esc_attr_e( 'House Members Produkte', 'globalkeys' ); ?>">
+			<ul class="gk-featured-products" aria-label="<?php esc_attr_e( 'House Rewards Produkte', 'globalkeys' ); ?>">
 				<?php foreach ( $products as $product ) : ?>
-					<?php if ( ! $product || ! is_a( $product, 'WC_Product' ) ) { continue; } ?>
-					<li class="gk-featured-product">
-						<a href="<?php echo esc_url( $product->get_permalink() ); ?>" class="gk-featured-product-link">
-							<span class="gk-featured-product-image">
-								<?php echo $product->get_image( 'woocommerce_thumbnail', array( 'alt' => esc_attr( $product->get_name() ) ) ); ?>
-							</span>
-							<span class="gk-featured-product-title"><?php echo esc_html( $product->get_name() ); ?></span>
-							<span class="gk-featured-product-price"><?php echo $product->get_price_html(); ?></span>
-						</a>
-					</li>
+					<?php
+					if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
+						continue;
+					}
+					if ( function_exists( 'globalkeys_house_rewards_pricing_context_enter' ) ) {
+						globalkeys_house_rewards_pricing_context_enter();
+					}
+					try {
+						$gk_house_badge = false;
+						if ( function_exists( 'globalkeys_product_has_house_member_deal' ) && globalkeys_product_has_house_member_deal( $product ) ) {
+							$gk_house_badge = ! function_exists( 'globalkeys_user_has_house_member_access' ) || ! globalkeys_user_has_house_member_access();
+						}
+						set_query_var( 'product', $product );
+						set_query_var( 'gk_show_house_member_card_badge', $gk_house_badge );
+						set_query_var( 'gk_house_rewards_card_context', true );
+						get_template_part( 'template-parts/product-card', 'bestseller' );
+					} finally {
+						if ( function_exists( 'globalkeys_house_rewards_pricing_context_leave' ) ) {
+							globalkeys_house_rewards_pricing_context_leave();
+						}
+					}
+					?>
 				<?php endforeach; ?>
+				<?php
+				set_query_var( 'gk_show_house_member_card_badge', false );
+				set_query_var( 'gk_house_rewards_card_context', false );
+				?>
 			</ul>
 		<?php else : ?>
-			<p class="gk-section-text gk-featured-empty"><?php esc_html_e( 'Aktuell sind keine House-Members-Produkte hinterlegt.', 'globalkeys' ); ?></p>
+			<p class="gk-section-text gk-featured-empty"><?php esc_html_e( 'Aktuell sind keine House-Rewards-Produkte hinterlegt.', 'globalkeys' ); ?></p>
 		<?php endif; ?>
 	</div>
 </section>

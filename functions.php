@@ -409,6 +409,7 @@ add_action( 'init', 'globalkeys_enable_customer_registration', 1 );
 require get_template_directory() . '/inc/woocommerce-registration.php';
 require get_template_directory() . '/inc/woocommerce-product-trailer.php';
 require get_template_directory() . '/inc/woocommerce-product-preorder.php';
+require get_template_directory() . '/inc/gk-house-member-access.php';
 require get_template_directory() . '/inc/woocommerce-product-elden-nightreign.php';
 require get_template_directory() . '/inc/woocommerce-product-hero-image.php';
 require get_template_directory() . '/inc/gk-product-hover-panel.php';
@@ -567,12 +568,185 @@ add_action( 'wp_ajax_nopriv_gk_search_products', 'globalkeys_ajax_search_product
 function globalkeys_ajax_search_results_html() {
 	check_ajax_referer( 'gk_search_products', 'nonce' );
 	$term = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : '';
+	$price_min        = isset( $_REQUEST['price_min'] ) ? (float) $_REQUEST['price_min'] : null;
+	$price_max        = isset( $_REQUEST['price_max'] ) ? (float) $_REQUEST['price_max'] : null;
+	$hide_out_of_stock = ! empty( $_REQUEST['hide_out_of_stock'] );
 	if ( $term === '' || ! class_exists( 'WooCommerce' ) ) {
 		wp_send_json_success( array( 'html' => '', 'noResults' => true, 'total' => 0 ) );
 	}
 	$result  = globalkeys_search_products_starts_with( $term, 0 );
 	$ids     = isset( $result['ids'] ) ? $result['ids'] : array();
-	$total   = isset( $result['total'] ) ? $result['total'] : 0;
+	if ( $price_min !== null || $price_max !== null ) {
+		$filtered = array();
+		foreach ( $ids as $pid ) {
+			$product = wc_get_product( $pid );
+			if ( ! $product || ! $product->is_visible() ) {
+				continue;
+			}
+			$p = (float) $product->get_price();
+			if ( $price_min !== null && $p < $price_min ) {
+				continue;
+			}
+			if ( $price_max !== null && $p > $price_max ) {
+				continue;
+			}
+			$filtered[] = $pid;
+		}
+		$ids = $filtered;
+	}
+	$device_keys = isset( $_REQUEST['device'] ) ? array_map( 'sanitize_text_field', (array) $_REQUEST['device'] ) : array();
+	$device_keys = array_intersect( array_filter( $device_keys ), array_keys( globalkeys_get_filter_devices() ) );
+	if ( ! empty( $device_keys ) ) {
+		$filtered = array();
+		foreach ( $ids as $pid ) {
+			$terms = get_the_terms( (int) $pid, 'product_cat' );
+			if ( ! $terms || is_wp_error( $terms ) ) {
+				continue;
+			}
+			foreach ( $device_keys as $dk ) {
+				$match = false;
+				foreach ( $terms as $t ) {
+					if ( $t && globalkeys_term_matches_device( $t, $dk ) ) {
+						$match = true;
+						break;
+					}
+				}
+				if ( $match ) {
+					$filtered[] = $pid;
+					break;
+				}
+			}
+		}
+		$ids = $filtered;
+	}
+	$product_type_keys = isset( $_REQUEST['product_type'] ) ? array_map( 'sanitize_text_field', (array) $_REQUEST['product_type'] ) : array();
+	$product_type_keys = array_intersect( array_filter( $product_type_keys ), array_keys( globalkeys_get_filter_product_types() ) );
+	if ( ! empty( $product_type_keys ) ) {
+		$filtered = array();
+		foreach ( $ids as $pid ) {
+			$pt = null;
+			$product = wc_get_product( $pid );
+			if ( $product ) {
+				$pt = globalkeys_get_product_type_for_filter( $product );
+			}
+			if ( $pt && in_array( $pt, $product_type_keys, true ) ) {
+				$filtered[] = $pid;
+			}
+		}
+		$ids = $filtered;
+	}
+	$game_mode_keys = isset( $_REQUEST['game_mode'] ) ? array_map( 'sanitize_text_field', (array) $_REQUEST['game_mode'] ) : array();
+	$game_mode_keys = array_intersect( array_filter( $game_mode_keys ), array_keys( globalkeys_get_filter_game_modes() ) );
+	if ( ! empty( $game_mode_keys ) ) {
+		$filtered = array();
+		foreach ( $ids as $pid ) {
+			$product_modes = array();
+			$mode_taxonomies = array( 'product_tag' );
+			if ( taxonomy_exists( 'pa_game_mode' ) ) {
+				$mode_taxonomies[] = 'pa_game_mode';
+			}
+			foreach ( $mode_taxonomies as $tax ) {
+				$terms = get_the_terms( (int) $pid, $tax );
+				if ( $terms && ! is_wp_error( $terms ) ) {
+					foreach ( $terms as $t ) {
+						if ( ! $t ) continue;
+						foreach ( $game_mode_keys as $gk ) {
+							if ( globalkeys_term_matches_game_mode( $t, $gk ) ) {
+								$product_modes[] = $gk;
+							}
+						}
+					}
+				}
+			}
+			foreach ( $game_mode_keys as $gk ) {
+				if ( in_array( $gk, $product_modes, true ) ) {
+					$filtered[] = $pid;
+					break;
+				}
+			}
+		}
+		$ids = $filtered;
+	}
+	$category_keys = isset( $_REQUEST['category'] ) ? array_map( 'sanitize_text_field', (array) $_REQUEST['category'] ) : array();
+	$category_keys = array_intersect( array_filter( $category_keys ), array_keys( globalkeys_get_filter_categories() ) );
+	if ( ! empty( $category_keys ) ) {
+		$filtered = array();
+		foreach ( $ids as $pid ) {
+			$product = wc_get_product( $pid );
+			if ( ! $product ) {
+				continue;
+			}
+			$matched = array();
+			$taxonomies = array( 'product_tag', 'product_cat' );
+			foreach ( $taxonomies as $tax ) {
+				$terms = get_the_terms( (int) $pid, $tax );
+				if ( $terms && ! is_wp_error( $terms ) ) {
+					foreach ( $terms as $t ) {
+						if ( ! $t ) continue;
+						foreach ( $category_keys as $ck ) {
+							if ( globalkeys_term_matches_category_filter( $t, $ck ) ) {
+								$matched[ $ck ] = true;
+							}
+						}
+					}
+				}
+			}
+			foreach ( $category_keys as $ck ) {
+				if ( ! empty( $matched[ $ck ] ) ) {
+					$filtered[] = $pid;
+					break;
+				}
+			}
+		}
+		$ids = $filtered;
+	}
+	$gamepad_keys = isset( $_REQUEST['gamepad'] ) ? array_map( 'sanitize_text_field', (array) $_REQUEST['gamepad'] ) : array();
+	$gamepad_keys = array_intersect( array_filter( $gamepad_keys ), array_keys( globalkeys_get_filter_gamepads() ) );
+	if ( ! empty( $gamepad_keys ) ) {
+		$filtered = array();
+		foreach ( $ids as $pid ) {
+			$product = wc_get_product( $pid );
+			if ( ! $product ) {
+				continue;
+			}
+			$matched = array();
+			$taxonomies = array( 'product_tag', 'product_cat' );
+			if ( taxonomy_exists( 'pa_controller_support' ) ) {
+				$taxonomies[] = 'pa_controller_support';
+			}
+			foreach ( $taxonomies as $tax ) {
+				$terms = get_the_terms( (int) $pid, $tax );
+				if ( $terms && ! is_wp_error( $terms ) ) {
+					foreach ( $terms as $t ) {
+						if ( ! $t ) continue;
+						foreach ( $gamepad_keys as $gk ) {
+							if ( globalkeys_term_matches_gamepad( $t, $gk ) ) {
+								$matched[ $gk ] = true;
+							}
+						}
+					}
+				}
+			}
+			foreach ( $gamepad_keys as $gk ) {
+				if ( ! empty( $matched[ $gk ] ) ) {
+					$filtered[] = $pid;
+					break;
+				}
+			}
+		}
+		$ids = $filtered;
+	}
+	if ( $hide_out_of_stock ) {
+		$filtered = array();
+		foreach ( $ids as $pid ) {
+			$product = wc_get_product( $pid );
+			if ( $product && $product->is_visible() && $product->is_in_stock() ) {
+				$filtered[] = $pid;
+			}
+		}
+		$ids = $filtered;
+	}
+	$total   = count( $ids );
 	$no_res  = empty( $ids );
 	$html    = '';
 	if ( ! $no_res ) {
@@ -604,6 +778,277 @@ add_action( 'wp_ajax_gk_search_results_html', 'globalkeys_ajax_search_results_ht
 add_action( 'wp_ajax_nopriv_gk_search_results_html', 'globalkeys_ajax_search_results_html' );
 
 /**
+ * Feste Devices-Liste wie im Design (exakt).
+ * Keys für Filterung, Werte = Anzeigenamen.
+ *
+ * @return array<string, string>
+ */
+function globalkeys_get_filter_devices() {
+	return array(
+		'pc'          => 'PC',
+		'mac'         => 'Mac',
+		'switch-2'    => 'Switch 2',
+		'ps4'         => 'PlayStation 4',
+		'ps5'         => 'PlayStation 5',
+		'xbox-one'    => 'Xbox One',
+		'xbox-series' => 'Xbox Series X|S',
+		'gift-card'   => 'Gift Card',
+	);
+}
+
+/**
+ * Prüft ob ein product_cat-Term zu einem Device-Key passt.
+ *
+ * @param WP_Term $term      Kategorie-Term.
+ * @param string  $device_key Device-Key aus globalkeys_get_filter_devices().
+ * @return bool
+ */
+function globalkeys_term_matches_device( $term, $device_key ) {
+	if ( ! $term || ! isset( $term->slug ) ) {
+		return false;
+	}
+	$slug = strtolower( (string) $term->slug );
+	$name = strtolower( (string) wp_strip_all_tags( $term->name ) );
+	$hay  = $slug . ' ' . $name . ' ' . ( isset( $term->name ) ? $term->name : '' );
+
+	switch ( $device_key ) {
+		case 'pc':
+			return (bool) preg_match( '/(^|[-_\s])pc([-_\s]|$)|pc games|\bwindows\b/', $hay );
+		case 'mac':
+			return (bool) preg_match( '/\bmac\b|macos|os ?x/', $hay );
+		case 'switch-2':
+			return (bool) preg_match( '/switch\s*2|switch-2|switch2/i', $hay );
+		case 'ps4':
+			return (bool) preg_match( '/\bps4\b|playstation\s*4|playstation4/', $hay );
+		case 'ps5':
+			return (bool) preg_match( '/\bps5\b|playstation\s*5|playstation5/', $hay );
+		case 'xbox-one':
+			return (bool) preg_match( '/\bxbox\s*one\b|xboxone/', $hay );
+		case 'xbox-series':
+			return (bool) preg_match( '/\bxbox\s*series\b|xbox\s*series\s*[x|s]/i|xboxseries/', $hay );
+		case 'gift-card':
+			return (bool) preg_match( '/gift\s*card|giftcard|geschenk/', $hay );
+		default:
+			return false;
+	}
+}
+
+/**
+ * Feste Product-Type-Liste wie im Design.
+ *
+ * @return array<string, string>
+ */
+function globalkeys_get_filter_product_types() {
+	return array(
+		'games'        => 'Games',
+		'dlc'          => 'DLC',
+		'pre-orders'   => 'Pre-orders',
+		'gift-cards'   => 'Gift cards',
+		'subscriptions' => 'Subscriptions',
+	);
+}
+
+/**
+ * Ermittelt den Produkttyp für die Filterung (ein Typ pro Produkt).
+ *
+ * @param WC_Product $product Produkt.
+ * @return string Product-Type-Key.
+ */
+function globalkeys_get_product_type_for_filter( $product ) {
+	if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
+		return 'games';
+	}
+	$type = $product->get_type();
+	if ( $type === 'subscription' || $type === 'variable-subscription' ) {
+		return 'subscriptions';
+	}
+	if ( $type === 'gift-card' ) {
+		return 'gift-cards';
+	}
+	$terms = get_the_terms( $product->get_id(), 'product_cat' );
+	$hay   = '';
+	if ( $terms && ! is_wp_error( $terms ) ) {
+		foreach ( $terms as $t ) {
+			if ( $t ) {
+				$hay .= ' ' . strtolower( (string) $t->slug ) . ' ' . strtolower( (string) $t->name );
+			}
+		}
+	}
+	if ( preg_match( '/gift\s*card|giftcard|geschenk/', $hay ) ) {
+		return 'gift-cards';
+	}
+	if ( function_exists( 'globalkeys_is_preorder_product' ) && globalkeys_is_preorder_product( $product ) ) {
+		return 'pre-orders';
+	}
+	if ( preg_match( '/\bdlc\b|addon|erweiterung|downloadable\s*content/', $hay ) ) {
+		return 'dlc';
+	}
+	return 'games';
+}
+
+/**
+ * Kategorien/Tags wie auf der Homepage-Section (All Categories).
+ * Slug => Anzeigename.
+ *
+ * @return array<string, string>
+ */
+function globalkeys_get_filter_categories() {
+	return array(
+		'survival'   => __( 'Survival', 'globalkeys' ),
+		'rpg'        => __( 'RPG', 'globalkeys' ),
+		'shooter'    => __( 'Shooter', 'globalkeys' ),
+		'simulation' => __( 'Simulation', 'globalkeys' ),
+		'strategy'   => __( 'Strategy', 'globalkeys' ),
+		'horror'     => __( 'Horror', 'globalkeys' ),
+		'indie'      => __( 'Indie', 'globalkeys' ),
+		'story'      => __( 'Story', 'globalkeys' ),
+		'open-world' => __( 'Open World', 'globalkeys' ),
+	);
+}
+
+/**
+ * Gamepads-Filter (Controller-Support).
+ *
+ * @return array<string, string>
+ */
+function globalkeys_get_filter_gamepads() {
+	return array(
+		'gamepad-preferred'           => __( 'Gamepad Preferred', 'globalkeys' ),
+		'full-controller-support'     => __( 'Full Controller Support', 'globalkeys' ),
+		'xbox-controller-support'     => __( 'Xbox Controller Support', 'globalkeys' ),
+		'dualshock-controller-support' => __( 'DualShock Controller Support', 'globalkeys' ),
+		'dualsense-controller-support' => __( 'DualSense Controller Support', 'globalkeys' ),
+		'steam-input-api-support'     => __( 'Steam Input API Support', 'globalkeys' ),
+	);
+}
+
+/**
+ * Prüft ob ein Term (product_tag, product_cat oder pa_*) zu einem Gamepad-Key passt.
+ *
+ * @param WP_Term $term       Term.
+ * @param string  $gamepad_key Gamepad-Key aus globalkeys_get_filter_gamepads().
+ * @return bool
+ */
+function globalkeys_term_matches_gamepad( $term, $gamepad_key ) {
+	if ( ! $term || ! isset( $term->slug ) ) {
+		return false;
+	}
+	$slug = strtolower( (string) $term->slug );
+	$name = strtolower( (string) wp_strip_all_tags( $term->name ) );
+	$hay  = $slug . ' ' . $name;
+
+	switch ( $gamepad_key ) {
+		case 'gamepad-preferred':
+			return (bool) preg_match( '/gamepad[\s_-]?preferred|gamepad preferred/', $hay );
+		case 'full-controller-support':
+			return (bool) preg_match( '/full[\s_-]?controller[\s_-]?support|full controller support/', $hay );
+		case 'xbox-controller-support':
+			return (bool) preg_match( '/xbox[\s_-]?controller|xbox controller/', $hay );
+		case 'dualshock-controller-support':
+			return (bool) preg_match( '/dualshock|dual[\s_-]?shock/', $hay );
+		case 'dualsense-controller-support':
+			return (bool) preg_match( '/dualsense|dual[\s_-]?sense/', $hay );
+		case 'steam-input-api-support':
+			return (bool) preg_match( '/steam[\s_-]?input|steam input api/', $hay );
+		default:
+			return false;
+	}
+}
+
+/**
+ * Prüft ob ein Term (product_tag oder product_cat) zu einer Kategorie passt.
+ *
+ * @param WP_Term $term     Term.
+ * @param string  $cat_key  Kategorie-Key aus globalkeys_get_filter_categories().
+ * @return bool
+ */
+function globalkeys_term_matches_category_filter( $term, $cat_key ) {
+	if ( ! $term || ! isset( $term->slug ) ) {
+		return false;
+	}
+	$slug = strtolower( (string) $term->slug );
+	$name = strtolower( (string) wp_strip_all_tags( $term->name ) );
+	$hay  = $slug . ' ' . $name;
+
+	switch ( $cat_key ) {
+		case 'survival':
+			return (bool) preg_match( '/\bsurvival\b/', $hay );
+		case 'rpg':
+			return (bool) preg_match( '/\brpg\b/', $hay );
+		case 'shooter':
+			return (bool) preg_match( '/\bshooter\b/', $hay );
+		case 'simulation':
+			return (bool) preg_match( '/\bsimulation\b/', $hay );
+		case 'sport':
+			return (bool) preg_match( '/\bsport\b/', $hay );
+		case 'strategy':
+			return (bool) preg_match( '/\bstrategy\b/', $hay );
+		case 'horror':
+			return (bool) preg_match( '/\bhorror\b/', $hay );
+		case 'indie':
+			return (bool) preg_match( '/\bindie\b/', $hay );
+		case 'story':
+			return (bool) preg_match( '/\bstory\b/', $hay );
+		case 'open-world':
+			return (bool) preg_match( '/open[\s_-]?world|openworld/', $hay );
+		default:
+			return false;
+	}
+}
+
+/**
+ * Feste Game-Modes-Liste wie im Design (ohne LAN PvP und untere 5).
+ *
+ * @return array<string, string>
+ */
+function globalkeys_get_filter_game_modes() {
+	return array(
+		'single-player'             => 'Single-player',
+		'multi-player'              => 'Multi-player',
+		'cross-platform-multiplayer' => 'Cross-Platform Multiplayer',
+		'pvp'                       => 'PvP',
+		'online-pvp'                => 'Online PvP',
+		'co-op'                     => 'Co-op',
+		'online-co-op'              => 'Online Co-op',
+	);
+}
+
+/**
+ * Prüft ob ein Term (product_tag oder pa_game_mode) zu einem Game-Mode-Key passt.
+ *
+ * @param WP_Term $term        Term.
+ * @param string  $mode_key    Game-Mode-Key aus globalkeys_get_filter_game_modes().
+ * @return bool
+ */
+function globalkeys_term_matches_game_mode( $term, $mode_key ) {
+	if ( ! $term || ! isset( $term->slug ) ) {
+		return false;
+	}
+	$slug = strtolower( (string) $term->slug );
+	$name = strtolower( (string) wp_strip_all_tags( $term->name ) );
+	$hay  = $slug . ' ' . $name;
+
+	switch ( $mode_key ) {
+		case 'single-player':
+			return (bool) preg_match( '/single[\s_-]?player|singleplayer/', $hay );
+		case 'multi-player':
+			return (bool) preg_match( '/multi[\s_-]?player|multiplayer/', $hay );
+		case 'cross-platform-multiplayer':
+			return (bool) preg_match( '/cross[\s_-]?platform|crossplatform/', $hay );
+		case 'pvp':
+			return (bool) preg_match( '/\bpvp\b(?!\s*online)(?!\s*lan)/', $hay );
+		case 'online-pvp':
+			return (bool) preg_match( '/online[\s_-]?pvp|online pvp/', $hay );
+		case 'co-op':
+			return (bool) preg_match( '/\bco[\s_-]?op\b(?!\s*online)(?!\s*lan)/', $hay );
+		case 'online-co-op':
+			return (bool) preg_match( '/online[\s_-]?co[\s_-]?op|online co[\s_-]?op/', $hay );
+		default:
+			return false;
+	}
+}
+
+/**
  * Produktdaten + Karten-HTML für sofortige clientseitige Filterung auf der Suchseite.
  *
  * @return array{index: array, cards: array}|null
@@ -612,25 +1057,29 @@ function globalkeys_get_search_products_data_for_js() {
 	if ( ! class_exists( 'WooCommerce' ) ) {
 		return null;
 	}
+	$product_types = array( 'simple', 'variable', 'subscription', 'variable-subscription', 'gift-card' );
 	$ids = wc_get_products( array(
 		'status'  => 'publish',
 		'limit'   => -1,
 		'return'  => 'ids',
-		'type'    => array( 'simple', 'variable' ),
+		'type'    => $product_types,
 	) );
 	if ( empty( $ids ) ) {
-		return array( 'index' => array(), 'cards' => array(), 'dropdown' => array() );
+		return array( 'index' => array(), 'cards' => array(), 'dropdown' => array(), 'prices' => array(), 'dates' => array(), 'inStock' => array(), 'productCats' => array(), 'deviceOptions' => array(), 'productProductTypes' => array(), 'productTypeOptions' => array(), 'productCategoryTags' => array(), 'categoryFilterOptions' => array(), 'productGamepads' => array(), 'gamepadOptions' => array(), 'productGameModes' => array(), 'gameModeOptions' => array(), 'priceMin' => 0, 'priceMax' => 100 );
 	}
-	$pre_ids = function_exists( 'globalkeys_get_preorder_list_product_ids' ) ? globalkeys_get_preorder_list_product_ids() : array();
-	$index      = array();
-	$cards      = array();
-	$id_to_name = array();
-	$dropdown   = array();
-	$prices     = array();
+	$index            = array();
+	$cards            = array();
+	$id_to_name       = array();
+	$dropdown         = array();
+	$prices            = array();
+	$dates            = array();
+	$in_stock          = array();
+	$product_cats      = array();
+	$product_game_modes    = array();
+	$product_product_types = array();
+	$product_category_tags = array();
+	$product_gamepads      = array();
 	foreach ( $ids as $pid ) {
-		if ( ! empty( $pre_ids ) && in_array( (int) $pid, $pre_ids, true ) ) {
-			continue;
-		}
 		$product = wc_get_product( $pid );
 		if ( ! $product || ! $product->is_visible() ) {
 			continue;
@@ -655,6 +1104,82 @@ function globalkeys_get_search_products_data_for_js() {
 			'image' => $img_url ?: ( function_exists( 'wc_placeholder_img_src' ) ? wc_placeholder_img_src( 'woocommerce_thumbnail' ) : '' ),
 		);
 		$prices[ (int) $pid ] = $price_num;
+		$date_created = $product->get_date_created();
+		$dates[ (int) $pid ] = $date_created ? $date_created->getTimestamp() : 0;
+		$in_stock[ (int) $pid ] = $product->is_in_stock();
+		$terms   = get_the_terms( (int) $pid, 'product_cat' );
+		$devices = globalkeys_get_filter_devices();
+		$matched = array();
+		if ( $terms && ! is_wp_error( $terms ) ) {
+			foreach ( $terms as $t ) {
+				if ( ! $t ) {
+					continue;
+				}
+				foreach ( array_keys( $devices ) as $key ) {
+					if ( globalkeys_term_matches_device( $t, $key ) ) {
+						$matched[ $key ] = true;
+					}
+				}
+			}
+		}
+		$product_cats[ (int) $pid ] = array_keys( $matched );
+		$modes_matched = array();
+		$mode_taxonomies = array( 'product_tag' );
+		if ( taxonomy_exists( 'pa_game_mode' ) ) {
+			$mode_taxonomies[] = 'pa_game_mode';
+		}
+		foreach ( $mode_taxonomies as $tax ) {
+			$mode_terms = get_the_terms( (int) $pid, $tax );
+			if ( $mode_terms && ! is_wp_error( $mode_terms ) ) {
+				foreach ( $mode_terms as $mt ) {
+					if ( ! $mt ) continue;
+					foreach ( array_keys( globalkeys_get_filter_game_modes() ) as $key ) {
+						if ( globalkeys_term_matches_game_mode( $mt, $key ) ) {
+							$modes_matched[ $key ] = true;
+						}
+					}
+				}
+			}
+		}
+		$product_game_modes[ (int) $pid ]    = array_keys( $modes_matched );
+		$product_product_types[ (int) $pid ] = globalkeys_get_product_type_for_filter( $product );
+		$cat_tags_matched = array();
+		$cat_keys = array_keys( globalkeys_get_filter_categories() );
+		$taxonomies = array( 'product_tag', 'product_cat' );
+		foreach ( $taxonomies as $tax ) {
+			$cat_terms = get_the_terms( (int) $pid, $tax );
+			if ( $cat_terms && ! is_wp_error( $cat_terms ) ) {
+				foreach ( $cat_terms as $ct ) {
+					if ( ! $ct ) continue;
+					foreach ( $cat_keys as $ck ) {
+						if ( globalkeys_term_matches_category_filter( $ct, $ck ) ) {
+							$cat_tags_matched[ $ck ] = true;
+						}
+					}
+				}
+			}
+		}
+		$product_category_tags[ (int) $pid ] = array_keys( $cat_tags_matched );
+		$gamepad_matched = array();
+		$gamepad_keys    = array_keys( globalkeys_get_filter_gamepads() );
+		$gamepad_taxonomies = array( 'product_tag', 'product_cat' );
+		if ( taxonomy_exists( 'pa_controller_support' ) ) {
+			$gamepad_taxonomies[] = 'pa_controller_support';
+		}
+		foreach ( $gamepad_taxonomies as $gtax ) {
+			$gp_terms = get_the_terms( (int) $pid, $gtax );
+			if ( $gp_terms && ! is_wp_error( $gp_terms ) ) {
+				foreach ( $gp_terms as $gt ) {
+					if ( ! $gt ) continue;
+					foreach ( $gamepad_keys as $gk ) {
+						if ( globalkeys_term_matches_gamepad( $gt, $gk ) ) {
+							$gamepad_matched[ $gk ] = true;
+						}
+					}
+				}
+			}
+		}
+		$product_gamepads[ (int) $pid ] = array_keys( $gamepad_matched );
 		ob_start();
 		$GLOBALS['product'] = $product;
 		get_template_part( 'template-parts/product-card', 'bestseller' );
@@ -676,7 +1201,32 @@ function globalkeys_get_search_products_data_for_js() {
 			}
 		}
 	}
-	return array( 'index' => $index, 'cards' => $cards, 'names' => $id_to_name, 'dropdown' => $dropdown, 'prices' => $prices );
+	$price_min      = ! empty( $prices ) ? (float) min( $prices ) : 0;
+	$price_max      = ! empty( $prices ) ? (float) max( $prices ) : 100;
+	$device_options      = globalkeys_get_filter_devices();
+	$product_type_options = globalkeys_get_filter_product_types();
+	$category_options    = globalkeys_get_filter_categories();
+	$category_counts     = array();
+	foreach ( array_keys( $category_options ) as $ck ) {
+		$category_counts[ $ck ] = 0;
+	}
+	foreach ( $product_category_tags as $pid_tags ) {
+		foreach ( $pid_tags as $tag ) {
+			if ( isset( $category_counts[ $tag ] ) ) {
+				$category_counts[ $tag ]++;
+			}
+		}
+	}
+	$category_filter_options = array();
+	foreach ( $category_options as $slug => $label ) {
+		$category_filter_options[ $slug ] = array(
+			'label' => $label,
+			'count' => isset( $category_counts[ $slug ] ) ? (int) $category_counts[ $slug ] : 0,
+		);
+	}
+	$gamepad_options  = globalkeys_get_filter_gamepads();
+	$game_mode_options = globalkeys_get_filter_game_modes();
+	return array( 'index' => $index, 'cards' => $cards, 'names' => $id_to_name, 'dropdown' => $dropdown, 'prices' => $prices, 'dates' => $dates, 'inStock' => $in_stock, 'productCats' => $product_cats, 'deviceOptions' => $device_options, 'productProductTypes' => $product_product_types, 'productTypeOptions' => $product_type_options, 'productCategoryTags' => $product_category_tags, 'categoryFilterOptions' => $category_filter_options, 'productGamepads' => $product_gamepads, 'gamepadOptions' => $gamepad_options, 'productGameModes' => $product_game_modes, 'gameModeOptions' => $game_mode_options, 'priceMin' => $price_min, 'priceMax' => $price_max );
 }
 
 require get_template_directory() . '/inc/profile-avatar.php';
@@ -1825,6 +2375,10 @@ function globalkeys_scripts() {
 		'seeAll'             => __( 'See all results', 'globalkeys' ),
 		'resultsCountOne'    => __( '1 result', 'globalkeys' ),
 		'resultsCountMany'   => __( '%d results', 'globalkeys' ),
+		'priceBetween'       => __( 'Price between %1$s € and %2$s €', 'globalkeys' ),
+		'hideOutOfStock'     => __( 'Hide out of stock items', 'globalkeys' ),
+		'removeFilter'       => __( 'Remove filter', 'globalkeys' ),
+		'clearAll'           => __( 'Clear all', 'globalkeys' ),
 	);
 	if ( class_exists( 'WooCommerce' ) ) {
 		$gk_pill_search_vars['productsData'] = globalkeys_get_search_products_data_for_js();
