@@ -399,16 +399,46 @@
 
 	function initFilterSidebar() {
 		var layout = document.getElementById( 'gk-search-layout' );
+		var sidebar = document.getElementById( 'gk-search-filter-sidebar' );
 		var toggleBtn = document.querySelector( '.gk-search-filters-toggle' );
 		var closeBtn = document.querySelector( '.gk-search-filter-sidebar-close' );
-		if ( ! layout || ! toggleBtn ) {
+		var footer = document.getElementById( 'colophon' );
+		if ( ! layout || ! toggleBtn || ! sidebar ) {
 			return;
 		}
+		function updateSidebarHeight() {
+			if ( ! layout.classList.contains( 'is-sidebar-open' ) ) {
+				sidebar.style.height = '';
+				return;
+			}
+			if ( footer ) {
+				var footerTop = footer.getBoundingClientRect().top;
+				var vh = window.innerHeight;
+				sidebar.style.height = Math.min( vh, Math.max( 0, footerTop ) ) + 'px';
+			} else {
+				sidebar.style.height = window.innerHeight + 'px';
+			}
+		}
+
 		function setSidebarOpen( isOpen ) {
 			if ( isOpen ) {
 				layout.classList.add( 'is-sidebar-open' );
 				document.body.classList.add( 'gk-filter-sidebar-open' );
+				updateSidebarHeight();
 			} else {
+				toggleBtn.blur();
+				function clearHeightAfterClose( e ) {
+					if ( e && e.propertyName !== 'transform' ) return;
+					sidebar.removeEventListener( 'transitionend', clearHeightAfterClose );
+					sidebar.style.height = '';
+				}
+				sidebar.addEventListener( 'transitionend', clearHeightAfterClose );
+				setTimeout( function() {
+					if ( ! layout.classList.contains( 'is-sidebar-open' ) ) {
+						sidebar.removeEventListener( 'transitionend', clearHeightAfterClose );
+						sidebar.style.height = '';
+					}
+				}, 280 );
 				layout.classList.remove( 'is-sidebar-open' );
 				document.body.classList.remove( 'gk-filter-sidebar-open' );
 			}
@@ -424,6 +454,17 @@
 				setSidebarOpen( false );
 			} );
 		}
+		var scrollTimeout;
+		window.addEventListener( 'scroll', function() {
+			if ( scrollTimeout ) {
+				window.cancelAnimationFrame( scrollTimeout );
+			}
+			scrollTimeout = window.requestAnimationFrame( function() {
+				updateSidebarHeight();
+				scrollTimeout = null;
+			} );
+		}, { passive: true } );
+		window.addEventListener( 'resize', updateSidebarHeight );
 	}
 
 	if ( document.readyState === 'loading' ) {

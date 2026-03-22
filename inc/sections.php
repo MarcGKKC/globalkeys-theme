@@ -157,6 +157,12 @@ function globalkeys_get_front_page_sections() {
 			'aria_label' => __( 'Kategorien', 'globalkeys' ),
 		),
 		array(
+			'id'        => 'section-preorders',
+			'slug'      => 'preorders',
+			'label'     => __( 'Pre-orders', 'globalkeys' ),
+			'aria_label' => __( 'Pre-orders', 'globalkeys' ),
+		),
+		array(
 			'id'        => 'section-gift-cards',
 			'slug'      => 'gift-cards',
 			'label'     => __( 'Gift Cards', 'globalkeys' ),
@@ -173,12 +179,6 @@ function globalkeys_get_front_page_sections() {
 			'slug'      => 'budget-games',
 			'label'     => __( 'Spiele für jeden Geldbeutel', 'globalkeys' ),
 			'aria_label' => __( 'Spiele für jeden Geldbeutel', 'globalkeys' ),
-		),
-		array(
-			'id'        => 'section-preorders',
-			'slug'      => 'preorders',
-			'label'     => __( 'Pre-orders', 'globalkeys' ),
-			'aria_label' => __( 'Pre-orders', 'globalkeys' ),
 		),
 		array(
 			'id'        => 'section-reward',
@@ -209,12 +209,6 @@ function globalkeys_get_front_page_sections() {
 			'slug'      => 'cta',
 			'label'     => __( 'Call to Action', 'globalkeys' ),
 			'aria_label' => __( 'Handlungsaufforderung', 'globalkeys' ),
-		),
-		array(
-			'id'        => 'section-weekly-deals',
-			'slug'      => 'weekly-deals',
-			'label'     => __( 'Weekly deals', 'globalkeys' ),
-			'aria_label' => __( 'Weekly deals', 'globalkeys' ),
 		),
 	);
 

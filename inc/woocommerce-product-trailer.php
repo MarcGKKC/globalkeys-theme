@@ -115,6 +115,12 @@ function globalkeys_get_default_product_trailer_url( $product ) {
 		'life-is-strange-reunion-pc'           => 'life-is-strange-r-steam-preview.webm',
 		'life-is-strange-reunion-pc-steam'     => 'life-is-strange-r-steam-preview.webm',
 		'life-is-strange-r-steam'          => 'life-is-strange-r-steam-preview.webm',
+		'lego-batman-legacy-of-the-dark-knight'             => 'lego-batman-lotDK-preview-gk.webm',
+		'lego-batman-legacy-of-the-dark-knight-steam'      => 'lego-batman-lotDK-preview-gk.webm',
+		'lego-batman-legacy-of-the-dark-knight-pc'         => 'lego-batman-lotDK-preview-gk.webm',
+		'lego-batman-legacy-of-the-dark-knight-pc-steam'   => 'lego-batman-lotDK-preview-gk.webm',
+		'lego-batman-lotdk'                                => 'lego-batman-lotDK-preview-gk.webm',
+		'lego-batman-lotdk-steam'                          => 'lego-batman-lotDK-preview-gk.webm',
 	);
 
 	if ( isset( $trailers_by_slug[ $slug ] ) ) {
@@ -155,6 +161,12 @@ function globalkeys_get_default_product_trailer_url( $product ) {
 	/* Life is Strange: Reunion */
 	if ( $title !== '' && stripos( $title, 'life is strange' ) !== false && stripos( $title, 'reunion' ) !== false ) {
 		return get_template_directory_uri() . '/Previews/life-is-strange-r-steam-preview.webm';
+	}
+
+	/* LEGO Batman: Legacy of the Dark Knight */
+	if ( $title !== '' && stripos( $title, 'lego' ) !== false && stripos( $title, 'batman' ) !== false
+		&& ( stripos( $title, 'legacy of the dark knight' ) !== false || stripos( $title, 'lotdk' ) !== false ) ) {
+		return get_template_directory_uri() . '/Previews/lego-batman-lotDK-preview-gk.webm';
 	}
 
 	/* Elden Ring Nightreign – vor Shadow of the Erdtree (beides „Elden Ring“) */

@@ -1916,94 +1916,129 @@ body.gk-search-results-page .header-pill-search-dropdown {
 	display: none !important;
 }
 
-/* Suchergebnisse: Filter-Sidebar links über volle Höhe (wie Instant Gaming) */
+/* Suchergebnisse: Filter-Sidebar – Content verschiebt sich, eine Variable steuert alles */
+@property --gk-filter-offset {
+	syntax: "<length>";
+	inherits: true;
+	initial-value: 0px;
+}
+
 :root {
-	--gk-filter-sidebar-width: 260px;
+	--gk-filter-sidebar-width: 295px;
 	--gk-filter-content-gap: 1.5rem;
 }
 
-/* Push-Effekt: ganze Seite rutscht nach rechts; Filter-Kante = Hauptrand, symmetrischer Rand links/rechts für die ganze Seite */
-body.gk-filter-sidebar-open #page {
-	margin-left: var( --gk-filter-sidebar-width );
-	width: calc( 100% - var( --gk-filter-sidebar-width ) );
-	padding-left: var( --gk-filter-content-gap );
-	padding-right: var( --gk-filter-content-gap );
+body.gk-search-results-page {
+	--gk-filter-offset: 0px;
+	transition: --gk-filter-offset 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+body.gk-filter-sidebar-open.gk-search-results-page {
+	--gk-filter-offset: var(--gk-filter-sidebar-width);
+}
+
+/* Suchergebnisse: gap für Header-Scroll */
+/* Header: gap-Transition für Scroll, sonst keine Transitions – verhindert Desync beim Filter */
+body.gk-search-results-page .header-pill-wrapper {
+	transition: gap 0.16s ease-out;
+}
+body.gk-search-results-page .site-branding {
+	transition: none;
+}
+
+/* Content-Shift über Variable */
+body.gk-search-results-page #masthead {
+	margin-left: var(--gk-filter-offset);
+	width: calc(100% - var(--gk-filter-offset));
 	box-sizing: border-box;
-	transition: margin-left 0.3s ease, width 0.3s ease, padding 0.3s ease;
+}
+body.gk-filter-sidebar-open.gk-search-results-page #masthead {
+	padding-left: var(--gk-filter-content-gap);
 }
 
-body.gk-search-results-page #page {
-	transition: margin-left 0.3s ease, width 0.3s ease, padding 0.3s ease;
-}
-
-/* Pill und Nav-Punkte darüber: weniger nach rechts beim Öffnen */
-body.gk-filter-sidebar-open .header-pill-wrapper {
-	margin-left: -6rem;
-}
-
-/* Logo: leicht nach links beim Öffnen */
-body.gk-filter-sidebar-open .site-branding {
-	margin-left: -1.5rem;
-}
-
-/* Produktkarten: symmetrischer Rand, minimal größere Karten durch leicht reduzierten Gap */
-body.gk-filter-sidebar-open .gk-section-shop-results .gk-featured-products {
-	max-width: 100%;
+body.gk-search-results-page .site-main {
+	margin-left: calc(var(--gk-filter-offset) + 10px);
+	width: calc(100% - var(--gk-filter-offset) - 10px);
 	box-sizing: border-box;
-	gap: calc( 1rem + 4px );
 }
 
-body.gk-filter-sidebar-open .gk-section-shop-results .gk-search-results-count {
+/* Alle Werte über Variable – keine Snaps, Original-Werte wenn geschlossen */
+body.gk-search-results-page .site-main--shop {
+	padding-left: calc(1.25rem + var(--gk-filter-offset) / var(--gk-filter-sidebar-width) * (0.25rem - 1.25rem));
+	padding-right: calc(1.25rem + var(--gk-filter-offset) / var(--gk-filter-sidebar-width) * (0.25rem - 1.25rem));
+}
+
+body.gk-search-results-page .gk-section-shop-results .gk-section-featured-inner {
+	padding-left: calc(1.5rem + var(--gk-filter-offset) / var(--gk-filter-sidebar-width) * (0.25rem - 1.5rem));
+	padding-right: calc(1.5rem + var(--gk-filter-offset) / var(--gk-filter-sidebar-width) * (0.25rem - 1.5rem));
+}
+
+body.gk-search-results-page .header-pill-wrapper {
+	margin-left: calc(var(--gk-filter-offset) / var(--gk-filter-sidebar-width) * -6rem);
+}
+body.gk-search-results-page .site-branding {
+	margin-left: calc(var(--gk-filter-offset) / var(--gk-filter-sidebar-width) * -1.5rem);
+}
+body.gk-search-results-page .gk-section-shop-results .gk-search-results-count {
+	margin-left: calc(-6.5rem + var(--gk-filter-offset) / var(--gk-filter-sidebar-width) * 6.5rem);
+}
+
+body.gk-search-results-page .gk-section-shop-results .gk-search-sort-by-wrap {
+	margin-right: calc(-6.6rem + var(--gk-filter-offset) / var(--gk-filter-sidebar-width) * 6.6rem);
+	margin-left: calc(8px + var(--gk-filter-offset) / var(--gk-filter-sidebar-width) * -14px);
+}
+
+/* Produktkarten: Bestsellers-Größe wenn Filter zu (wie Homepage), interpoliert zu kompakt wenn offen */
+body.gk-search-results-page .gk-section-shop-results .gk-featured-products {
+	--gk-heading-shift: calc(6.5rem + 8px);
+	margin-left: calc(-1 * var(--gk-heading-shift) + var(--gk-filter-offset) / var(--gk-filter-sidebar-width) * (var(--gk-heading-shift) - 0.25rem));
+	margin-right: 0;
+	width: calc(100% + var(--gk-heading-shift) - var(--gk-filter-offset) / var(--gk-filter-sidebar-width) * var(--gk-heading-shift));
+	max-width: none;
+	box-sizing: border-box;
+}
+
+@media screen and (min-width: 768px) {
+	body.gk-search-results-page .gk-section-shop-results .gk-featured-products {
+		margin-right: calc(-1 * var(--gk-heading-shift) + var(--gk-filter-offset) / var(--gk-filter-sidebar-width) * var(--gk-heading-shift));
+		width: calc(100% + 2 * var(--gk-heading-shift) - var(--gk-filter-offset) / var(--gk-filter-sidebar-width) * 2 * var(--gk-heading-shift));
+	}
+}
+
+/* Suchergebnisse: Header-Actions immer fixed */
+body.gk-search-results-page .site-header-actions {
+	position: fixed;
+	top: calc( 0.5rem + 8px );
+	right: 1.25rem;
+	z-index: 10002;
 	margin-left: 0;
 }
 
-body.gk-filter-sidebar-open .gk-search-sort-by-wrap {
-	margin-right: 0;
-}
-
-/* Footer: bei geöffneter Filter-Bar kein Viewport-Breakout – gleicher Rand links/rechts wie Rest der Seite */
-body.gk-filter-sidebar-open .site-footer.gk-footer,
-body.gk-filter-sidebar-open #colophon.gk-footer {
-	margin-left: 0;
-	margin-right: 0;
-	width: 100%;
-	max-width: 100%;
-}
-
-body.gk-filter-sidebar-open .gk-footer-inner,
-body.gk-filter-sidebar-open .gk-footer-payment-inner,
-body.gk-filter-sidebar-open .gk-footer-bottom-inner {
-	margin-left: 0;
-	margin-right: 0;
-	max-width: 100%;
-	padding-left: calc( var( --gk-filter-content-gap ) + 1.25rem );
-	padding-right: calc( var( --gk-filter-content-gap ) + 1.25rem );
-}
-
-body.gk-filter-sidebar-open .gk-footer-payment-bar {
-	padding-left: calc( var( --gk-filter-content-gap ) + 1.25rem );
-	padding-right: calc( var( --gk-filter-content-gap ) + 1.25rem );
-}
-
-body.gk-filter-sidebar-open .gk-footer-bottom {
-	padding-left: calc( var( --gk-filter-content-gap ) + 1.25rem );
-	padding-right: calc( var( --gk-filter-content-gap ) + 1.25rem );
+/* Platzhalter damit die Grid-Spalte nicht kollabiert (Actions aus dem Flow) */
+body.gk-search-results-page .site-header-inner {
+	grid-template-columns: 1fr auto minmax( 12rem, 1fr );
 }
 
 .gk-search-filter-sidebar {
 	position: fixed;
 	left: 0;
 	top: 0;
-	bottom: 0;
-	width: 0;
+	width: var( --gk-filter-sidebar-width );
+	height: 100vh;
 	overflow: hidden;
-	background: #1a1828;
+	background: #13122a;
 	z-index: 10001;
-	transition: width 0.3s ease;
+	transform: scaleX( 0 );
+	transform-origin: left center;
+	transition: transform 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
+	pointer-events: none;
+	backface-visibility: hidden;
+	-webkit-backface-visibility: hidden;
 }
 
 .gk-search-layout.is-sidebar-open .gk-search-filter-sidebar {
-	width: var( --gk-filter-sidebar-width );
+	transform: scaleX( 1 );
+	pointer-events: auto;
+	/* Höhe per JS: stoppt am oberen Footer-Rand */
 }
 
 .gk-search-layout {
@@ -2016,7 +2051,9 @@ body.gk-filter-sidebar-open .gk-footer-bottom {
 	align-items: center;
 	justify-content: space-between;
 	padding: 1.25rem 1.25rem 1rem;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+	border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+	min-height: 4.5rem;
+	box-sizing: border-box;
 }
 
 .gk-search-filter-sidebar-title {
@@ -2052,6 +2089,7 @@ body.gk-filter-sidebar-open .gk-footer-bottom {
 
 .gk-search-main {
 	width: 100%;
+	overflow-x: clip;
 }
 
 .gk-search-filters-toggle {
@@ -2077,8 +2115,14 @@ body.gk-filter-sidebar-open .gk-footer-bottom {
 	border-color: #04DA8D;
 }
 
+/* Filter aktiv: leicht grün, SVG in Grün */
 .gk-search-layout.is-sidebar-open .gk-search-filters-toggle {
+	background: rgba(4, 218, 141, 0.1);
 	border-color: #04DA8D;
+}
+
+.gk-search-layout.is-sidebar-open .gk-search-filters-toggle svg {
+	stroke: #04DA8D;
 }
 
 .gk-search-filters-toggle svg {
@@ -2103,14 +2147,14 @@ body.gk-filter-sidebar-open .gk-footer-bottom {
 	text-align: left;
 }
 
-/* Suchergebnisse: Sort by rechts, bündig mit rechtem Kartenrand */
-.gk-search-sort-by-wrap {
+/* Suchergebnisse: Sort by rechts */
+.gk-section-shop-results .gk-search-sort-by-wrap {
 	display: flex;
 	align-items: center;
 	gap: 0.6rem;
 	margin-right: -6.6rem;
+	margin-left: 8px;
 }
-
 .gk-search-sort-by-label {
 	margin: 0;
 	font-size: 1.0625rem;
@@ -2146,13 +2190,9 @@ body.gk-filter-sidebar-open .gk-footer-bottom {
 	color: #fff;
 }
 
-/* Shop/Suchergebnisse: Bestseller-Karten, 3 pro Zeile, keine Heading-Verschiebung */
-.gk-section-shop-results .gk-featured-products {
-	margin-left: 0;
-	margin-right: 0;
-	width: 100%;
-	grid-template-columns: repeat( 3, 1fr );
-}
+/* Shop/Suchergebnisse: nutzt Bestsellers-Layout (gleiche Karten-Größe wie Homepage) */
+
+
 
 @media screen and (max-width: 1023px) {
 	.gk-section-shop-results .gk-featured-products {
@@ -2382,6 +2422,12 @@ body.gk-nav-section-page .site-main.site-main--nav-section {
 	max-width: 100vw;
 	box-sizing: border-box;
 	padding: 0;
+}
+
+/* Suchergebnisse: Footer über Filter-Bar, damit diese nicht darüber liegt */
+body.gk-search-results-page #colophon {
+	position: relative;
+	z-index: 10002;
 }
 .site-footer.gk-footer a {
 	color: #fff;
@@ -3088,6 +3134,15 @@ body.home .gk-section-cta .gk-section-inner {
 	visibility: hidden;
 }
 
+/* Sonst bleibt das volle .gk-section-Padding (2rem oben/unten je Section) – riesige Lücke zwischen Last seen und Footer */
+body.home .gk-section-intro,
+body.home .gk-section-cta {
+	padding-top: 0;
+	padding-bottom: 0;
+	margin-bottom: 0;
+	min-height: 0;
+}
+
 /* Trust Strip: wie Referenz – Icon, Titel, Untertitel, Trennlinien */
 .gk-section-trust-strip {
 	position: relative;
@@ -3367,13 +3422,21 @@ body.home .gk-section-cta .gk-section-inner {
 .gk-section-featured,
 .gk-section-bestsellers,
 .gk-section-recently-viewed,
-.gk-section-preorders,
-.gk-section-weekly-deals {
+.gk-section-preorders {
 	background: var(--gk-bg-color);
 	padding-top: 2.5rem;
 	padding-bottom: 1.25rem;
 }
 
+/* Last seen direkt vor Intro: kompakter Zwischenabstand */
+.gk-section-recently-viewed + .gk-section-intro {
+	padding-top: 1.5rem;
+}
+
+.gk-section-recently-viewed:has( + .gk-section-intro ) {
+	padding-bottom: 0.75rem;
+	margin-bottom: 0;
+}
 
 .gk-section-featured-inner {
 	max-width: 72rem;
