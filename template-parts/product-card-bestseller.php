@@ -85,9 +85,8 @@ if ( function_exists( 'globalkeys_get_product_trailer_url' ) && function_exists(
 		$gk_trailer_src = globalkeys_resolve_product_trailer_url( $gk_trailer_raw );
 	}
 }
-$gk_show_house_member_card_badge = (bool) get_query_var( 'gk_show_house_member_card_badge', false );
 ?>
-<li class="gk-featured-product<?php echo $gk_show_house_member_card_badge ? ' gk-house-product--deal' : ''; ?>">
+<li class="gk-featured-product">
 	<a href="<?php echo esc_url( $product->get_permalink() ); ?>" class="gk-featured-product-link" aria-label="<?php echo esc_attr( $aria_label_card ); ?>">
 		<span class="gk-featured-product-image<?php echo $gk_trailer_src ? ' has-trailer' : ''; ?>">
 			<?php
@@ -150,9 +149,6 @@ $gk_show_house_member_card_badge = (bool) get_query_var( 'gk_show_house_member_c
 				tabindex="-1"
 				aria-hidden="true"
 			></video>
-			<?php endif; ?>
-			<?php if ( $gk_show_house_member_card_badge ) : ?>
-				<span class="gk-house-product-badge" aria-hidden="true"><?php esc_html_e( 'Extra für Mitglieder', 'globalkeys' ); ?></span>
 			<?php endif; ?>
 		</span>
 		<span class="gk-bestseller-meta-row" aria-hidden="true">

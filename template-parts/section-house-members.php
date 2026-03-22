@@ -81,12 +81,7 @@ if ( function_exists( 'wc_get_products' ) ) {
 						globalkeys_house_rewards_pricing_context_enter();
 					}
 					try {
-						$gk_house_badge = false;
-						if ( function_exists( 'globalkeys_product_has_house_member_deal' ) && globalkeys_product_has_house_member_deal( $product ) ) {
-							$gk_house_badge = ! function_exists( 'globalkeys_user_has_house_member_access' ) || ! globalkeys_user_has_house_member_access();
-						}
 						set_query_var( 'product', $product );
-						set_query_var( 'gk_show_house_member_card_badge', $gk_house_badge );
 						set_query_var( 'gk_house_rewards_card_context', true );
 						get_template_part( 'template-parts/product-card', 'bestseller' );
 					} finally {
@@ -97,7 +92,6 @@ if ( function_exists( 'wc_get_products' ) ) {
 					?>
 				<?php endforeach; ?>
 				<?php
-				set_query_var( 'gk_show_house_member_card_badge', false );
 				set_query_var( 'gk_house_rewards_card_context', false );
 				?>
 			</ul>

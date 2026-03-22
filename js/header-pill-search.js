@@ -6,6 +6,9 @@
  */
 ( function() {
 	function init() {
+		if ( document.body.classList.contains( 'gk-search-results-page' ) ) {
+			document.documentElement.classList.add( 'gk-search-results-page' );
+		}
 		var container = document.querySelector( '.header-pill-container' );
 		if ( ! container ) {
 			return;
@@ -392,7 +395,7 @@
 						html += data.cards[ ids[ k ] ] || '';
 					}
 					if ( listEl ) listEl.innerHTML = html;
-					if ( noResultsEl ) noResultsEl.style.display = 'none';
+					if ( noResultsEl ) noResultsEl.style.display = ids.length ? 'none' : 'flex';
 					setSearchResultsCount( ids.length );
 					var paginationEl = document.getElementById( 'gk-search-pagination' );
 					if ( paginationEl ) paginationEl.style.display = 'none';
@@ -401,7 +404,7 @@
 					}
 				} else {
 					if ( listEl ) listEl.innerHTML = '';
-					if ( noResultsEl ) noResultsEl.style.display = 'block';
+					if ( noResultsEl ) noResultsEl.style.display = 'flex';
 					setSearchResultsCount( 0 );
 					var paginationEl = document.getElementById( 'gk-search-pagination' );
 					if ( paginationEl ) paginationEl.style.display = 'none';
@@ -435,7 +438,7 @@
 					html += data.cards[ ids[ j ] ] || '';
 				}
 				if ( listEl ) listEl.innerHTML = html;
-				if ( noResultsEl ) noResultsEl.style.display = ids.length ? 'none' : 'block';
+				if ( noResultsEl ) noResultsEl.style.display = ids.length ? 'none' : 'flex';
 				setSearchResultsCount( ids.length );
 				var paginationEl = document.getElementById( 'gk-search-pagination' );
 				if ( paginationEl ) paginationEl.style.display = 'none';
@@ -494,7 +497,7 @@
 					var noResults = res && res.data && res.data.noResults;
 					var total = ( res && res.data && res.data.total !== undefined ) ? res.data.total : 0;
 					if ( listEl ) listEl.innerHTML = html || '';
-					if ( noResultsEl ) noResultsEl.style.display = noResults ? 'block' : 'none';
+					if ( noResultsEl ) noResultsEl.style.display = noResults ? 'flex' : 'none';
 					setSearchResultsCount( total );
 					var paginationEl = document.getElementById( 'gk-search-pagination' );
 					if ( paginationEl ) paginationEl.style.display = 'none';
@@ -592,6 +595,11 @@
 
 		document.addEventListener( 'gk_search_filters_changed', updateSearchResultsPage );
 		document.addEventListener( 'gk_search_filters_changed', updateActiveFiltersBar );
+		document.addEventListener( 'gk_search_filters_changed', function() {
+			requestAnimationFrame( function() {
+				window.scrollTo( 0, 0 );
+			} );
+		} );
 
 		function updateActiveFiltersBar() {
 			var bar = document.getElementById( 'gk-active-filters-bar' );
@@ -637,6 +645,10 @@
 			if ( chips.length === 0 ) {
 				bar.setAttribute( 'aria-hidden', 'true' );
 				chipsWrap.innerHTML = '';
+				if ( clearBtn ) {
+					clearBtn.setAttribute( 'aria-hidden', 'true' );
+					clearBtn.style.display = 'none';
+				}
 				var badge = document.getElementById( 'gk-search-filters-count-badge' );
 				if ( badge ) {
 					badge.setAttribute( 'aria-hidden', 'true' );
@@ -673,6 +685,8 @@
 				chipsWrap.appendChild( el );
 			}
 			if ( clearBtn ) {
+				clearBtn.removeAttribute( 'aria-hidden' );
+				clearBtn.style.display = '';
 				clearBtn.onclick = function() {
 					clearAllActiveFilters();
 					updateActiveFiltersBar();
@@ -767,12 +781,17 @@
 				sidebar.style.height = '';
 				return;
 			}
+			var vh = window.innerHeight;
 			if ( footer ) {
 				var footerTop = footer.getBoundingClientRect().top;
-				var vh = window.innerHeight;
-				sidebar.style.height = Math.min( vh, Math.max( 0, footerTop ) ) + 'px';
+				var calcHeight = Math.min( vh, Math.max( 0, footerTop ) );
+				if ( window.scrollY < 150 && calcHeight < vh * 0.85 ) {
+					sidebar.style.height = vh + 'px';
+				} else {
+					sidebar.style.height = calcHeight + 'px';
+				}
 			} else {
-				sidebar.style.height = window.innerHeight + 'px';
+				sidebar.style.height = vh + 'px';
 			}
 		}
 
@@ -821,6 +840,11 @@
 			} );
 		}, { passive: true } );
 		window.addEventListener( 'resize', updateSidebarHeight );
+		document.addEventListener( 'gk_search_filters_changed', function() {
+			requestAnimationFrame( function() {
+				requestAnimationFrame( updateSidebarHeight );
+			} );
+		} );
 
 		function initPriceSlider() {
 			var minInput = document.getElementById( 'gk-price-min' );
@@ -879,6 +903,7 @@
 					updatePriceDisplay();
 				} );
 			}
+			document.addEventListener( 'gk_search_filters_changed', updateResetVisibility );
 			updatePriceDisplay();
 		}
 		initPriceSlider();
@@ -910,6 +935,7 @@
 					onFilterChange();
 				} );
 			}
+			document.addEventListener( 'gk_search_filters_changed', updateResetVisibility );
 			updateResetVisibility();
 		}
 		initPreferencesFilter();
@@ -965,6 +991,7 @@
 					onFilterChange();
 				} );
 			}
+			document.addEventListener( 'gk_search_filters_changed', updateResetVisibility );
 			updateResetVisibility();
 		}
 		initDevicesFilter();
@@ -1020,6 +1047,7 @@
 					onFilterChange();
 				} );
 			}
+			document.addEventListener( 'gk_search_filters_changed', updateResetVisibility );
 			updateResetVisibility();
 		}
 		initProductTypeFilter();
@@ -1075,6 +1103,7 @@
 					onFilterChange();
 				} );
 			}
+			document.addEventListener( 'gk_search_filters_changed', updateResetVisibility );
 			updateResetVisibility();
 		}
 		initGameModesFilter();
@@ -1136,6 +1165,7 @@
 					onFilterChange();
 				} );
 			}
+			document.addEventListener( 'gk_search_filters_changed', updateResetVisibility );
 			updateResetVisibility();
 		}
 		initCategoriesFilter();
@@ -1191,6 +1221,7 @@
 					onFilterChange();
 				} );
 			}
+			document.addEventListener( 'gk_search_filters_changed', updateResetVisibility );
 			updateResetVisibility();
 		}
 		initGamepadsFilter();

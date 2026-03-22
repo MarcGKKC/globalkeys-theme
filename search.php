@@ -200,9 +200,9 @@ if ( $gk_product_search && class_exists( 'WooCommerce' ) ) {
 						}
 						?>
 					</ul>
-				</div>
-				<div id="gk-search-no-results" style="display:<?php echo ( $gk_product_query && $gk_product_query->have_posts() ) ? 'none' : 'block'; ?>;">
-					<?php get_template_part( 'template-parts/content', 'none' ); ?>
+					<div id="gk-search-no-results" class="gk-search-no-results-wrap" style="display:<?php echo ( $gk_product_query && $gk_product_query->have_posts() ) ? 'none' : 'flex'; ?>;">
+						<?php get_template_part( 'template-parts/content', 'search-none' ); ?>
+					</div>
 				</div>
 				<div id="gk-search-pagination">
 					<?php

@@ -2041,7 +2041,7 @@ body.gk-search-results-page .site-header-inner {
 .gk-search-layout.is-sidebar-open .gk-search-filter-sidebar {
 	transform: scaleX( 1 );
 	pointer-events: auto;
-	/* Höhe per JS: stoppt am oberen Footer-Rand */
+	/* Höhe per JS: stoppt am Footer beim Scrollen */
 }
 
 .gk-search-layout {
@@ -3167,6 +3167,43 @@ body.gk-search-results-page .gk-section-shop-results .gk-active-filters-bar {
 
 .gk-active-filters-clear-all:hover {
 	color: #04DA8D;
+}
+
+.gk-active-filters-clear-all[aria-hidden="true"] {
+	display: none !important;
+}
+
+/* Suchergebnisse: Keine Treffer – zusätzlicher Block zentriert */
+.gk-search-no-results-wrap {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 16rem;
+	padding: 2rem 1.5rem;
+	width: 100%;
+}
+.gk-search-no-results-inner {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	gap: 1rem;
+}
+.gk-search-no-results-icon {
+	flex-shrink: 0;
+	color: #04DA8D;
+}
+.gk-search-no-results-title {
+	margin: 0;
+	font-size: 1.5rem;
+	font-weight: 700;
+	color: #fff;
+}
+.gk-search-no-results-text {
+	margin: 0;
+	font-size: 1rem;
+	font-weight: 400;
+	color: rgba(255, 255, 255, 0.7);
 }
 
 /* Suchergebnisse: Anzahl-Anzeige links */
@@ -5035,27 +5072,6 @@ body.home .gk-section-cta {
 	color: var(--gk-house-rewards-promo-red);
 }
 
-/* House Rewards: Badge auf gleicher Karte wie Bestseller (Bild-Container) */
-.gk-section-house-members .gk-featured-product-image {
-	position: relative;
-}
-.gk-section-house-members .gk-house-product-badge {
-	position: absolute;
-	left: 0.5rem;
-	bottom: 0.5rem;
-	z-index: 4; /* über Trailer (z-index 3) */
-	padding: 0.25rem 0.5rem;
-	font-size: 0.65rem;
-	font-weight: 700;
-	text-transform: uppercase;
-	letter-spacing: 0.04em;
-	color: #0d0d12;
-	background: #04da8d;
-	border-radius: 4px;
-	line-height: 1.2;
-	pointer-events: none;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-}
 .gk-house-member-product-notice {
 	margin-bottom: 1.25rem;
 }
@@ -6298,4 +6314,7 @@ body.home .gk-section-cta {
 /* Sanftes Scrollen zu Section-Ankern */
 html {
 	scroll-behavior: smooth;
+}
+html.gk-search-results-page {
+	scroll-behavior: auto !important;
 }
