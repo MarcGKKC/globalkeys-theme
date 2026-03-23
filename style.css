@@ -3443,7 +3443,7 @@ body.gk-platform-page .gk-section-inner.gk-section-featured-inner {
 	align-items: stretch;
 	text-decoration: none;
 	color: inherit;
-	min-height: 22rem;
+	min-height: 32rem;
 	overflow: visible;
 	position: relative;
 }
@@ -3490,23 +3490,18 @@ body.gk-platform-page .gk-section-inner.gk-section-featured-inner {
 	flex-direction: column;
 	gap: 0;
 	box-sizing: border-box;
-	overflow: visible;
+	overflow: hidden;
 }
 .gk-platform-featured-slide__panel-img-wrap {
-	--gk-panel-img-overlap: 2.5rem;
-	--gk-panel-img-scale: 1.11;
-	width: calc((100% + var(--gk-panel-img-overlap)) * var(--gk-panel-img-scale));
-	margin-left: calc(-1 * var(--gk-panel-img-overlap));
-	margin-top: 0.1rem;
+	width: 100%;
+	margin: 0 0 0.5rem;
 	aspect-ratio: 16/9;
-	min-height: 14rem;
+	max-height: 11.5rem;
 	border-radius: 6px;
 	overflow: hidden;
 	background: #1a193f;
 	flex-shrink: 0;
-	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-	z-index: 2;
-	transform: translate(-2.35rem, calc(-0.3rem - 2px));
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
 }
 .gk-platform-featured-slide__panel-img {
 	width: 100%;
@@ -3517,7 +3512,7 @@ body.gk-platform-page .gk-section-inner.gk-section-featured-inner {
 .gk-platform-featured-slide__panel-body {
 	flex: 1;
 	min-width: 0;
-	min-height: 10.5rem;
+	min-height: 16.5rem;
 	display: flex;
 	flex-direction: column;
 	gap: 0;
@@ -5480,10 +5475,12 @@ body.home .gk-section-questions-answers {
 	border-radius: var(--gk-faq-radius);
 }
 
+/* Antwort: Höhen-Transition steuert gk-faq-accordion-animate.js */
 .gk-faq-item__answer {
 	flex: 0 0 auto;
-	/* Gleiche Fläche wie der Fragenblock; kein Strich zwischen Frage und Antwort */
 	background: transparent;
+	/* Weniger Repaint über Nachbarn während height-Transition */
+	contain: paint;
 }
 
 .gk-faq-item__answer-inner {

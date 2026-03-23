@@ -2526,6 +2526,14 @@ function globalkeys_scripts() {
 			file_exists( $gk_faq_cube_js ) ? (string) filemtime( $gk_faq_cube_js ) : _S_VERSION,
 			true
 		);
+		$gk_faq_acc_js = get_template_directory() . '/js/gk-faq-accordion-animate.js';
+		wp_enqueue_script(
+			'globalkeys-faq-accordion-animate',
+			get_template_directory_uri() . '/js/gk-faq-accordion-animate.js',
+			array(),
+			file_exists( $gk_faq_acc_js ) ? (string) filemtime( $gk_faq_acc_js ) : _S_VERSION,
+			true
+		);
 	}
 
 	/* PC Plattform: Featured-Game-Carousel (Timer, Hover-Pause, Auto-Switch) */

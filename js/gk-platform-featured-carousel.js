@@ -1,7 +1,7 @@
 /**
  * PC Plattform: Featured-Game-Carousel
- * Timer = Trailer-Länge des aktuellen Spiels, Pause bei Hover, Auto-Switch.
- * Nur Spiele mit Trailer. Dots (Breadcrumb) wechseln die Karten per Klick.
+ * Timer = Trailer-Länge des aktuellen Spiels. Auto-Switch per Video-Ende oder Fallback-Timer.
+ * Dots wechseln die Karten per Klick.
  */
 (function () {
 	'use strict';
@@ -111,7 +111,7 @@
 		var boundVideo = null;
 		var endedBound = null;
 		var rafId = null;
-		var isHovering = false;
+		var backupTimerId = null;
 		var autoEnabled = true;
 		var timerMs = fallbackMs;
 		var pausedAtPercent = 0;
@@ -127,7 +127,7 @@
 		}
 
 		function tick() {
-			if (!boundVideo || !autoEnabled || isHovering) return;
+			if (!boundVideo || !autoEnabled) return;
 			var d = boundVideo.duration;
 			if (d && isFinite(d) && d > 0) {
 				var pct = boundVideo.currentTime / d;
@@ -142,6 +142,10 @@
 				cancelAnimationFrame(rafId);
 				rafId = null;
 			}
+			if (backupTimerId) {
+				clearTimeout(backupTimerId);
+				backupTimerId = null;
+			}
 			if (boundVideo && endedBound) {
 				boundVideo.removeEventListener('ended', endedBound);
 			}
@@ -153,13 +157,66 @@
 			if (!video) return;
 			unbindVideoEvents();
 			function onEnded() {
-				if (!autoEnabled || isHovering) return;
+				if (!autoEnabled) return;
 				showSlide(currentIndex + 1);
 			}
 			boundVideo = video;
 			endedBound = onEnded;
 			video.addEventListener('ended', onEnded);
 			rafId = requestAnimationFrame(tick);
+			backupTimerId = setTimeout(function () {
+				backupTimerId = null;
+				if (autoEnabled && boundVideo === video) {
+					showSlide(currentIndex + 1);
+				}
+			}, timerMs + 500);
+		}
+
+		function ensureVideoPlay(video, resetElapsed, pausedPct) {
+			if (!video) return;
+			video.currentTime = resetElapsed ? 0 : (pausedPct * (video.duration || 0));
+			var played = false;
+			var listenersAttached = false;
+			function removeListeners() {
+				if (!listenersAttached) return;
+				listenersAttached = false;
+				video.removeEventListener('loadedmetadata', tryPlay);
+				video.removeEventListener('loadeddata', tryPlay);
+				video.removeEventListener('canplay', tryPlay);
+			}
+			function tryPlay() {
+				if (played) return;
+				video.play().then(function () {
+					played = true;
+					removeListeners();
+				}).catch(function () {
+					if (!listenersAttached) {
+						listenersAttached = true;
+						video.addEventListener('loadedmetadata', tryPlay, { once: true });
+						video.addEventListener('loadeddata', tryPlay, { once: true });
+						video.addEventListener('canplay', tryPlay, { once: true });
+					}
+				});
+			}
+			if (video.readyState >= 2) {
+				tryPlay();
+			} else if (video.readyState >= 1) {
+				tryPlay();
+			} else {
+				video.addEventListener('loadedmetadata', tryPlay, { once: true });
+				video.addEventListener('loadeddata', tryPlay, { once: true });
+				video.addEventListener('canplay', tryPlay, { once: true });
+			}
+			setTimeout(function () {
+				if (!played && video.readyState >= 1) {
+					tryPlay();
+				}
+			}, 400);
+			setTimeout(function () {
+				if (!played) {
+					tryPlay();
+				}
+			}, 1000);
 		}
 
 		function startTimer(resetElapsed, durationMs) {
@@ -167,33 +224,35 @@
 				timerMs = durationMs;
 			}
 			var video = slides[currentIndex].querySelector('video.gk-platform-featured-slide__trailer');
-			if (!autoEnabled || isHovering) {
-				updateTimerDisplay(resetElapsed ? 0 : pausedAtPercent);
-				if (timerValue) {
-					var sec = Math.ceil((timerMs / 1000) * (1 - (resetElapsed ? 0 : pausedAtPercent)));
-					timerValue.textContent = String(Math.max(0, sec));
-				}
-				return;
-			}
-			bindVideoEvents(video);
 			if (resetElapsed) {
 				pausedAtPercent = 0;
 				updateTimerDisplay(0);
+			} else if (!autoEnabled) {
+				updateTimerDisplay(pausedAtPercent);
+				if (timerValue) {
+					var sec = Math.ceil((timerMs / 1000) * (1 - pausedAtPercent));
+					timerValue.textContent = String(Math.max(0, sec));
+				}
 			}
 			if (video) {
-				video.currentTime = resetElapsed ? 0 : pausedAtPercent * video.duration;
-				video.play().catch(function () {});
+				video.loop = !autoEnabled;
 			}
+			if (autoEnabled) {
+				bindVideoEvents(video);
+			} else {
+				unbindVideoEvents();
+			}
+			ensureVideoPlay(video, resetElapsed, pausedAtPercent);
 		}
 
 		function stopTimer() {
 			var video = slides[currentIndex].querySelector('video.gk-platform-featured-slide__trailer');
 			unbindVideoEvents();
-			if (video && video.duration && isFinite(video.duration)) {
-				pausedAtPercent = video.currentTime / video.duration;
-			}
 			if (video) {
-				video.pause();
+				video.loop = true;
+				if (video.duration && isFinite(video.duration)) {
+					pausedAtPercent = video.currentTime / video.duration;
+				}
 			}
 			updateTimerDisplay(Math.min(1, Math.max(0, pausedAtPercent)));
 		}
@@ -217,7 +276,14 @@
 					if (i === idx) {
 						v.preload = 'auto';
 						v.currentTime = 0;
-						v.play().catch(function () {});
+						v.loop = !autoEnabled;
+						if (v.readyState >= 2) {
+							v.play().catch(function () {});
+						} else {
+							v.addEventListener('loadeddata', function () {
+								v.play().catch(function () {});
+							}, { once: true });
+						}
 					} else {
 						v.pause();
 					}
@@ -298,29 +364,20 @@
 			}
 		}
 
-		el.addEventListener('mouseenter', function () {
-			isHovering = true;
-			el.classList.add('is-hovering');
-			stopTimer();
-		});
-		el.addEventListener('mouseleave', function () {
-			isHovering = false;
-			el.classList.remove('is-hovering');
-			startTimer(false);
-		});
 
-		if (autoInput) {
-			function updateAutoState() {
+		function updateAutoState() {
+			if (autoInput) {
 				autoEnabled = autoInput.checked;
 				el.classList.toggle('is-auto-off', !autoEnabled);
-				if (autoEnabled) {
-					startTimer(false);
-				} else {
-					stopTimer();
-				}
 			}
+			if (autoEnabled) {
+				startTimer(false);
+			} else {
+				stopTimer();
+			}
+		}
+		if (autoInput) {
 			autoInput.addEventListener('change', updateAutoState);
-			updateAutoState();
 		}
 
 		/* Dots: direkte Klick-Listener für zuverlässiges Slide-Wechseln */
@@ -339,7 +396,17 @@
 			});
 		});
 
+		/* Erst Slide 0 aktivieren, dann Timer nach 2 Frames – verhindert Race bei erstem Video */
 		showSlide(0);
+		var firstVideo = slides[0].querySelector('video.gk-platform-featured-slide__trailer');
+		if (firstVideo && firstVideo.readyState === 0) {
+			firstVideo.load();
+		}
+		requestAnimationFrame(function () {
+			requestAnimationFrame(function () {
+				updateAutoState();
+			});
+		});
 		syncSlideHeights(slides);
 		var resizeTimer;
 		function onResize() {
