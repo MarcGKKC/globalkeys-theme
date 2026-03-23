@@ -277,6 +277,98 @@ function globalkeys_platform_body_class( $classes ) {
 add_filter( 'body_class', 'globalkeys_platform_body_class' );
 
 /**
+ * Liefert bis zu $limit Featured-Produkte für die Plattform-Seite (Carousel).
+ * Nur Produkte mit hinterlegtem Trailer-Video.
+ *
+ * @param string $platform Plattform-Slug (pc, playstation, xbox, nintendo).
+ * @param int    $limit    Max. Anzahl Produkte.
+ * @return WC_Product[]
+ */
+function globalkeys_get_platform_featured_products( $platform, $limit = 5 ) {
+	if ( ! class_exists( 'WooCommerce' ) ) {
+		return array();
+	}
+	$get_trailer = function_exists( 'globalkeys_get_product_trailer_url' );
+	if ( ! $get_trailer ) {
+		return array();
+	}
+	$args = array(
+		'status'  => 'publish',
+		'limit'   => 50,
+		'orderby' => 'date',
+		'order'   => 'DESC',
+		'return'  => 'objects',
+	);
+	$products = wc_get_products( $args );
+	if ( ! is_array( $products ) ) {
+		return array();
+	}
+	$with_trailer = array();
+	foreach ( $products as $p ) {
+		if ( ! $p || ! is_a( $p, 'WC_Product' ) || ! $p->is_visible() ) {
+			continue;
+		}
+		$url = globalkeys_get_product_trailer_url( $p );
+		if ( $url !== '' ) {
+			$resolved = function_exists( 'globalkeys_resolve_product_trailer_url' )
+				? globalkeys_resolve_product_trailer_url( $url )
+				: $url;
+			if ( $resolved !== '' ) {
+				$with_trailer[] = $p;
+				if ( count( $with_trailer ) >= (int) $limit ) {
+					break;
+				}
+			}
+		}
+	}
+	return $with_trailer;
+}
+
+/**
+ * Liefert Trending-Produkte für die Plattform-Seite (unter dem Carousel).
+ * 9 Produkte nach Beliebtheit, ohne PlayStation und Xbox.
+ *
+ * @param int $limit Max. Anzahl Produkte.
+ * @return WC_Product[]
+ */
+function globalkeys_get_platform_trending_products( $limit = 9 ) {
+	if ( ! function_exists( 'wc_get_products' ) ) {
+		return array();
+	}
+	$args = array(
+		'status'  => 'publish',
+		'limit'   => 60,
+		'orderby' => 'popularity',
+		'order'   => 'DESC',
+	);
+	if ( function_exists( 'globalkeys_wc_product_args_exclude_preorders' ) ) {
+		$args = globalkeys_wc_product_args_exclude_preorders( $args );
+	}
+	$products = wc_get_products( $args );
+	if ( ! is_array( $products ) ) {
+		return array();
+	}
+	$filtered = array();
+	$get_platform = function_exists( 'globalkeys_get_product_platform_key' );
+	foreach ( $products as $p ) {
+		if ( ! $p || ! is_a( $p, 'WC_Product' ) || ! $p->is_visible() ) {
+			continue;
+		}
+		if ( $get_platform ) {
+			$key = globalkeys_get_product_platform_key( $p );
+			if ( $key === 'playstation' || $key === 'xbox' ) {
+				continue;
+			}
+		}
+		$filtered[] = $p;
+		if ( count( $filtered ) >= (int) $limit ) {
+			break;
+		}
+	}
+	return $filtered;
+}
+
+/**
  * Nav-Punkte über der Pill: eigene Seiten (Trending Games, Preorders, Available Soon, Activation, Support).
  */
 function globalkeys_nav_section_rewrite_rules() {
@@ -2418,6 +2510,34 @@ function globalkeys_scripts() {
 	/* Carousel: immer auf der Startseite laden (Hero-Sections + Test; unabhängig von strikter has_front_page_sections-Bedingung) */
 	if ( is_front_page() ) {
 		wp_enqueue_script( 'globalkeys-categories-carousel', get_template_directory_uri() . '/js/gk-categories-carousel.js', array(), _S_VERSION, true );
+		$gk_faq_cat_js = get_template_directory() . '/js/gk-faq-categories.js';
+		wp_enqueue_script(
+			'globalkeys-faq-categories',
+			get_template_directory_uri() . '/js/gk-faq-categories.js',
+			array(),
+			file_exists( $gk_faq_cat_js ) ? (string) filemtime( $gk_faq_cat_js ) : _S_VERSION,
+			true
+		);
+		$gk_faq_cube_js = get_template_directory() . '/js/gk-faq-cube-size-sync.js';
+		wp_enqueue_script(
+			'globalkeys-faq-cube-size-sync',
+			get_template_directory_uri() . '/js/gk-faq-cube-size-sync.js',
+			array(),
+			file_exists( $gk_faq_cube_js ) ? (string) filemtime( $gk_faq_cube_js ) : _S_VERSION,
+			true
+		);
+	}
+
+	/* PC Plattform: Featured-Game-Carousel (Timer, Hover-Pause, Auto-Switch) */
+	if ( get_query_var( 'gk_platform' ) === 'pc' ) {
+		$gk_carousel_js = get_template_directory() . '/js/gk-platform-featured-carousel.js';
+		wp_enqueue_script(
+			'globalkeys-platform-featured-carousel',
+			get_template_directory_uri() . '/js/gk-platform-featured-carousel.js',
+			array(),
+			file_exists( $gk_carousel_js ) ? (string) filemtime( $gk_carousel_js ) : _S_VERSION,
+			true
+		);
 	}
 
 	if ( function_exists( 'is_account_page' ) && is_account_page() && is_user_logged_in() ) {

@@ -344,6 +344,12 @@ function globalkeys_get_front_page_sections() {
 			'aria_label' => __( 'Bestseller', 'globalkeys' ),
 		),
 		array(
+			'id'        => 'section-recently-viewed',
+			'slug'      => 'recently-viewed',
+			'label'     => __( 'Last seen', 'globalkeys' ),
+			'aria_label' => __( 'Last seen', 'globalkeys' ),
+		),
+		array(
 			'id'        => 'section-categories',
 			'slug'      => 'categories',
 			'label'     => __( 'All Categories', 'globalkeys' ),
@@ -392,10 +398,10 @@ function globalkeys_get_front_page_sections() {
 			'aria_label' => __( 'Premium membership', 'globalkeys' ),
 		),
 		array(
-			'id'        => 'section-recently-viewed',
-			'slug'      => 'recently-viewed',
-			'label'     => __( 'Last seen', 'globalkeys' ),
-			'aria_label' => __( 'Last seen', 'globalkeys' ),
+			'id'         => 'section-questions-answers',
+			'slug'       => 'questions-answers',
+			'label'      => __( 'Questions & Answers', 'globalkeys' ),
+			'aria_label' => __( 'Questions & Answers', 'globalkeys' ),
 		),
 		array(
 			'id'        => 'section-intro',

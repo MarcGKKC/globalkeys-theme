@@ -14,6 +14,7 @@ function globalkeys_product_trailer_url_field() {
 	global $post;
 
 	$value = $post ? get_post_meta( $post->ID, '_gk_product_trailer_url', true ) : '';
+	$value_carousel = $post ? get_post_meta( $post->ID, '_gk_product_trailer_carousel_url', true ) : '';
 	?>
 	<div class="options_group">
 		<?php
@@ -28,6 +29,17 @@ function globalkeys_product_trailer_url_field() {
 				'value'       => $value,
 			)
 		);
+		woocommerce_wp_text_input(
+			array(
+				'id'          => '_gk_product_trailer_carousel_url',
+				'name'        => '_gk_product_trailer_carousel_url',
+				'label'       => __( 'Carousel-Trailer (HD, optional)', 'globalkeys' ),
+				'placeholder' => '',
+				'description' => __( 'Optional: HD-Version (z. B. 1920×1080) für die Produktvorschau auf der Plattform-Seite. Leer = Standard-Trailer.', 'globalkeys' ),
+				'desc_tip'    => true,
+				'value'       => $value_carousel,
+			)
+		);
 		?>
 	</div>
 	<?php
@@ -40,27 +52,35 @@ add_action( 'woocommerce_product_options_general_product_data', 'globalkeys_prod
  * @param WC_Product $product Produktobjekt.
  */
 function globalkeys_save_product_trailer_url( $product ) {
-	if ( ! isset( $_POST['_gk_product_trailer_url'] ) ) {
-		return;
-	}
-
 	if ( ! is_a( $product, 'WC_Product' ) ) {
 		return;
 	}
 
-	$url = trim( wp_unslash( $_POST['_gk_product_trailer_url'] ) );
-
-	if ( $url === '' ) {
-		$product->delete_meta_data( '_gk_product_trailer_url' );
-		return;
+	if ( isset( $_POST['_gk_product_trailer_url'] ) ) {
+		$url = trim( wp_unslash( $_POST['_gk_product_trailer_url'] ) );
+		if ( $url === '' ) {
+			$product->delete_meta_data( '_gk_product_trailer_url' );
+		} else {
+			$safe = esc_url_raw( $url );
+			if ( $safe === '' ) {
+				$safe = sanitize_text_field( $url );
+			}
+			$product->update_meta_data( '_gk_product_trailer_url', $safe );
+		}
 	}
 
-	$safe = esc_url_raw( $url );
-	if ( $safe === '' ) {
-		$safe = sanitize_text_field( $url );
+	if ( isset( $_POST['_gk_product_trailer_carousel_url'] ) ) {
+		$url = trim( wp_unslash( $_POST['_gk_product_trailer_carousel_url'] ) );
+		if ( $url === '' ) {
+			$product->delete_meta_data( '_gk_product_trailer_carousel_url' );
+		} else {
+			$safe = esc_url_raw( $url );
+			if ( $safe === '' ) {
+				$safe = sanitize_text_field( $url );
+			}
+			$product->update_meta_data( '_gk_product_trailer_carousel_url', $safe );
+		}
 	}
-
-	$product->update_meta_data( '_gk_product_trailer_url', $safe );
 }
 add_action( 'woocommerce_admin_process_product_object', 'globalkeys_save_product_trailer_url', 10, 1 );
 
