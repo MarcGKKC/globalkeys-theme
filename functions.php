@@ -288,6 +288,34 @@ function globalkeys_get_platform_featured_products( $platform, $limit = 5 ) {
 	if ( ! class_exists( 'WooCommerce' ) ) {
 		return array();
 	}
+	$limit = (int) $limit;
+	if ( $limit < 1 ) {
+		$limit = 5;
+	}
+	/* PlayStation / Xbox / Nintendo (vorerst): zufällige sichtbare Produkte ohne Trailer-Pflicht */
+	if ( is_string( $platform ) && in_array( $platform, array( 'playstation', 'xbox', 'nintendo' ), true ) ) {
+		$args = array(
+			'status'   => 'publish',
+			'limit'    => $limit,
+			'orderby'  => 'rand',
+			'return'   => 'objects',
+			'paginate' => false,
+		);
+		if ( function_exists( 'globalkeys_wc_product_args_exclude_preorders' ) ) {
+			$args = globalkeys_wc_product_args_exclude_preorders( $args );
+		}
+		$products = wc_get_products( $args );
+		if ( ! is_array( $products ) ) {
+			return array();
+		}
+		$out = array();
+		foreach ( $products as $p ) {
+			if ( $p && is_a( $p, 'WC_Product' ) && $p->is_visible() ) {
+				$out[] = $p;
+			}
+		}
+		return $out;
+	}
 	$get_trailer = function_exists( 'globalkeys_get_product_trailer_url' );
 	if ( ! $get_trailer ) {
 		return array();
@@ -326,14 +354,39 @@ function globalkeys_get_platform_featured_products( $platform, $limit = 5 ) {
 
 /**
  * Liefert Trending-Produkte für die Plattform-Seite (unter dem Carousel).
- * 9 Produkte nach Beliebtheit, ohne PlayStation und Xbox.
+ * PC: Beliebtheit, ohne PlayStation/Xbox. PlayStation/Xbox/Nintendo (vorerst): zufällige sichtbare Produkte.
  *
- * @param int $limit Max. Anzahl Produkte.
+ * @param int         $limit    Max. Anzahl Produkte.
+ * @param string|null $platform Plattform-Slug (z. B. pc, playstation, xbox, nintendo); null = PC-Logik.
  * @return WC_Product[]
  */
-function globalkeys_get_platform_trending_products( $limit = 9 ) {
+function globalkeys_get_platform_trending_products( $limit = 9, $platform = null ) {
 	if ( ! function_exists( 'wc_get_products' ) ) {
 		return array();
+	}
+	$limit = max( 1, (int) $limit );
+	if ( is_string( $platform ) && in_array( $platform, array( 'playstation', 'xbox', 'nintendo' ), true ) ) {
+		$args = array(
+			'status'   => 'publish',
+			'limit'    => $limit,
+			'orderby'  => 'rand',
+			'return'   => 'objects',
+			'paginate' => false,
+		);
+		if ( function_exists( 'globalkeys_wc_product_args_exclude_preorders' ) ) {
+			$args = globalkeys_wc_product_args_exclude_preorders( $args );
+		}
+		$products = wc_get_products( $args );
+		if ( ! is_array( $products ) ) {
+			return array();
+		}
+		$out = array();
+		foreach ( $products as $p ) {
+			if ( $p && is_a( $p, 'WC_Product' ) && $p->is_visible() ) {
+				$out[] = $p;
+			}
+		}
+		return $out;
 	}
 	$args = array(
 		'status'  => 'publish',
@@ -348,7 +401,7 @@ function globalkeys_get_platform_trending_products( $limit = 9 ) {
 	if ( ! is_array( $products ) ) {
 		return array();
 	}
-	$filtered = array();
+	$filtered       = array();
 	$get_platform = function_exists( 'globalkeys_get_product_platform_key' );
 	foreach ( $products as $p ) {
 		if ( ! $p || ! is_a( $p, 'WC_Product' ) || ! $p->is_visible() ) {
@@ -361,11 +414,120 @@ function globalkeys_get_platform_trending_products( $limit = 9 ) {
 			}
 		}
 		$filtered[] = $p;
-		if ( count( $filtered ) >= (int) $limit ) {
+		if ( count( $filtered ) >= $limit ) {
 			break;
 		}
 	}
 	return $filtered;
+}
+
+/**
+ * Zufällige Produkte für die Plattform-Section „Best with Friends“ (z. B. 3 Karten).
+ * PC: ohne PlayStation/Xbox-Kategorien (wie Trending). Andere Plattformen: passend zum Slug.
+ *
+ * @param int         $limit    Anzahl.
+ * @param string|null $platform gk_platform-Slug (pc, playstation, xbox, nintendo).
+ * @return WC_Product[]
+ */
+function globalkeys_get_best_with_friends_products( $limit = 3, $platform = null ) {
+	if ( ! function_exists( 'wc_get_products' ) ) {
+		return array();
+	}
+	$limit    = max( 1, (int) $limit );
+	$platform = is_string( $platform ) && $platform !== '' ? $platform : null;
+
+	$args = array(
+		'status'   => 'publish',
+		'limit'    => 200,
+		'orderby'  => 'rand',
+		'return'   => 'objects',
+		'paginate' => false,
+	);
+	if ( function_exists( 'globalkeys_wc_product_args_exclude_preorders' ) ) {
+		$args = globalkeys_wc_product_args_exclude_preorders( $args );
+	}
+	$products = wc_get_products( $args );
+	if ( ! is_array( $products ) ) {
+		return array();
+	}
+
+	$get_key = function_exists( 'globalkeys_get_product_platform_key' );
+	$out     = array();
+
+	foreach ( $products as $p ) {
+		if ( ! $p || ! is_a( $p, 'WC_Product' ) || ! $p->is_visible() ) {
+			continue;
+		}
+		if ( $get_key ) {
+			$key = globalkeys_get_product_platform_key( $p );
+			if ( $platform === 'pc' || $platform === null ) {
+				if ( $key === 'playstation' || $key === 'xbox' ) {
+					continue;
+				}
+			} elseif ( $platform === 'playstation' ) {
+				if ( $key !== 'playstation' ) {
+					continue;
+				}
+			} elseif ( $platform === 'xbox' ) {
+				if ( $key !== 'xbox' ) {
+					continue;
+				}
+			} elseif ( $platform === 'nintendo' ) {
+				if ( $key !== 'nintendo' ) {
+					continue;
+				}
+			}
+		}
+		$out[] = $p;
+		if ( count( $out ) >= $limit ) {
+			break;
+		}
+	}
+
+	return $out;
+}
+
+/**
+ * Genre-/Kategorienamen wie Homepage-Section „All Categories“ (Carousel).
+ *
+ * @return string[] Übersetzte Labels.
+ */
+function globalkeys_get_homepage_category_collection_labels() {
+	return array(
+		__( 'Survival', 'globalkeys' ),
+		__( 'Adventure', 'globalkeys' ),
+		__( 'Action', 'globalkeys' ),
+		__( 'RPG', 'globalkeys' ),
+		__( 'Shooter', 'globalkeys' ),
+		__( 'Simulation', 'globalkeys' ),
+		__( 'Sport', 'globalkeys' ),
+		__( 'Strategy', 'globalkeys' ),
+		__( 'Horror', 'globalkeys' ),
+		__( 'Indie', 'globalkeys' ),
+		__( 'Multiplayer', 'globalkeys' ),
+		__( 'Story', 'globalkeys' ),
+		__( 'Casual', 'globalkeys' ),
+		__( 'Open World', 'globalkeys' ),
+		__( 'New Releases', 'globalkeys' ),
+	);
+}
+
+/**
+ * PC-Kategorie-Raster: 2 Reihen × 4 Kästen — wichtigste Genres, gleiche Texte wie Homepage „All Categories“.
+ *
+ * @return string[]
+ */
+function globalkeys_get_pc_category_grid_labels() {
+	return array(
+		__( 'Action', 'globalkeys' ),
+		__( 'Adventure', 'globalkeys' ),
+		__( 'RPG', 'globalkeys' ),
+		__( 'Shooter', 'globalkeys' ),
+		__( 'Strategy', 'globalkeys' ),
+		__( 'Simulation', 'globalkeys' ),
+		__( 'Horror', 'globalkeys' ),
+		__( 'Indie', 'globalkeys' ),
+	);
 }
 
 /**
@@ -437,6 +599,17 @@ function globalkeys_search_results_body_class( $classes ) {
 	return $classes;
 }
 add_filter( 'body_class', 'globalkeys_search_results_body_class' );
+
+/**
+ * Suchseite mit ?gk_filters=open: Filterleiste sofort sichtbar (CSS-Offset wie bei JS-geöffneter Sidebar).
+ */
+function globalkeys_search_filters_open_body_class( $classes ) {
+	if ( is_search() && isset( $_GET['post_type'] ) && 'product' === $_GET['post_type'] && isset( $_GET['gk_filters'] ) && 'open' === sanitize_text_field( wp_unslash( (string) $_GET['gk_filters'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$classes[] = 'gk-filter-sidebar-open';
+	}
+	return $classes;
+}
+add_filter( 'body_class', 'globalkeys_search_filters_open_body_class' );
 
 function globalkeys_nav_section_maybe_flush_rewrites() {
 	if ( get_option( 'globalkeys_nav_section_rewrite_flushed' ) ) {
@@ -544,9 +717,10 @@ add_filter( 'template_include', 'globalkeys_force_search_template_for_product_se
  *
  * @param string $term Suchbegriff.
  * @param int    $limit Max. Anzahl Produkte (0 = alle).
+ * @param bool   $exclude_preorders Vorbesteller aus Treffern streichen (Standard: ja; bei Filter „Pre-orders“: nein).
  * @return array{ids: int[], products: array} IDs und Produktdaten für Dropdown.
  */
-function globalkeys_search_products_starts_with( $term, $limit = 0 ) {
+function globalkeys_search_products_starts_with( $term, $limit = 0, $exclude_preorders = true ) {
 	global $wpdb;
 	$term = trim( (string) $term );
 	if ( $term === '' || ! class_exists( 'WooCommerce' ) ) {
@@ -577,7 +751,7 @@ function globalkeys_search_products_starts_with( $term, $limit = 0 ) {
 	}
 
 	$ids = array_unique( array_filter( array_merge( $title_ids, $sku_ids ) ) );
-	if ( function_exists( 'globalkeys_get_preorder_list_product_ids' ) ) {
+	if ( $exclude_preorders && function_exists( 'globalkeys_get_preorder_list_product_ids' ) ) {
 		$pre = globalkeys_get_preorder_list_product_ids();
 		if ( ! empty( $pre ) ) {
 			$ids = array_values( array_diff( $ids, $pre ) );
@@ -666,7 +840,10 @@ function globalkeys_ajax_search_results_html() {
 	if ( $term === '' || ! class_exists( 'WooCommerce' ) ) {
 		wp_send_json_success( array( 'html' => '', 'noResults' => true, 'total' => 0 ) );
 	}
-	$result  = globalkeys_search_products_starts_with( $term, 0 );
+	$product_type_req = isset( $_REQUEST['product_type'] ) ? array_map( 'sanitize_text_field', (array) $_REQUEST['product_type'] ) : array();
+	$product_type_req = array_intersect( array_filter( $product_type_req ), array_keys( globalkeys_get_filter_product_types() ) );
+	$exclude_preorders = ! in_array( 'pre-orders', $product_type_req, true );
+	$result  = globalkeys_search_products_starts_with( $term, 0, $exclude_preorders );
 	$ids     = isset( $result['ids'] ) ? $result['ids'] : array();
 	if ( $price_min !== null || $price_max !== null ) {
 		$filtered = array();
@@ -1157,7 +1334,26 @@ function globalkeys_get_search_products_data_for_js() {
 		'type'    => $product_types,
 	) );
 	if ( empty( $ids ) ) {
-		return array( 'index' => array(), 'cards' => array(), 'dropdown' => array(), 'prices' => array(), 'dates' => array(), 'inStock' => array(), 'productCats' => array(), 'deviceOptions' => array(), 'productProductTypes' => array(), 'productTypeOptions' => array(), 'productCategoryTags' => array(), 'categoryFilterOptions' => array(), 'productGamepads' => array(), 'gamepadOptions' => array(), 'productGameModes' => array(), 'gameModeOptions' => array(), 'priceMin' => 0, 'priceMax' => 100 );
+		return array(
+			'index'                 => array(),
+			'cards'                 => array(),
+			'dropdown'              => array(),
+			'prices'                => array(),
+			'dates'                 => array(),
+			'inStock'               => array(),
+			'productCats'           => array(),
+			'deviceOptions'         => array(),
+			'productProductTypes'   => array(),
+			'productTypeOptions'    => globalkeys_get_filter_product_types(),
+			'productCategoryTags'   => array(),
+			'categoryFilterOptions' => array(),
+			'productGamepads'       => array(),
+			'gamepadOptions'        => array(),
+			'productGameModes'      => array(),
+			'gameModeOptions'       => array(),
+			'priceMin'              => 0,
+			'priceMax'              => 100,
+		);
 	}
 	$index            = array();
 	$cards            = array();
@@ -2473,7 +2669,18 @@ function globalkeys_scripts() {
 		'clearAll'           => __( 'Clear all', 'globalkeys' ),
 	);
 	if ( class_exists( 'WooCommerce' ) ) {
-		$gk_pill_search_vars['productsData'] = globalkeys_get_search_products_data_for_js();
+		$gk_pill_search_vars['productsData']        = globalkeys_get_search_products_data_for_js();
+		$gk_pill_search_vars['filterProductTypes'] = globalkeys_get_filter_product_types();
+	}
+	if ( function_exists( 'is_search' ) && is_search() && isset( $_GET['post_type'] ) && 'product' === $_GET['post_type'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$gk_pm_raw = isset( $_GET['gk_price_max'] ) ? wp_unslash( $_GET['gk_price_max'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( $gk_pm_raw !== '' && is_numeric( $gk_pm_raw ) ) {
+			$gk_pill_search_vars['initialPriceMax'] = max( 0, min( 999999, (int) round( (float) $gk_pm_raw ) ) );
+		}
+		$gk_pmin_raw = isset( $_GET['gk_price_min'] ) ? wp_unslash( $_GET['gk_price_min'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( $gk_pmin_raw !== '' && is_numeric( $gk_pmin_raw ) ) {
+			$gk_pill_search_vars['initialPriceMin'] = max( 0, min( 999999, (int) round( (float) $gk_pmin_raw ) ) );
+		}
 	}
 	wp_localize_script( 'globalkeys-header-pill-search', 'gkPillSearch', $gk_pill_search_vars );
 	$gk_drawer_ver = (string) filemtime( get_template_directory() . '/js/gk-account-drawer.js' );
@@ -2510,6 +2717,14 @@ function globalkeys_scripts() {
 	/* Carousel: immer auf der Startseite laden (Hero-Sections + Test; unabhängig von strikter has_front_page_sections-Bedingung) */
 	if ( is_front_page() ) {
 		wp_enqueue_script( 'globalkeys-categories-carousel', get_template_directory_uri() . '/js/gk-categories-carousel.js', array(), _S_VERSION, true );
+		$gk_budget_rotate_js = get_template_directory() . '/js/gk-budget-games-rotate.js';
+		wp_enqueue_script(
+			'globalkeys-budget-games-rotate',
+			get_template_directory_uri() . '/js/gk-budget-games-rotate.js',
+			array(),
+			file_exists( $gk_budget_rotate_js ) ? (string) filemtime( $gk_budget_rotate_js ) : _S_VERSION,
+			true
+		);
 		$gk_faq_cat_js = get_template_directory() . '/js/gk-faq-categories.js';
 		wp_enqueue_script(
 			'globalkeys-faq-categories',
@@ -2530,14 +2745,15 @@ function globalkeys_scripts() {
 		wp_enqueue_script(
 			'globalkeys-faq-accordion-animate',
 			get_template_directory_uri() . '/js/gk-faq-accordion-animate.js',
-			array(),
+			array( 'globalkeys-faq-cube-size-sync' ),
 			file_exists( $gk_faq_acc_js ) ? (string) filemtime( $gk_faq_acc_js ) : _S_VERSION,
 			true
 		);
 	}
 
-	/* PC Plattform: Featured-Game-Carousel (Timer, Hover-Pause, Auto-Switch) */
-	if ( get_query_var( 'gk_platform' ) === 'pc' ) {
+	/* Plattform: Featured-Carousel (PC mit Trailer, PlayStation vorerst Bild-Fallback) */
+	$gk_pf = get_query_var( 'gk_platform' );
+	if ( $gk_pf === 'pc' || $gk_pf === 'playstation' || $gk_pf === 'xbox' || $gk_pf === 'nintendo' ) {
 		$gk_carousel_js = get_template_directory() . '/js/gk-platform-featured-carousel.js';
 		wp_enqueue_script(
 			'globalkeys-platform-featured-carousel',
@@ -2545,6 +2761,24 @@ function globalkeys_scripts() {
 			array(),
 			file_exists( $gk_carousel_js ) ? (string) filemtime( $gk_carousel_js ) : _S_VERSION,
 			true
+		);
+	}
+	if ( $gk_pf === 'pc' ) {
+		$gk_pc_cat_expand_js = get_template_directory() . '/js/gk-pc-category-grid-expand.js';
+		wp_enqueue_script(
+			'globalkeys-pc-category-grid-expand',
+			get_template_directory_uri() . '/js/gk-pc-category-grid-expand.js',
+			array(),
+			file_exists( $gk_pc_cat_expand_js ) ? (string) filemtime( $gk_pc_cat_expand_js ) : _S_VERSION,
+			true
+		);
+		wp_localize_script(
+			'globalkeys-pc-category-grid-expand',
+			'gkPcCategoryGrid',
+			array(
+				'showAll'  => __( 'Show All', 'globalkeys' ),
+				'showLess' => __( 'Show Less', 'globalkeys' ),
+			)
 		);
 	}
 

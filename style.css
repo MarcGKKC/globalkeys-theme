@@ -741,7 +741,6 @@ body.gk-header-scrolled .header-pill-wrapper .header-nav-above {
 	max-height: 0;
 	transform: translateY(-100%);
 	opacity: 0;
-	pointer-events: none;
 	visibility: hidden;
 	transition: max-height 0.16s ease-out, transform 0.16s ease-out, opacity 0.16s ease-out, visibility 0s linear 0.16s;
 }
@@ -833,6 +832,21 @@ body.gk-header-scrolled .site-header-inner {
 	opacity: 0.9;
 }
 
+/* Logo: kein blauer Browser-Fokus-/Klick-Rahmen */
+#masthead .site-branding a.site-logo-link:focus,
+#masthead .site-branding a.site-logo-link:focus-visible,
+#masthead .site-branding a.site-logo-link:active,
+#masthead .site-branding .custom-logo-link:focus,
+#masthead .site-branding .custom-logo-link:focus-visible,
+#masthead .site-branding .custom-logo-link:active {
+	outline: none;
+	box-shadow: none;
+}
+#masthead .site-branding a.site-logo-link,
+#masthead .site-branding .custom-logo-link {
+	-webkit-tap-highlight-color: transparent;
+}
+
 .site-logo-placeholder {
 	display: block;
 }
@@ -858,6 +872,8 @@ body.gk-header-scrolled .site-header-inner {
 	align-items: center;
 	justify-content: center;
 	gap: 0.25rem 1rem;
+	position: relative;
+	z-index: 6;
 }
 
 /* Menüpunkte über der Pill: kleiner Hover-Kasten in Grün, aktueller Punkt nur Grün */
@@ -888,11 +904,23 @@ body.gk-header-scrolled .site-header-inner {
 	color: #04DA8D !important;
 }
 
+/* Nav über der Pill: kein weißer Browser-Fokus-/Klick-Rahmen */
+#masthead .header-nav-above a:focus,
+#masthead .header-nav-above a:focus-visible,
+#masthead .header-nav-above a:active {
+	outline: none;
+	box-shadow: none;
+}
+#masthead .header-nav-above a {
+	-webkit-tap-highlight-color: transparent;
+}
+
 /* Äußerer Bereich: Pill + X-Bereich (X nur bei offener Suche sichtbar, absolut positioniert) + Dropdown */
 .header-pill-search-outer {
 	position: relative;
 	display: inline-block;
 	overflow: visible;
+	z-index: 2;
 }
 
 /* Eigenes Bereich für das X – bei geschlossener Suche kein Platz, bei offener Suche absolut rechts daneben */
@@ -1287,6 +1315,20 @@ body.gk-header-scrolled .header-pill-search-dropdown {
 	box-shadow: 0 0 0 2px #ff000b !important;
 }
 
+/* Kollektionen in der Pill: kein weißer Fokus-/Klick-Rahmen (Active-Farbring bleibt) */
+#masthead .header-pill .platform-filter:focus,
+#masthead .header-pill .platform-filter:focus-visible {
+	outline: none;
+}
+#masthead .header-pill .platform-filter:active {
+	outline: none;
+}
+#masthead .header-pill .platform-filter:not(.active):active {
+	box-shadow: none;
+}
+#masthead .header-pill .platform-filter {
+	-webkit-tap-highlight-color: transparent;
+}
 
 .header-pill .platform-filter-icon {
 	width: 1.85rem;
@@ -2051,6 +2093,39 @@ body.gk-search-results-page .site-header-inner {
 
 .gk-search-layout {
 	position: relative;
+	width: 100%;
+}
+
+/* Produktsuche: bei wenig Treffern Footer am unteren Viewport (nicht „schwebend“ neben voller Filter-Sidebar) */
+body.gk-search-results-page #page.site {
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+
+body.gk-search-results-page #masthead,
+body.gk-search-results-page #colophon {
+	flex-shrink: 0;
+}
+
+body.gk-search-results-page #primary.site-main {
+	flex: 1 1 auto;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+}
+
+body.gk-search-results-page #gk-search-layout {
+	flex: 1 1 auto;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	width: 100%;
+}
+
+body.gk-search-results-page .gk-search-main {
+	flex: 1 1 auto;
+	min-height: 0;
 	width: 100%;
 }
 
@@ -3387,6 +3462,216 @@ body.gk-platform-page .site-main.site-main--platform {
 	background: rgba(255, 255, 255, 0.22);
 }
 
+/* PC-Kollektion Gift Cards: gleiche Blöcke/Typo wie .gk-platform-header; nur margin-top negiert (mittig auf der Seite) */
+.gk-section-pc-gift-cards {
+	background: var(--gk-bg-color);
+	padding: 2.5rem 0;
+	box-sizing: border-box;
+}
+.gk-section-pc-gift-cards .gk-pc-gift-cards__header.gk-platform-header {
+	margin-top: 0;
+}
+
+/* Gift-Cards-Bar: aktiver Punkt – gleiche Maße wie .gk-platform-stores-bar a */
+.gk-section-pc-gift-cards .gk-platform-stores-bar a.active {
+	background: #04da8d;
+	color: #fff;
+	box-shadow: 0 0 0 2px #04da8d;
+}
+.gk-section-pc-gift-cards .gk-platform-stores-bar a.active:hover {
+	background: #03c47e;
+	color: #fff;
+}
+
+/* PC-Kollektion: Kategorie-Raster – Kopf wie Gift Cards; Raster-Breite wie Pre-orders (.gk-featured-products heading-shift) */
+.gk-section-pc-category-grid {
+	background: var(--gk-bg-color);
+	padding: 2.5rem 0;
+	box-sizing: border-box;
+}
+body.gk-platform-page .gk-section-pc-category-grid {
+	--gk-bestsellers-heading-shift: calc(6.5rem + 8px);
+}
+/* Eine horizontale Linie mit exakt gleicher Breite wie das Raster darunter, mittig durch den Titel */
+.gk-section-pc-category-grid .gk-pc-category-grid__title-row {
+	position: relative;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: calc(100% + var(--gk-bestsellers-heading-shift) + 2.5rem);
+	max-width: none;
+	margin-left: calc(-1 * var(--gk-bestsellers-heading-shift) - 1.25rem);
+	margin-right: -1.25rem;
+	margin-bottom: 0.5rem;
+	padding: 0;
+	box-sizing: border-box;
+}
+@media screen and (min-width: 768px) {
+	body.gk-platform-page .gk-section-pc-category-grid .gk-pc-category-grid__title-row {
+		margin-right: calc(-1 * var(--gk-bestsellers-heading-shift) - 1.25rem);
+		width: calc(100% + 2 * var(--gk-bestsellers-heading-shift) + 2.5rem);
+	}
+}
+.gk-section-pc-category-grid .gk-pc-category-grid__title-row::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 50%;
+	transform: translateY(-50%);
+	height: 1px;
+	background: rgba(255, 255, 255, 0.22);
+	z-index: 0;
+	pointer-events: none;
+}
+.gk-section-pc-category-grid .gk-pc-category-grid__title-row .gk-platform-title {
+	position: relative;
+	z-index: 1;
+	margin: 0;
+	padding: 0 1rem;
+	text-align: center;
+	transform: none;
+	background: var(--gk-bg-color);
+	max-width: 56rem;
+	box-decoration-break: clone;
+	-webkit-box-decoration-break: clone;
+}
+.gk-section-pc-category-grid .gk-pc-category-grid__header.gk-platform-header {
+	margin-top: 0;
+}
+.gk-section-pc-category-grid .gk-platform-title {
+	font-size: calc(clamp(calc(2rem + 1px), 4.5vw, calc(2.75rem + 1px)) - 16px);
+}
+.gk-section-pc-category-grid .gk-section-inner.gk-section-featured-inner {
+	padding-top: 0.15rem;
+}
+.gk-pc-category-grid__list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 0.65rem;
+	width: 100%;
+	box-sizing: border-box;
+}
+body.gk-platform-page .gk-section-pc-category-grid .gk-pc-category-grid__list {
+	margin-left: calc(-1 * var(--gk-bestsellers-heading-shift));
+	margin-right: 0;
+	width: calc(100% + var(--gk-bestsellers-heading-shift));
+	max-width: none;
+}
+@media screen and (min-width: 768px) {
+	body.gk-platform-page .gk-section-pc-category-grid .gk-pc-category-grid__list {
+		margin-right: calc(-1 * var(--gk-bestsellers-heading-shift));
+		width: calc(100% + 2 * var(--gk-bestsellers-heading-shift));
+	}
+}
+.gk-section-pc-category-grid .gk-pc-category-grid__list--compact {
+	max-height: 30rem;
+	opacity: 1;
+	transform: translateY(0);
+	overflow: hidden;
+	pointer-events: auto;
+	transition: none;
+}
+.gk-section-pc-category-grid .gk-pc-category-grid__list--full {
+	max-height: 0;
+	opacity: 0;
+	transform: translateY(-8px);
+	overflow: hidden;
+	pointer-events: none;
+	transition: none;
+}
+.gk-section-pc-category-grid.is-expanded .gk-pc-category-grid__list--compact {
+	max-height: 0;
+	opacity: 0;
+	transform: translateY(-8px);
+	pointer-events: none;
+}
+.gk-section-pc-category-grid.is-expanded .gk-pc-category-grid__list--full {
+	max-height: 52rem;
+	opacity: 1;
+	transform: translateY(0);
+	pointer-events: auto;
+}
+.gk-pc-category-grid__footer {
+	display: flex;
+	justify-content: center;
+	margin-top: 1.35rem;
+}
+.gk-pc-category-grid__toggle {
+	appearance: none;
+	border: 1px solid #04da8d;
+	background: #04da8d;
+	color: #fff;
+	font-size: 1.02rem;
+	font-weight: 600;
+	padding: 0.72rem 1.75rem;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.2s;
+}
+.gk-pc-category-grid__toggle:hover {
+	background: #03c47e;
+	border-color: #03c47e;
+	color: #fff;
+	transform: translateY(-1px);
+}
+.gk-pc-category-grid__toggle:focus-visible {
+	outline: 2px solid #04da8d;
+	outline-offset: 2px;
+}
+@media screen and (min-width: 901px) {
+	/* Desktop: Full-Layout fuer 4er-Reihen, letzte 3 mittig */
+	.gk-section-pc-category-grid .gk-pc-category-grid__list--full {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 0.65rem;
+	}
+	.gk-section-pc-category-grid .gk-pc-category-grid__list--full .gk-pc-category-grid__item {
+		flex: 0 0 calc((100% - (3 * 0.65rem)) / 4);
+	}
+}
+.gk-pc-category-grid__item {
+	margin: 0;
+	min-width: 0;
+}
+.gk-pc-category-grid__link,
+.gk-pc-category-grid__link:link,
+.gk-pc-category-grid__link:visited {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 5.6rem;
+	padding: 1.25rem 1rem;
+	box-sizing: border-box;
+	background: #13122a;
+	color: #fff;
+	text-decoration: none;
+	font-size: 1.125rem;
+	font-weight: 500;
+	line-height: 1.3;
+	text-align: center;
+	border-radius: 8px;
+	transition: background 0.2s, color 0.2s;
+}
+.gk-pc-category-grid__link:hover {
+	background: rgba(255, 255, 255, 0.08);
+	color: #fff;
+}
+@media screen and (max-width: 900px) {
+	.gk-pc-category-grid__list {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+@media screen and (max-width: 520px) {
+	.gk-pc-category-grid__list {
+		grid-template-columns: repeat(1, minmax(0, 1fr));
+	}
+}
+
 /* PC Featured Carousel: großes Trailer-Video links, Panel rechts (Hover-Box-Style).
    Gleicher Randabstand wie Bestseller-Produktkarten: gleiche Breakout-Struktur (heading-shift). */
 body.gk-platform-page .gk-section-inner.gk-section-featured-inner {
@@ -3427,7 +3712,8 @@ body.gk-platform-page .gk-section-inner.gk-section-featured-inner {
 .gk-platform-featured-carousel__inner.is-transitioning .gk-platform-featured-carousel__transition-overlay {
 	opacity: 1;
 }
-.gk-platform-featured-carousel__inner.is-transitioning .gk-platform-featured-slide__trailer {
+.gk-platform-featured-carousel__inner.is-transitioning .gk-platform-featured-slide__trailer,
+.gk-platform-featured-carousel__inner.is-transitioning .gk-platform-featured-slide__trailer-fallback {
 	opacity: 0;
 	pointer-events: none;
 }
@@ -3456,6 +3742,17 @@ body.gk-platform-page .gk-section-inner.gk-section-featured-inner {
 	overflow: visible;
 }
 .gk-platform-featured-slide__trailer {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: center;
+	transform: translateZ(0);
+	backface-visibility: hidden;
+	transition: opacity 0.08s ease-out;
+}
+.gk-platform-featured-slide__trailer-fallback {
 	position: absolute;
 	inset: 0;
 	width: 100%;
@@ -3772,6 +4069,170 @@ body.gk-platform-page .gk-section-inner.gk-section-featured-inner {
 	}
 }
 
+/* PC-Plattform: Panorama-Banner unter Trending – gleiche Breite wie Produkt-Raster (heading-shift) */
+body.gk-platform-page .gk-section-platform-spotlight .gk-platform-spotlight {
+	--gk-spotlight-shift: calc(6.5rem + 8px);
+	margin-left: calc(-1 * var(--gk-spotlight-shift));
+	margin-right: 0;
+	width: calc(100% + var(--gk-spotlight-shift));
+	max-width: none;
+	box-sizing: border-box;
+}
+
+@media screen and (min-width: 768px) {
+	body.gk-platform-page .gk-section-platform-spotlight .gk-platform-spotlight {
+		margin-right: calc(-1 * var(--gk-spotlight-shift));
+		width: calc(100% + 2 * var(--gk-spotlight-shift));
+	}
+}
+
+/* Panorama-Banner: höher als zuvor; Bild full-bleed, Fokus leicht oberhalb Mitte (Key-Art) */
+.gk-platform-spotlight {
+	position: relative;
+	display: block;
+	width: 100%;
+	overflow: hidden;
+	border-radius: 6px;
+	background: #0d0c1a;
+	box-shadow: none;
+	border: none;
+	min-height: clamp(14rem, 26vw, 20.5rem);
+	height: clamp(14rem, 26vw, 20.5rem);
+}
+
+.gk-platform-spotlight__img {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: center 38%;
+	pointer-events: none;
+	z-index: 0;
+	display: block;
+}
+
+.gk-platform-spotlight__fade {
+	display: none;
+}
+
+.gk-platform-spotlight__hit {
+	position: relative;
+	z-index: 2;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: center;
+	gap: 1.35rem;
+	min-height: clamp(14rem, 26vw, 20.5rem);
+	width: 100%;
+	box-sizing: border-box;
+	padding: 1.35rem clamp(1.35rem, 3.8vw, 2.75rem);
+	text-decoration: none;
+	color: #fff;
+}
+
+.gk-platform-spotlight__hit:hover {
+	opacity: 0.97;
+}
+
+.gk-platform-spotlight__title-cluster {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.45rem;
+	max-width: min(32rem, 92%);
+}
+
+.gk-platform-spotlight__release {
+	display: inline-block;
+	padding: 0.26rem 0.52rem;
+	font-size: clamp(0.65rem, 0.95vw, 0.78rem);
+	font-weight: 600;
+	line-height: 1.2;
+	color: #fff;
+	background: rgba(143, 187, 211, 0.72);
+	border-radius: 4px;
+	letter-spacing: 0.02em;
+	box-shadow: none;
+}
+
+.gk-platform-spotlight__title {
+	font-size: clamp(1.28rem, 2.75vw, 2.05rem);
+	font-weight: 600;
+	line-height: 1.15;
+	color: #fff;
+	letter-spacing: -0.03em;
+	max-width: 100%;
+}
+
+.gk-platform-spotlight__row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.6rem;
+	width: 100%;
+	min-width: 0;
+}
+
+/* Gleiche Komponenten wie Produktkarten; Grid-Platzierung der Karten hier zurücksetzen */
+.gk-platform-spotlight .gk-bestseller-price-bar {
+	grid-column: unset;
+	grid-row: unset;
+	justify-self: stretch;
+	justify-content: flex-start;
+	align-items: flex-end;
+	width: auto;
+	max-width: 100%;
+	padding: 0;
+	margin: 0;
+	gap: 0.45rem 1.15rem;
+}
+
+.gk-section-bestsellers.gk-section-platform-spotlight .gk-bestseller-price-badge {
+	font-size: clamp(0.72rem, 1.05vw, 0.88rem);
+	padding: 0.22rem 0.36rem;
+}
+
+.gk-section-bestsellers.gk-section-platform-spotlight .gk-bestseller-price-now {
+	font-size: clamp(1.5rem, 2.65vw, 2.1rem);
+	font-weight: 600;
+	font-variant-numeric: proportional-nums;
+	margin-left: 1.25rem;
+	text-align: left;
+	padding-right: 0;
+}
+
+.gk-section-bestsellers.gk-section-platform-spotlight .gk-bestseller-price-now .woocommerce-Price-amount,
+.gk-section-bestsellers.gk-section-platform-spotlight .gk-bestseller-price-now .woocommerce-Price-currencySymbol {
+	font-weight: 600;
+}
+
+@media screen and (max-width: 767px) {
+	body.gk-platform-page .gk-section-platform-spotlight .gk-platform-spotlight {
+		margin-left: 0;
+		margin-right: 0;
+		width: 100%;
+		max-width: 100%;
+	}
+	.gk-platform-spotlight,
+	.gk-platform-spotlight__hit {
+		height: clamp(12.5rem, 50vw, 16.5rem);
+		min-height: clamp(12.5rem, 50vw, 16.5rem);
+	}
+	.gk-platform-spotlight__img {
+		object-position: center 35%;
+	}
+	.gk-platform-spotlight__hit {
+		padding-left: 1.15rem;
+		padding-right: 1rem;
+	}
+	.gk-platform-spotlight__title-cluster {
+		max-width: 90%;
+	}
+}
+
 /* Nav-Section-Seiten (Trending Games, Preorders, …): gleicher leerer Hauptbereich */
 body.gk-nav-section-page .site-main.site-main--nav-section {
 	min-height: 170vh;
@@ -4026,7 +4487,7 @@ body.gk-filter-sidebar-open.gk-search-results-page #colophon.gk-filter-sidebar-f
 	max-width: calc(72rem + (6.5rem + 8px) * 2);
 	margin-left: calc(50% - 36rem - 6.5rem - 8px);
 	margin-right: auto;
-	padding: 3rem 1.5rem 2.5rem;
+	padding: 3rem 1.5rem 1.5rem;
 	box-sizing: border-box;
 }
 .gk-footer-top {
@@ -4064,41 +4525,149 @@ body.gk-filter-sidebar-open.gk-search-results-page #colophon.gk-filter-sidebar-f
 	margin: 0 0 1.25rem;
 	max-width: 34rem;
 }
-.gk-footer-newsletter {
+/* Äußerer Block nur für Breite; Linie + Buttons in .gk-footer-locale-inner = wie Text (max 34rem), zentriert */
+.gk-footer-locale {
+	box-sizing: border-box;
+	align-self: stretch;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+.gk-footer-locale-inner {
+	--gk-footer-locale-line: rgba(255, 255, 255, 0.14);
 	box-sizing: border-box;
 	max-width: 34rem;
-	width: min(100%, 34rem);
-	padding-top: 1.25rem;
-	border-top: 1px solid rgba(255, 255, 255, 0.14);
-}
-.gk-footer-newsletter-heading {
-	font-size: 1rem;
-	font-weight: 700;
-	margin: 0 0 0.35rem;
-}
-.gk-footer-newsletter-text {
-	font-size: 0.875rem;
-	color: rgba(255, 255, 255, 0.85);
-	line-height: 1.45;
-	margin: 0 0 0.75rem;
-}
-.gk-footer-newsletter-input {
 	width: 100%;
-	max-width: 20rem;
-	padding: 0.6rem 0.9rem;
+	margin-left: 0;
+	margin-right: auto;
+	padding-top: 1.25rem;
+	border-top: 1px solid var(--gk-footer-locale-line);
+}
+
+/* Nur so breit wie Inhalt — Hover nicht auf leerer Fläche rechts */
+.gk-footer-locale-row {
+	display: inline-flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 0;
+	max-width: 100%;
+	vertical-align: top;
+}
+
+.gk-footer-locale-btn {
+	appearance: none;
+	-webkit-appearance: none;
+	margin: 0;
+	padding: 0.5rem 0.95rem;
+	font-family: inherit;
 	font-size: 0.9375rem;
-	background: rgba(255, 255, 255, 0.06);
-	border: 1px solid rgba(255, 255, 255, 0.2);
+	font-weight: 600;
+	line-height: 1.3;
+	color: rgba(255, 255, 255, 0.9);
+	background: transparent;
+	border: none;
 	border-radius: 6px;
-	color: #fff;
+	cursor: pointer;
+	transition: color 0.2s ease;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.45rem;
+}
+
+.gk-footer-locale-icon {
+	flex-shrink: 0;
+	width: 1.125rem;
+	height: 1.125rem;
+	display: block;
+}
+
+/*
+ * language-gk.svg als Maske: echte Hex-Farben, kein filter()-Türkis.
+ * Pfad relativ zu style.css (Theme-Root).
+ */
+.gk-footer-locale-icon--lang-mask {
+	display: block;
 	box-sizing: border-box;
+	background-color: rgba(255, 255, 255, 0.9);
+	transition: background-color 0.2s ease;
+	-webkit-mask-image: url("Pictures/language-gk.svg");
+	mask-image: url("Pictures/language-gk.svg");
+	-webkit-mask-size: contain;
+	mask-size: contain;
+	-webkit-mask-repeat: no-repeat;
+	mask-repeat: no-repeat;
+	-webkit-mask-position: center;
+	mask-position: center;
 }
-.gk-footer-newsletter-input::placeholder {
-	color: #9CA3AF;
+
+.gk-footer-locale-row:hover .gk-footer-locale-icon--lang-mask {
+	background-color: #04da8d;
 }
-.gk-footer-newsletter-input:focus {
+
+/* Hover nur über .gk-footer-locale-row: alle drei Labels + Icons grün, kein Button-Hintergrund */
+.gk-footer-locale-row:hover .gk-footer-locale-btn {
+	color: #04da8d;
+}
+
+.gk-footer-locale-btn:focus {
 	outline: none;
-	border-color: #04DA8D;
+}
+
+.gk-footer-locale-btn:focus-visible {
+	outline: 2px solid #04da8d;
+	outline-offset: 2px;
+}
+
+/*
+ * Trenner = klickbare Buttons (Linie + Abstand); Klick löst den rechten Locale-Button aus.
+ * Globale button:focus-Rahmen (#ccc) hier aus.
+ */
+.gk-footer-locale-sep {
+	appearance: none;
+	-webkit-appearance: none;
+	margin: 0;
+	padding: 0.35rem 0.85rem;
+	border: none;
+	background: transparent;
+	cursor: pointer;
+	flex-shrink: 0;
+	align-self: stretch;
+	display: inline-flex;
+	align-items: stretch;
+	justify-content: center;
+	box-sizing: border-box;
+	font-size: 0;
+	line-height: 0;
+	color: transparent;
+}
+
+.gk-footer-locale-sep:focus,
+.gk-footer-locale-sep:active {
+	outline: none;
+	border-color: transparent;
+	background: transparent;
+}
+
+.gk-footer-locale-sep:focus-visible {
+	outline: 2px solid #04da8d;
+	outline-offset: 1px;
+}
+
+.gk-footer-locale-sep::before {
+	content: '';
+	width: 0;
+	align-self: stretch;
+	min-height: 1.25rem;
+	border: none;
+	border-left: 1px solid var(--gk-footer-locale-line);
+	transition: border-color 0.2s ease;
+}
+
+.gk-footer-locale-row:hover .gk-footer-locale-sep::before {
+	border-left-color: #04da8d;
 }
 
 .gk-footer-right {
@@ -4212,7 +4781,7 @@ body.gk-filter-sidebar-open.gk-search-results-page #colophon.gk-filter-sidebar-f
 
 .gk-footer-payment-bar {
 	background: transparent;
-	padding: 1.25rem 1.5rem;
+	padding: 0.85rem 1.5rem;
 }
 .gk-footer-payment-inner {
 	max-width: calc(72rem + (6.5rem + 8px) * 2);
@@ -5011,6 +5580,12 @@ body.home .gk-section-questions-answers {
 	padding-bottom: 1.25rem;
 }
 
+/* Spotlight: etwas Luft zu Trending und zur nächsten Section */
+body.gk-platform-page .gk-section-bestsellers.gk-section-platform-spotlight {
+	padding-top: 1.5rem;
+	padding-bottom: 2rem;
+}
+
 /* Last seen direkt vor Categories: kompakter Zwischenabstand (Section nach Bestsellers) */
 .gk-section-recently-viewed + .gk-section-categories {
 	padding-top: 1.5rem;
@@ -5130,7 +5705,7 @@ body.home .gk-section-questions-answers {
 	text-align: center;
 }
 
-/* Spiele für jeden Geldbeutel: gleiche Karten wie Categories, ohne Carousel */
+/* Games for every budget: same cards as Categories */
 .gk-section-budget-games {
 	background: var(--gk-bg-color);
 	padding-top: 2.5rem;
@@ -5145,6 +5720,43 @@ body.home .gk-section-questions-answers {
 }
 .gk-section-budget-games .gk-featured-heading-wrap {
 	margin-bottom: 2.5rem;
+}
+
+/* PC-Kollektion „Our recommendations“: kompaktere Spieltitel; grüne Linie schmal; Titel näher an der Linie */
+.gk-section-pc-recommendations .gk-test-box-label {
+	gap: 0.75rem;
+}
+.gk-section-pc-recommendations .gk-pc-recommendation-box__title {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 3;
+	overflow: hidden;
+	word-break: break-word;
+	font-size: calc(1.3rem + 1px);
+	font-weight: 700;
+	line-height: 1.28;
+}
+.gk-section-pc-recommendations .gk-test-box-label-line {
+	width: 4px;
+	min-height: 3.5rem;
+	height: 2.9em;
+}
+.gk-section-pc-recommendations .gk-test-box--bg::before {
+	background: linear-gradient(
+		to top left,
+		rgba(0, 0, 0, 0.2) 0%,
+		rgba(0, 0, 0, 0.12) 35%,
+		rgba(0, 0, 0, 0.04) 70%,
+		transparent 100%
+	);
+}
+
+/* Budget-Section: kein Hover an der Überschrift (Unterstrich bleibt statisch) */
+.gk-section-budget-games .gk-featured-title-underline {
+	transition: none;
+}
+.gk-section-budget-games .gk-featured-heading-wrap:hover .gk-featured-title-underline {
+	width: 35%;
 }
 
 /* House Members Section: gleiches Design wie Budget/Categories */
@@ -5175,7 +5787,7 @@ body.home .gk-section-questions-answers {
 	/* Derselbe Abstand wie zwischen den FAQ-Karten (rechts) – fließt in die Würfelgröße ein */
 	--gk-faq-list-gap: 1.15rem;
 	/*
-	 * Eine zugeklappte FAQ-Kachel (äußere Höhe): Summary inkl. Padding, so hoch wie Chevron (2.65rem) + 1px Rand oben/unten.
+	 * Eine zugeklappte FAQ-Kachel (äußere Höhe): Summary inkl. Padding; Chevron-Bereich wie zuvor 2.65rem (Icon darin 23px wie Filter).
 	 */
 	--gk-faq-item-closed-h: calc(2 * 1.2rem + max(1.125rem * 1.4, 2.65rem) + 2px);
 	/*
@@ -5246,6 +5858,12 @@ body.home .gk-section-questions-answers {
 	border-radius: var(--gk-faq-radius);
 	transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease,
 		opacity 0.18s ease;
+	/* Global style.css: button:focus / :active setzt helle #aaa/#bbb-Ränder — auf dunklem FAQ-Hintergrund „weiß“ */
+	-webkit-tap-highlight-color: transparent;
+}
+
+.gk-faq-category-tile::-moz-focus-inner {
+	border: 0;
 }
 
 /* Kein kurzes „zu groß“ beim Reload: CSS-Fallback für --gk-faq-cube-size weicht leicht von der JS-Messung ab */
@@ -5273,17 +5891,42 @@ body.home .gk-section-questions-answers {
 
 .gk-faq-category-tile:focus {
 	outline: none;
+	border-color: var(--gk-faq-item-border);
+}
+
+.gk-faq-category-tile:active {
+	border-color: var(--gk-faq-item-border);
+}
+
+.gk-faq-category-tile:hover:focus {
+	border-color: rgba(255, 255, 255, 0.14);
 }
 
 .gk-faq-category-tile:focus-visible {
 	outline: 2px solid var(--gk-faq-accent);
 	outline-offset: 2px;
+	border-color: var(--gk-faq-item-border);
+}
+
+.gk-faq-category-tile:hover:focus-visible {
+	border-color: rgba(255, 255, 255, 0.14);
 }
 
 .gk-faq-category-tile.is-active {
 	background: rgba(0, 229, 153, 0.1);
 	border-color: rgba(0, 229, 153, 0.45);
 	box-shadow: 0 0 0 1px rgba(0, 229, 153, 0.2);
+}
+
+/* Höhere Spezifität als :hover:focus / :focus-visible — aktive Kachel behält grünen Rand */
+.gk-faq-category-tile.is-active:focus,
+.gk-faq-category-tile.is-active:active {
+	border-color: rgba(0, 229, 153, 0.45);
+}
+
+.gk-faq-category-tile.is-active:hover:focus,
+.gk-faq-category-tile.is-active:hover:focus-visible {
+	border-color: rgba(0, 229, 153, 0.45);
 }
 
 /* Icon + Beschriftung dicht untereinander, zusammen im Würfel zentriert */
@@ -5437,7 +6080,7 @@ body.home .gk-section-questions-answers {
 	min-width: 0;
 }
 
-/* Pfeil rechts, vertikal mittig, ohne Hintergrund; weiß; beim Aufklappen Drehung nach unten */
+/* Gleiches SVG wie Filter-Sidebar; äußere Box 2.65rem = frühere Karten-/Zeilenhöhe */
 .gk-faq-item__chevron {
 	flex-shrink: 0;
 	align-self: center;
@@ -5449,20 +6092,24 @@ body.home .gk-section-questions-answers {
 	margin-left: auto;
 	background: transparent;
 	border-radius: 0;
-	transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.gk-faq-item__chevron::before {
-	content: "›";
+.gk-faq-item__chevron-svg {
 	display: block;
-	font-size: 1.95rem;
-	font-weight: 600;
-	line-height: 1;
-	color: #fff;
+	width: 23px;
+	height: 23px;
+	stroke: rgba(255, 255, 255, 0.5);
+	transition: transform 0.2s ease, stroke 0.2s ease;
+	transform: rotate(-90deg);
+	transform-origin: center;
 }
 
-.gk-faq-item[open] .gk-faq-item__chevron {
-	transform: rotate(90deg);
+.gk-faq-item[open] .gk-faq-item__chevron-svg {
+	transform: none;
+}
+
+.gk-faq-item__summary:hover .gk-faq-item__chevron-svg {
+	stroke: #fff;
 }
 
 .gk-faq-item__summary:focus {
@@ -5475,12 +6122,15 @@ body.home .gk-section-questions-answers {
 	border-radius: var(--gk-faq-radius);
 }
 
-/* Antwort: Höhen-Transition steuert gk-faq-accordion-animate.js */
+/* Antwort: Höhen-Transition steuert gk-faq-accordion-animate.js (kein contain:paint — sonst harte Repaint-Grenzen beim height/auto-Wechsel) */
 .gk-faq-item__answer {
 	flex: 0 0 auto;
 	background: transparent;
-	/* Weniger Repaint über Nachbarn während height-Transition */
-	contain: paint;
+}
+
+/* Offener Block: Klick im Antwortbereich schließt (Script); Hinweis auf Klickbarkeit */
+.gk-faq-item[open] > .gk-faq-item__answer {
+	cursor: pointer;
 }
 
 .gk-faq-item__answer-inner {
@@ -6122,6 +6772,16 @@ body.home .gk-section-questions-answers {
 	box-sizing: border-box;
 	overflow: hidden;
 	background: #13122a;
+}
+a.gk-test-box {
+	display: block;
+	text-decoration: none;
+	color: inherit;
+	cursor: pointer;
+}
+a.gk-test-box:focus-visible {
+	outline: 2px solid #04DA8D;
+	outline-offset: 3px;
 }
 .gk-test-box--bg::after {
 	content: '';
@@ -7096,6 +7756,11 @@ body.home .gk-section-questions-answers {
 .gk-section-bestsellers .gk-bestseller-price-now .woocommerce-Price-amount,
 .gk-section-bestsellers .gk-bestseller-price-now .woocommerce-Price-currencySymbol {
 	color: #fff;
+}
+
+/* PC-Plattform Spotlight: Preis leicht nach rechts (überschreibt .gk-bestseller-price-now #7235) */
+body.gk-platform-page .gk-section-platform-spotlight .gk-bestseller-price-now {
+	margin-left: 1.25rem;
 }
 
 @media screen and (max-width: 1023px) {

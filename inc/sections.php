@@ -376,8 +376,8 @@ function globalkeys_get_front_page_sections() {
 		array(
 			'id'        => 'section-budget-games',
 			'slug'      => 'budget-games',
-			'label'     => __( 'Spiele für jeden Geldbeutel', 'globalkeys' ),
-			'aria_label' => __( 'Spiele für jeden Geldbeutel', 'globalkeys' ),
+			'label'     => __( 'Games for every budget', 'globalkeys' ),
+			'aria_label' => __( 'Games for every budget', 'globalkeys' ),
 		),
 		array(
 			'id'        => 'section-reward',

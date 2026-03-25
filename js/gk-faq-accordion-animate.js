@@ -19,6 +19,15 @@
 
 	var animByDetails = new WeakMap();
 
+	/* Synchron mit gk-faq-cube-size-sync: kein sync() während Höhen-Animation (min-height-Reset flackert) */
+	function bumpLayoutAnim(delta) {
+		window.dispatchEvent(
+			new CustomEvent('gk-faq-anim', {
+				detail: { delta: delta },
+			})
+		);
+	}
+
 	function clearAnimStyles(answer) {
 		if (!answer) {
 			return;
@@ -43,6 +52,7 @@
 				answer.removeEventListener('transitionend', t.onEnd);
 			}
 			animByDetails.delete(details);
+			bumpLayoutAnim(-1);
 		}
 		clearAnimStyles(answer);
 	}
@@ -79,6 +89,7 @@
 		}
 
 		cancelAnim(details);
+		bumpLayoutAnim(1);
 
 		answer.style.willChange = 'height';
 		answer.style.overflow = 'hidden';
@@ -89,6 +100,7 @@
 		var target = measureAnswerTargetHeight(answer);
 		if (target < 1) {
 			clearAnimStyles(answer);
+			bumpLayoutAnim(-1);
 			return;
 		}
 
@@ -96,9 +108,21 @@
 		answer.style.transition =
 			'height ' + DURATION_OPEN_MS / 1000 + 's ' + EASING;
 
+		/* Ein rAF: Öffnen läuft nur nach preventDefault + manuellem open (kein natives Vollbild-Frame) */
 		window.requestAnimationFrame(function () {
 			if (!details.open) {
+				var tAb = animByDetails.get(details);
+				if (tAb) {
+					if (tAb.timeoutId) {
+						window.clearTimeout(tAb.timeoutId);
+					}
+					if (tAb.onEnd) {
+						answer.removeEventListener('transitionend', tAb.onEnd);
+					}
+					animByDetails.delete(details);
+				}
 				clearAnimStyles(answer);
+				bumpLayoutAnim(-1);
 				return;
 			}
 			answer.style.height = target + 'px';
@@ -124,8 +148,10 @@
 			answer.style.height = 'auto';
 			answer.style.overflow = '';
 			answer.style.willChange = '';
-			void answer.offsetHeight;
-			answer.style.removeProperty('transition');
+			window.requestAnimationFrame(function () {
+				answer.style.removeProperty('transition');
+				bumpLayoutAnim(-1);
+			});
 		}
 
 		function onEnd(ev) {
@@ -177,6 +203,8 @@
 			return;
 		}
 
+		bumpLayoutAnim(1);
+
 		answer.style.overflow = 'hidden';
 		answer.style.height = start + 'px';
 		void answer.offsetHeight;
@@ -184,7 +212,9 @@
 			'height ' + DURATION_CLOSE_MS / 1000 + 's ' + EASING;
 
 		window.requestAnimationFrame(function () {
-			answer.style.height = '0px';
+			window.requestAnimationFrame(function () {
+				answer.style.height = '0px';
+			});
 		});
 
 		var done = false;
@@ -203,6 +233,7 @@
 			animByDetails.delete(details);
 			details.open = false;
 			clearAnimStyles(answer);
+			bumpLayoutAnim(-1);
 			if (cb) {
 				cb();
 			}
@@ -223,59 +254,92 @@
 	}
 
 	if (!reduceMotion) {
-		root.addEventListener('click', function (e) {
-			var t = e.target;
-			if (!t || !t.closest) {
-				return;
-			}
-			var summary = t.closest('.gk-faq-item__summary');
-			if (!summary || !root.contains(summary)) {
-				return;
-			}
-			var details = summary.closest('.gk-faq-item');
-			if (!details || details.hidden) {
-				return;
-			}
-			var answer = details.querySelector('.gk-faq-item__answer');
-			if (!answer) {
-				return;
-			}
+		/*
+		 * Capture + preventDefault: sonst öffnet die Engine <details> sofort in voller Höhe,
+		 * ein Frame lang sichtbar, dann erst toggle/openAnimate — Flackern.
+		 */
+		root.addEventListener(
+			'click',
+			function (e) {
+				var t = e.target;
+				if (!t || !t.closest) {
+					return;
+				}
+				var summary = t.closest('.gk-faq-item__summary');
+				if (!summary || !root.contains(summary)) {
+					return;
+				}
+				if (t.closest('a')) {
+					return;
+				}
+				var details = summary.closest('.gk-faq-item');
+				if (!details || details.hidden) {
+					return;
+				}
+				var answer = details.querySelector('.gk-faq-item__answer');
+				if (!answer) {
+					return;
+				}
 
-			if (details.open) {
 				e.preventDefault();
-				closeAnimate(details, answer, null);
-				return;
-			}
 
-			var other = findOpenSibling(details);
-			if (!other) {
-				return;
-			}
+				if (details.open) {
+					closeAnimate(details, answer, null);
+					return;
+				}
 
-			e.preventDefault();
+				var other = findOpenSibling(details);
+				if (other) {
+					var oAns = other.querySelector('.gk-faq-item__answer');
+					if (!oAns) {
+						other.open = false;
+					} else {
+						closeAnimate(other, oAns, null);
+					}
+				}
 
-			var oAns = other.querySelector('.gk-faq-item__answer');
-			if (!oAns) {
-				other.open = false;
 				details.open = true;
-				return;
-			}
-
-			/* Alten parallel schließen, neuen sofort öffnen (kein Warten auf Ende der Schließ-Animation) */
-			closeAnimate(other, oAns, null);
-			details.open = true;
-		});
+				openAnimate(details, answer);
+			},
+			true
+		);
 	}
 
-	var items = root.querySelectorAll('.gk-faq-item');
-	for (var j = 0; j < items.length; j++) {
-		(function (details) {
-			var answer = details.querySelector('.gk-faq-item__answer');
-			if (!answer) {
-				return;
-			}
+	/* Klick im Antwortbereich schließt den Block (nicht bei Links/Buttons/Formularfeldern) */
+	root.addEventListener('click', function (e) {
+		var el = e.target;
+		if (!el || !el.closest) {
+			return;
+		}
+		if (el.closest('.gk-faq-item__summary')) {
+			return;
+		}
+		if (
+			el.closest(
+				'a, button, input, textarea, select, [contenteditable="true"], [role="button"], [role="link"]'
+			)
+		) {
+			return;
+		}
+		var answer = el.closest('.gk-faq-item__answer');
+		if (!answer || !root.contains(answer)) {
+			return;
+		}
+		var details = answer.closest('.gk-faq-item');
+		if (!details || details.hidden || !details.open) {
+			return;
+		}
+		if (reduceMotion) {
+			details.open = false;
+			return;
+		}
+		closeAnimate(details, answer, null);
+	});
 
-			if (reduceMotion) {
+	if (reduceMotion) {
+		var items = root.querySelectorAll('.gk-faq-item');
+		for (var j = 0; j < items.length; j++) {
+			(function (details) {
 				details.addEventListener('toggle', function () {
 					if (!details.open) {
 						return;
@@ -288,19 +352,7 @@
 						}
 					}
 				});
-				return;
-			}
-
-			details.addEventListener(
-				'toggle',
-				function () {
-					if (!details.open) {
-						return;
-					}
-					openAnimate(details, answer);
-				},
-				true
-			);
-		})(items[j]);
+			})(items[j]);
+		}
 	}
 })();

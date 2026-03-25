@@ -1,7 +1,7 @@
 <?php
 /**
- * Template part: Trending-Section unter dem Carousel auf der PC-Plattform-Seite.
- * Gleiches Design wie Bestsellers auf der Homepage, 9 Produkte, ohne PlayStation/Xbox.
+ * Template part: Trending-Section unter dem Carousel auf Plattform-Seiten (PC, PlayStation, …).
+ * Plattform-Kollektionen: 6 Produkte (PC: Beliebtheit ohne PS/Xbox; PS/Xbox/Nintendo: Zufall). Homepage unverändert.
  *
  * @package globalkeys
  */
@@ -10,8 +10,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+$gk_platform_trending = get_query_var( 'gk_platform' );
+$gk_platform_trending = is_string( $gk_platform_trending ) ? $gk_platform_trending : '';
+
 $products = function_exists( 'globalkeys_get_platform_trending_products' )
-	? globalkeys_get_platform_trending_products( 9 )
+	? globalkeys_get_platform_trending_products( 6, $gk_platform_trending !== '' ? $gk_platform_trending : null )
 	: array();
 ?>
 

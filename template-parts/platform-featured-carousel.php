@@ -1,9 +1,9 @@
 <?php
 /**
- * Template part: Featured-Game-Carousel für Plattform-Seiten (PC etc.)
+ * Template part: Featured-Game-Carousel für Plattform-Seiten (PC, PlayStation, …)
  *
- * Großes Trailer-Video links, rechts Panel mit Produktinfo (Hover-Box-Style).
- * Nur Spiele mit Trailer. Timer = Trailer-Länge pro Slide, Pause bei Hover.
+ * Links: Trailer-Video (PC) oder großes Produktbild ohne Trailer (z. B. PlayStation-Platzhalter).
+ * Rechts: Panel wie Hover-Box. Timer = Trailer-Länge oder Fallback (data-timer-fallback-ms).
  *
  * @package globalkeys
  */
@@ -50,6 +50,16 @@ if ( empty( $products ) ) {
 			$img_url     = $img_id ? wp_get_attachment_image_url( $img_id, 'medium_large' ) : ( function_exists( 'wc_placeholder_img_src' ) ? wc_placeholder_img_src( 'woocommerce_thumbnail' ) : '' );
 			if ( ! $img_url && function_exists( 'globalkeys_get_product_hero_image_url' ) ) {
 				$img_url = globalkeys_get_product_hero_image_url( $product, 'medium_large' );
+			}
+			$cover_left_url = $img_id ? wp_get_attachment_image_url( $img_id, 'large' ) : '';
+			if ( ! $cover_left_url && function_exists( 'globalkeys_get_product_hero_image_url' ) ) {
+				$cover_left_url = globalkeys_get_product_hero_image_url( $product, 'large' );
+			}
+			if ( ! $cover_left_url && $img_url ) {
+				$cover_left_url = $img_url;
+			}
+			if ( ! $cover_left_url && function_exists( 'wc_placeholder_img_src' ) ) {
+				$cover_left_url = wc_placeholder_img_src( 'woocommerce_single' );
 			}
 			$raw_desc   = $product->get_short_description();
 			if ( $raw_desc === '' ) {
@@ -114,10 +124,22 @@ if ( empty( $products ) ) {
 			<article class="gk-platform-featured-slide<?php echo $is_active ? ' is-active' : ''; ?>" data-index="<?php echo (int) $idx; ?>" aria-hidden="<?php echo $is_active ? 'false' : 'true'; ?>">
 				<a href="<?php echo esc_url( $product_url ); ?>" class="gk-platform-featured-slide__link">
 					<div class="gk-platform-featured-slide__trailer-wrap">
-						<video class="gk-platform-featured-slide__trailer" muted playsinline preload="<?php echo $idx === 0 ? 'auto' : 'metadata'; ?>" aria-hidden="true"
-							<?php echo $idx === 0 ? ' fetchpriority="high" ' : ''; ?>
-							src="<?php echo esc_url( $trailer_src ); ?>"></video>
-						<span class="gk-platform-featured-slide__trailer-label"><?php esc_html_e( 'Trailervorschau', 'globalkeys' ); ?> | <?php echo esc_html( $name ); ?></span>
+						<?php if ( $trailer_src !== '' ) : ?>
+							<video class="gk-platform-featured-slide__trailer" muted playsinline preload="<?php echo $idx === 0 ? 'auto' : 'metadata'; ?>" aria-hidden="true"
+								<?php echo $idx === 0 ? ' fetchpriority="high" ' : ''; ?>
+								src="<?php echo esc_url( $trailer_src ); ?>"></video>
+							<span class="gk-platform-featured-slide__trailer-label"><?php esc_html_e( 'Trailervorschau', 'globalkeys' ); ?> | <?php echo esc_html( $name ); ?></span>
+						<?php else : ?>
+							<img
+								class="gk-platform-featured-slide__trailer-fallback"
+								src="<?php echo esc_url( $cover_left_url ); ?>"
+								alt=""
+								decoding="async"
+								loading="<?php echo $idx === 0 ? 'eager' : 'lazy'; ?>"
+								<?php echo $idx === 0 ? ' fetchpriority="high"' : ''; ?>
+							/>
+							<span class="gk-platform-featured-slide__trailer-label"><?php esc_html_e( 'Featured', 'globalkeys' ); ?> | <?php echo esc_html( $name ); ?></span>
+						<?php endif; ?>
 					</div>
 					<aside class="gk-platform-featured-slide__panel">
 						<?php if ( $img_url ) : ?>

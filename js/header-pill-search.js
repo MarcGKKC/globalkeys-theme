@@ -754,8 +754,12 @@
 			if ( ! container.classList.contains( 'is-search-open' ) ) {
 				return;
 			}
+			/* Suchergebnisse: Leiste offen lassen solange etwas im Feld steht; leer → wie sonst außenklick schließt */
 			if ( document.body.classList.contains( 'gk-search-results-page' ) ) {
-				return;
+				var query = searchInput ? ( searchInput.value || '' ).trim() : '';
+				if ( query.length > 0 ) {
+					return;
+				}
 			}
 			if ( closeArea && closeArea.contains( e.target ) ) {
 				return;
@@ -775,6 +779,7 @@
 		var sidebar = document.getElementById( 'gk-search-filter-sidebar' );
 		var toggleBtn = document.querySelector( '.gk-search-filters-toggle' );
 		var closeBtn = document.querySelector( '.gk-search-filter-sidebar-close' );
+		var gkSyncedFiltersFromInitialProductType = false;
 		if ( ! layout || ! toggleBtn || ! sidebar ) {
 			return;
 		}
@@ -825,6 +830,16 @@
 		}
 		window.addEventListener( 'resize', updateSidebarHeight );
 
+		/* Trending Games → Suchseite mit ?gk_filters=open: Filterleiste sofort offen */
+		try {
+			var sp = new URLSearchParams( window.location.search );
+			if ( sp.get( 'gk_filters' ) === 'open' ) {
+				setSidebarOpen( true );
+			}
+		} catch ( err ) {
+			/* ignore */
+		}
+
 		function initPriceSlider() {
 			var minInput = document.getElementById( 'gk-price-min' );
 			var maxInput = document.getElementById( 'gk-price-max' );
@@ -843,6 +858,31 @@
 			maxInput.max = sliderMax;
 			maxInput.step = 1;
 			maxInput.value = sliderMax;
+			var initMin = null;
+			var initMax = null;
+			if ( typeof gkPillSearch !== 'undefined' ) {
+				if ( gkPillSearch.initialPriceMax != null && gkPillSearch.initialPriceMax !== '' ) {
+					var imx = parseInt( String( gkPillSearch.initialPriceMax ), 10 );
+					if ( ! isNaN( imx ) ) initMax = imx;
+				}
+				if ( gkPillSearch.initialPriceMin != null && gkPillSearch.initialPriceMin !== '' ) {
+					var imn = parseInt( String( gkPillSearch.initialPriceMin ), 10 );
+					if ( ! isNaN( imn ) ) initMin = imn;
+				}
+			}
+			if ( initMin != null ) {
+				initMin = Math.max( 0, Math.min( initMin, sliderMax ) );
+				minInput.value = String( initMin );
+			}
+			if ( initMax != null ) {
+				initMax = Math.max( 0, Math.min( initMax, sliderMax ) );
+				maxInput.value = String( initMax );
+			}
+			if ( initMin != null && initMax != null && parseInt( minInput.value, 10 ) > parseInt( maxInput.value, 10 ) ) {
+				var tmp = minInput.value;
+				minInput.value = maxInput.value;
+				maxInput.value = tmp;
+			}
 			function isDefault() {
 				return parseInt( minInput.value, 10 ) === 0 && parseInt( maxInput.value, 10 ) >= sliderMax;
 			}
@@ -981,8 +1021,15 @@
 			var content = document.getElementById( 'gk-product-type-content' );
 			var resetBtn = document.getElementById( 'gk-product-type-reset' );
 			if ( ! wrap || ! toggleBtn || ! content ) return;
+			var initialPt = content.getAttribute( 'data-gk-initial-pt' );
 			var data = typeof gkPillSearch !== 'undefined' && gkPillSearch.productsData;
-			var options = ( data && data.productTypeOptions ) ? data.productTypeOptions : {};
+			var rawOpts = ( data && data.productTypeOptions != null ) ? data.productTypeOptions : null;
+			var options = {};
+			if ( rawOpts && typeof rawOpts === 'object' && ! Array.isArray( rawOpts ) ) {
+				options = rawOpts;
+			} else if ( typeof gkPillSearch !== 'undefined' && gkPillSearch.filterProductTypes && typeof gkPillSearch.filterProductTypes === 'object' && ! Array.isArray( gkPillSearch.filterProductTypes ) ) {
+				options = gkPillSearch.filterProductTypes;
+			}
 			var slugs = Object.keys( options );
 			content.innerHTML = '';
 			for ( var i = 0; i < slugs.length; i++ ) {
@@ -1027,7 +1074,32 @@
 				} );
 			}
 			document.addEventListener( 'gk_search_filters_changed', updateResetVisibility );
-			updateResetVisibility();
+			if ( ! initialPt && typeof URLSearchParams !== 'undefined' ) {
+				try {
+					var spUrl = new URLSearchParams( window.location.search );
+					if ( spUrl.get( 'gk_pt' ) === 'pre-orders' ) {
+						initialPt = 'pre-orders';
+					}
+				} catch ( eUrl ) {}
+			}
+			if ( initialPt ) {
+				var ptInputs = content.querySelectorAll( 'input[data-type-slug]' );
+				var preEl = null;
+				for ( var pi = 0; pi < ptInputs.length; pi++ ) {
+					if ( ptInputs[ pi ].getAttribute( 'data-type-slug' ) === initialPt ) {
+						preEl = ptInputs[ pi ];
+						break;
+					}
+				}
+				if ( preEl ) {
+					preEl.checked = true;
+					gkSyncedFiltersFromInitialProductType = true;
+					onFilterChange();
+				}
+				content.removeAttribute( 'data-gk-initial-pt' );
+			} else {
+				updateResetVisibility();
+			}
 		}
 		initProductTypeFilter();
 
@@ -1204,7 +1276,9 @@
 			updateResetVisibility();
 		}
 		initGamepadsFilter();
-		updateActiveFiltersBar();
+		if ( ! gkSyncedFiltersFromInitialProductType ) {
+			document.dispatchEvent( new CustomEvent( 'gk_search_filters_changed' ) );
+		}
 	}
 
 	if ( document.readyState === 'loading' ) {

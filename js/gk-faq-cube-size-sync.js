@@ -6,6 +6,23 @@
 (function () {
 	'use strict';
 
+	var faqAnimCount = 0;
+	var cubeSyncPending = false;
+	var roDebounceTimer = null;
+	var RESIZE_SYNC_DEBOUNCE_MS = 100;
+
+	window.addEventListener('gk-faq-anim', function (e) {
+		var d = e.detail && typeof e.detail.delta === 'number' ? e.detail.delta : 0;
+		faqAnimCount += d;
+		if (faqAnimCount < 0) {
+			faqAnimCount = 0;
+		}
+		if (faqAnimCount === 0 && cubeSyncPending) {
+			cubeSyncPending = false;
+			window.requestAnimationFrame(sync);
+		}
+	});
+
 	function parseGapPx(el) {
 		if (!el) {
 			return 0;
@@ -116,6 +133,12 @@
 	}
 
 	function sync() {
+		if (faqAnimCount > 0) {
+			cubeSyncPending = true;
+			return;
+		}
+		cubeSyncPending = false;
+
 		var section = document.querySelector('.gk-section-questions-answers');
 		if (!section) {
 			return;
@@ -151,16 +174,20 @@
 		}
 	}
 
-	function runSync() {
-		window.requestAnimationFrame(function () {
-			window.requestAnimationFrame(sync);
-		});
+	function scheduleDebouncedSync() {
+		if (roDebounceTimer) {
+			window.clearTimeout(roDebounceTimer);
+		}
+		roDebounceTimer = window.setTimeout(function () {
+			roDebounceTimer = null;
+			sync();
+		}, RESIZE_SYNC_DEBOUNCE_MS);
 	}
 
 	function init() {
-		/* Sofort messen (nicht erst nach 2× rAF), damit Fallback und Endwert fast zusammenfallen */
+		/* Sofort messen; Follow-up nach Debounce gleicht Layout nach Fonts/Bildern aus */
 		sync();
-		runSync();
+		scheduleDebouncedSync();
 
 		var section = document.querySelector('.gk-section-questions-answers');
 		var list = section ? section.querySelector('.gk-faq-list') : null;
@@ -177,14 +204,20 @@
 
 		if (typeof ResizeObserver !== 'undefined') {
 			var ro = new ResizeObserver(function () {
-				runSync();
+				scheduleDebouncedSync();
 			});
 			ro.observe(list);
 		}
 
-		window.addEventListener('resize', runSync);
-		window.addEventListener('load', runSync);
-		window.addEventListener('gk-faq-layout-changed', runSync);
+		window.addEventListener('resize', scheduleDebouncedSync);
+		window.addEventListener('load', scheduleDebouncedSync);
+		window.addEventListener('gk-faq-layout-changed', function () {
+			if (roDebounceTimer) {
+				window.clearTimeout(roDebounceTimer);
+				roDebounceTimer = null;
+			}
+			sync();
+		});
 
 		var tries = 0;
 		function retry() {

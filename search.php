@@ -14,18 +14,37 @@ get_header();
 
 $gk_product_search = isset( $_GET['post_type'] ) && $_GET['post_type'] === 'product'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 $gk_search_term    = isset( $_GET['s'] ) ? trim( (string) $_GET['s'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-
+$gk_pt_param     = isset( $_GET['gk_pt'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['gk_pt'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+$gk_pt_preorders = ( 'pre-orders' === $gk_pt_param );
 if ( $gk_product_search && class_exists( 'WooCommerce' ) ) {
 	if ( $gk_search_term !== '' ) {
-		$gk_search_result = function_exists( 'globalkeys_search_products_starts_with' )
-			? globalkeys_search_products_starts_with( $gk_search_term, 0 )
+		$gk_exclude_preorders = ! $gk_pt_preorders;
+		$gk_search_result     = function_exists( 'globalkeys_search_products_starts_with' )
+			? globalkeys_search_products_starts_with( $gk_search_term, 0, $gk_exclude_preorders )
 			: array( 'ids' => array() );
 		$gk_product_ids   = isset( $gk_search_result['ids'] ) ? $gk_search_result['ids'] : array();
+		if ( $gk_pt_preorders && function_exists( 'globalkeys_get_preorder_list_product_ids' ) ) {
+			$gk_pre_ids = globalkeys_get_preorder_list_product_ids();
+			$gk_product_ids = ! empty( $gk_pre_ids ) ? array_values( array_intersect( $gk_product_ids, $gk_pre_ids ) ) : array();
+		}
 		$gk_product_query = new WP_Query(
 			array(
 				'post_type'      => 'product',
 				'post_status'    => 'publish',
 				'post__in'       => $gk_product_ids ?: array( 0 ),
+				'orderby'        => 'post_title',
+				'order'          => 'ASC',
+				'paged'          => get_query_var( 'paged' ) ? (int) get_query_var( 'paged' ) : 1,
+				'posts_per_page' => get_option( 'posts_per_page', 12 ),
+			)
+		);
+	} elseif ( $gk_pt_preorders && function_exists( 'globalkeys_get_preorder_list_product_ids' ) ) {
+		$gk_preorder_ids = globalkeys_get_preorder_list_product_ids();
+		$gk_product_query = new WP_Query(
+			array(
+				'post_type'      => 'product',
+				'post_status'    => 'publish',
+				'post__in'       => ! empty( $gk_preorder_ids ) ? $gk_preorder_ids : array( 0 ),
 				'orderby'        => 'post_title',
 				'order'          => 'ASC',
 				'paged'          => get_query_var( 'paged' ) ? (int) get_query_var( 'paged' ) : 1,
@@ -54,8 +73,9 @@ if ( $gk_product_search && class_exists( 'WooCommerce' ) ) {
 		<?php if ( $gk_product_search && class_exists( 'WooCommerce' ) ) : ?>
 			<?php
 			$gk_total_count = ( $gk_product_query && $gk_product_query->found_posts >= 0 ) ? (int) $gk_product_query->found_posts : 0;
+			$gk_filters_launch_open = isset( $_GET['gk_filters'] ) && 'open' === sanitize_text_field( wp_unslash( (string) $_GET['gk_filters'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			?>
-			<div id="gk-search-layout" class="gk-search-layout">
+			<div id="gk-search-layout" class="gk-search-layout<?php echo $gk_filters_launch_open ? ' is-sidebar-open' : ''; ?>">
 				<aside id="gk-search-filter-sidebar" class="gk-search-filter-sidebar" role="complementary" aria-label="<?php esc_attr_e( 'Filters', 'globalkeys' ); ?>">
 					<div class="gk-search-filter-sidebar-header">
 						<h2 class="gk-search-filter-sidebar-title"><?php esc_html_e( 'Filters', 'globalkeys' ); ?></h2>
@@ -119,7 +139,7 @@ if ( $gk_product_search && class_exists( 'WooCommerce' ) ) {
 									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
 								</button>
 							</div>
-							<div class="gk-filter-product-type-content" id="gk-product-type-content"></div>
+							<div class="gk-filter-product-type-content" id="gk-product-type-content"<?php echo ! empty( $gk_pt_preorders ) ? ' data-gk-initial-pt="pre-orders"' : ''; ?>></div>
 						</div>
 						<div class="gk-filter-game-modes">
 							<div class="gk-filter-game-modes-header">
@@ -171,7 +191,7 @@ if ( $gk_product_search && class_exists( 'WooCommerce' ) ) {
 						<div class="gk-search-sort-by-wrap">
 							<div class="gk-search-filters-toggle-wrap">
 								<span id="gk-search-filters-count-badge" class="gk-search-filters-count-badge" aria-hidden="true">0</span>
-								<button type="button" class="gk-search-filters-toggle" aria-label="<?php esc_attr_e( 'Open filters', 'globalkeys' ); ?>" aria-expanded="false" aria-controls="gk-search-filter-sidebar">
+								<button type="button" class="gk-search-filters-toggle" aria-label="<?php esc_attr_e( 'Open filters', 'globalkeys' ); ?>" aria-expanded="<?php echo $gk_filters_launch_open ? 'true' : 'false'; ?>" aria-controls="gk-search-filter-sidebar">
 									<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
 									<span><?php esc_html_e( 'Filters', 'globalkeys' ); ?></span>
 								</button>

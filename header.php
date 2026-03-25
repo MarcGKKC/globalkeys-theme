@@ -64,20 +64,50 @@ if ( ! $gk_account_login ) {
 			<!-- Mitte: 5 Menüpunkte über der Pill, darunter Pill (Plattformen + Suche) – zentriert -->
 			<?php
 			$gk_cur_nav = is_string( get_query_var( 'gk_nav_section' ) ) ? get_query_var( 'gk_nav_section' ) : '';
+			$gk_is_search_results = is_search() && isset( $_GET['post_type'] ) && $_GET['post_type'] === 'product'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$gk_filters_open_only = $gk_is_search_results && isset( $_GET['gk_filters'] ) && 'open' === sanitize_text_field( wp_unslash( (string) $_GET['gk_filters'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$gk_pt_param                = isset( $_GET['gk_pt'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['gk_pt'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$gk_is_preorder_filter_launch = $gk_filters_open_only && ( 'pre-orders' === $gk_pt_param );
+			$gk_trending_nav_active     = ( $gk_cur_nav === 'trending-games' ) || ( $gk_filters_open_only && ! $gk_is_preorder_filter_launch );
+			$gk_preorders_nav_active    = ( $gk_cur_nav === 'preorders' ) || $gk_is_preorder_filter_launch;
 			?>
 			<div class="header-pill-wrapper">
 				<nav class="header-nav-above" aria-label="<?php esc_attr_e( 'Hauptmenü', 'globalkeys' ); ?>">
-					<a href="<?php echo esc_url( home_url( '/trending-games/' ) ); ?>" class="<?php echo ( $gk_cur_nav === 'trending-games' ) ? 'current' : ''; ?>"><?php esc_html_e( 'Trending Games', 'globalkeys' ); ?></a>
-					<a href="<?php echo esc_url( home_url( '/preorders/' ) ); ?>" class="<?php echo ( $gk_cur_nav === 'preorders' ) ? 'current' : ''; ?>"><?php esc_html_e( 'Preorders', 'globalkeys' ); ?></a>
+					<?php
+					$gk_trending_games_href = home_url( '/trending-games/' );
+					if ( function_exists( 'is_front_page' ) && is_front_page() && class_exists( 'WooCommerce' ) ) {
+						$gk_trending_games_href = add_query_arg(
+							array(
+								'post_type'  => 'product',
+								'gk_filters' => 'open',
+							),
+							home_url( '/' )
+						);
+					}
+					$gk_preorders_href = home_url( '/preorders/' );
+					if ( function_exists( 'is_front_page' ) && is_front_page() && class_exists( 'WooCommerce' ) ) {
+						$gk_preorders_href = add_query_arg(
+							array(
+								'post_type'  => 'product',
+								'gk_filters' => 'open',
+								'gk_pt'      => 'pre-orders',
+							),
+							home_url( '/' )
+						);
+					}
+					?>
+					<a href="<?php echo esc_url( $gk_trending_games_href ); ?>" class="<?php echo $gk_trending_nav_active ? 'current' : ''; ?>"><?php esc_html_e( 'Trending Games', 'globalkeys' ); ?></a>
+					<a href="<?php echo esc_url( $gk_preorders_href ); ?>" class="<?php echo $gk_preorders_nav_active ? 'current' : ''; ?>"><?php esc_html_e( 'Preorders', 'globalkeys' ); ?></a>
 					<a href="<?php echo esc_url( home_url( '/available-soon/' ) ); ?>" class="<?php echo ( $gk_cur_nav === 'available-soon' ) ? 'current' : ''; ?>"><?php esc_html_e( 'Available Soon', 'globalkeys' ); ?></a>
 					<a href="<?php echo esc_url( home_url( '/activation/' ) ); ?>" class="<?php echo ( $gk_cur_nav === 'activation' ) ? 'current' : ''; ?>"><?php esc_html_e( 'Activation', 'globalkeys' ); ?></a>
 					<a href="<?php echo esc_url( home_url( '/support/' ) ); ?>" class="<?php echo ( $gk_cur_nav === 'support' ) ? 'current' : ''; ?>"><?php esc_html_e( '24/7 Support', 'globalkeys' ); ?></a>
 				</nav>
 			<?php
-			$gk_is_search_results = is_search() && isset( $_GET['post_type'] ) && $_GET['post_type'] === 'product'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			/* Ohne gk_filters=open: Such-Pill auf der Suchseite ausgeklappt. Mit open: Filterleiste (JS), Pill zugeklappt. */
+			$gk_search_pill_expanded = $gk_is_search_results && ! $gk_filters_open_only;
 			?>
-			<div class="header-pill-search-outer<?php echo $gk_is_search_results ? ' is-search-open' : ''; ?>">
-				<div class="header-pill-container<?php echo $gk_is_search_results ? ' is-search-open' : ''; ?>">
+			<div class="header-pill-search-outer<?php echo $gk_search_pill_expanded ? ' is-search-open' : ''; ?>">
+				<div class="header-pill-container<?php echo $gk_search_pill_expanded ? ' is-search-open' : ''; ?>">
 					<div class="header-pill">
 						<?php
 						$pictures_uri    = get_template_directory_uri() . '/Pictures/';
@@ -101,14 +131,14 @@ if ( ! $gk_account_login ) {
 								<span class="platform-filter-label"><?php esc_html_e( 'Nintendo', 'globalkeys' ); ?></span>
 							</a>
 						</div>
-						<button type="button" class="header-pill-search-trigger header-pill-search-submit" aria-label="<?php esc_attr_e( 'Suchen öffnen', 'globalkeys' ); ?>" aria-expanded="<?php echo $gk_is_search_results ? 'true' : 'false'; ?>" aria-controls="gk-pill-search-overlay">
+						<button type="button" class="header-pill-search-trigger header-pill-search-submit" aria-label="<?php esc_attr_e( 'Suchen öffnen', 'globalkeys' ); ?>" aria-expanded="<?php echo $gk_search_pill_expanded ? 'true' : 'false'; ?>" aria-controls="gk-pill-search-overlay">
 							<svg class="search-submit-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 								<circle cx="11" cy="11" r="8"></circle>
 								<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
 							</svg>
 						</button>
 					</div>
-					<div id="gk-pill-search-overlay" class="header-pill-search-overlay" role="dialog" aria-label="<?php esc_attr_e( 'Suchen', 'globalkeys' ); ?>" aria-hidden="<?php echo $gk_is_search_results ? 'false' : 'true'; ?>">
+					<div id="gk-pill-search-overlay" class="header-pill-search-overlay" role="dialog" aria-label="<?php esc_attr_e( 'Suchen', 'globalkeys' ); ?>" aria-hidden="<?php echo $gk_search_pill_expanded ? 'false' : 'true'; ?>">
 						<?php
 						/* Suche immer zur Startseite mit post_type=product – garantiert keine 404 */
 						$gk_search_action = home_url( '/' );
@@ -133,7 +163,7 @@ if ( ! $gk_account_login ) {
 						</form>
 					</div>
 				</div>
-				<div class="header-pill-search-close-area" aria-hidden="<?php echo $gk_is_search_results ? 'false' : 'true'; ?>">
+				<div class="header-pill-search-close-area" aria-hidden="<?php echo $gk_search_pill_expanded ? 'false' : 'true'; ?>">
 					<button type="button" class="header-pill-search-close" aria-label="<?php esc_attr_e( 'Suche schließen', 'globalkeys' ); ?>">&times;</button>
 				</div>
 				<?php
@@ -142,7 +172,7 @@ if ( ! $gk_account_login ) {
 					$gk_search_url = add_query_arg( 'post_type', 'product', home_url( '/' ) );
 				}
 				?>
-				<div id="gk-search-dropdown" class="header-pill-search-dropdown" aria-hidden="true"<?php echo $gk_is_search_results ? ' data-gk-hide-dropdown="1"' : ''; ?> hidden data-base-url="<?php echo esc_url( $gk_search_url ); ?>">
+				<div id="gk-search-dropdown" class="header-pill-search-dropdown" aria-hidden="true"<?php echo $gk_search_pill_expanded ? ' data-gk-hide-dropdown="1"' : ''; ?> hidden data-base-url="<?php echo esc_url( $gk_search_url ); ?>">
 					<ul class="header-pill-search-dropdown-list" role="list">
 						<!-- Live-Suche: Liste wird per JS befüllt -->
 					</ul>

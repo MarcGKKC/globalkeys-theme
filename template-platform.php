@@ -1,7 +1,7 @@
 <?php
 /**
  * Template für Plattform-Seiten (PC, PlayStation, Xbox, Nintendo).
- * Zeigt Header + leeren Hauptbereich (nur Hintergrund).
+ * PC: … Gift cards, Pre-orders, Our recommendations, Category grid (ganz unten).
  *
  * @package globalkeys
  */
@@ -46,6 +46,80 @@ get_header();
 				<?php get_template_part( 'template-parts/platform-featured-carousel' ); ?>
 			</div>
 			<?php get_template_part( 'template-parts/section-platform-trending' ); ?>
+			<?php get_template_part( 'template-parts/section-platform-best-with-friends' ); ?>
+			<?php get_template_part( 'template-parts/section-platform-spotlight-banner' ); ?>
+			<?php get_template_part( 'template-parts/section-platform-pc-gift-cards' ); ?>
+			<?php get_template_part( 'template-parts/section', 'preorders' ); ?>
+			<?php get_template_part( 'template-parts/section-platform-pc-recommendations' ); ?>
+			<?php get_template_part( 'template-parts/section-platform-pc-category-grid' ); ?>
+		<?php elseif ( $gk_platform_slug === 'playstation' ) : ?>
+			<div class="gk-platform-header">
+				<h1 class="gk-platform-title"><?php esc_html_e( 'PlayStation', 'globalkeys' ); ?></h1>
+				<p class="gk-platform-desc"><?php esc_html_e( 'Discover the best PlayStation games, DLC, pre-orders and PlayStation bestsellers Globalkeys.co', 'globalkeys' ); ?></p>
+				<nav class="gk-platform-stores-bar" aria-label="<?php esc_attr_e( 'PlayStation consoles', 'globalkeys' ); ?>">
+					<a href="#"><?php esc_html_e( 'PlayStation 4', 'globalkeys' ); ?></a>
+					<a href="#"><?php esc_html_e( 'PlayStation 5', 'globalkeys' ); ?></a>
+				</nav>
+				<nav class="gk-platform-nav-below" aria-label="<?php esc_attr_e( 'Browse', 'globalkeys' ); ?>">
+					<a href="<?php echo esc_url( home_url( '/trending-games/' ) ); ?>"><?php esc_html_e( 'Trending', 'globalkeys' ); ?></a>
+					<a href="<?php echo esc_url( home_url( '/preorders/' ) ); ?>"><?php esc_html_e( 'Bestsellers', 'globalkeys' ); ?></a>
+					<a href="#"><?php esc_html_e( 'Gift cards', 'globalkeys' ); ?></a>
+					<a href="#"><?php esc_html_e( 'Subscriptions', 'globalkeys' ); ?></a>
+				</nav>
+			</div>
+			<div class="gk-section-inner gk-section-featured-inner">
+				<?php get_template_part( 'template-parts/platform-featured-carousel' ); ?>
+			</div>
+			<?php get_template_part( 'template-parts/section-platform-trending' ); ?>
+			<?php get_template_part( 'template-parts/section-platform-best-with-friends' ); ?>
+			<?php get_template_part( 'template-parts/section-platform-spotlight-banner' ); ?>
+			<?php get_template_part( 'template-parts/section', 'preorders' ); ?>
+		<?php elseif ( $gk_platform_slug === 'xbox' ) : ?>
+			<div class="gk-platform-header">
+				<h1 class="gk-platform-title"><?php esc_html_e( 'Xbox', 'globalkeys' ); ?></h1>
+				<p class="gk-platform-desc"><?php esc_html_e( 'Discover the best Xbox games, DLC, pre-orders and Xbox bestsellers Globalkeys.co', 'globalkeys' ); ?></p>
+				<nav class="gk-platform-stores-bar" aria-label="<?php esc_attr_e( 'Xbox consoles', 'globalkeys' ); ?>">
+					<a href="#"><?php esc_html_e( 'Xbox One', 'globalkeys' ); ?></a>
+					<a href="#"><?php esc_html_e( 'Xbox Series X|S', 'globalkeys' ); ?></a>
+				</nav>
+				<nav class="gk-platform-nav-below" aria-label="<?php esc_attr_e( 'Browse', 'globalkeys' ); ?>">
+					<a href="<?php echo esc_url( home_url( '/trending-games/' ) ); ?>"><?php esc_html_e( 'Trending', 'globalkeys' ); ?></a>
+					<a href="<?php echo esc_url( home_url( '/preorders/' ) ); ?>"><?php esc_html_e( 'Bestsellers', 'globalkeys' ); ?></a>
+					<a href="<?php echo esc_url( home_url( '/preorders/' ) ); ?>"><?php esc_html_e( 'Pre-orders', 'globalkeys' ); ?></a>
+					<a href="#"><?php esc_html_e( 'Gift cards', 'globalkeys' ); ?></a>
+					<a href="#"><?php esc_html_e( 'Subscriptions', 'globalkeys' ); ?></a>
+				</nav>
+			</div>
+			<div class="gk-section-inner gk-section-featured-inner">
+				<?php get_template_part( 'template-parts/platform-featured-carousel' ); ?>
+			</div>
+			<?php get_template_part( 'template-parts/section-platform-trending' ); ?>
+			<?php get_template_part( 'template-parts/section-platform-best-with-friends' ); ?>
+			<?php get_template_part( 'template-parts/section-platform-spotlight-banner' ); ?>
+			<?php get_template_part( 'template-parts/section', 'preorders' ); ?>
+		<?php elseif ( $gk_platform_slug === 'nintendo' ) : ?>
+			<div class="gk-platform-header">
+				<h1 class="gk-platform-title"><?php esc_html_e( 'Nintendo', 'globalkeys' ); ?></h1>
+				<p class="gk-platform-desc"><?php esc_html_e( 'Discover the best Nintendo games, DLC, pre-orders and Nintendo bestsellers Globalkeys.co', 'globalkeys' ); ?></p>
+				<nav class="gk-platform-stores-bar" aria-label="<?php esc_attr_e( 'Nintendo systems', 'globalkeys' ); ?>">
+					<a href="#"><?php esc_html_e( 'Nintendo Switch', 'globalkeys' ); ?></a>
+					<a href="#"><?php esc_html_e( 'Nintendo Switch 2', 'globalkeys' ); ?></a>
+				</nav>
+				<nav class="gk-platform-nav-below" aria-label="<?php esc_attr_e( 'Browse', 'globalkeys' ); ?>">
+					<a href="<?php echo esc_url( home_url( '/trending-games/' ) ); ?>"><?php esc_html_e( 'Trending', 'globalkeys' ); ?></a>
+					<a href="<?php echo esc_url( home_url( '/preorders/' ) ); ?>"><?php esc_html_e( 'Bestsellers', 'globalkeys' ); ?></a>
+					<a href="<?php echo esc_url( home_url( '/preorders/' ) ); ?>"><?php esc_html_e( 'Pre-orders', 'globalkeys' ); ?></a>
+					<a href="#"><?php esc_html_e( 'Gift cards', 'globalkeys' ); ?></a>
+					<a href="#"><?php esc_html_e( 'Subscriptions', 'globalkeys' ); ?></a>
+				</nav>
+			</div>
+			<div class="gk-section-inner gk-section-featured-inner">
+				<?php get_template_part( 'template-parts/platform-featured-carousel' ); ?>
+			</div>
+			<?php get_template_part( 'template-parts/section-platform-trending' ); ?>
+			<?php get_template_part( 'template-parts/section-platform-best-with-friends' ); ?>
+			<?php get_template_part( 'template-parts/section-platform-spotlight-banner' ); ?>
+			<?php get_template_part( 'template-parts/section', 'preorders' ); ?>
 		<?php endif; ?>
 
 	</main><!-- #primary -->

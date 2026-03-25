@@ -50,33 +50,57 @@ $gk_qa_categories = array_values(
 
 $gk_qa_default_items = array(
 	array(
-		'question' => __( 'What is Globalkeys and how does it work?', 'globalkeys' ),
-		'answer'   => __( 'Globalkeys is a digital games store: you buy a product key, receive it in your account after purchase, and redeem it on the relevant platform (e.g. Steam, PlayStation).', 'globalkeys' ),
+		'question' => __( 'Who is GlobalKeys and what do they do?', 'globalkeys' ),
+		'answer'   => __(
+			"GlobalKeys is a digital games shop: you browse the catalogue, pay online, and receive digital keys or redemption details in your account after purchase. You then activate them on the right platform (for example Steam or PlayStation), depending on the product.\n\n"
+			. "There is no physical shipping for keys—delivery is digital. Always read each product page before checkout so you know exactly what is included.",
+			'globalkeys'
+		),
 		'category' => 'shop',
 	),
 	array(
-		'question' => __( 'Do you also sell DLCs, gift cards, and subscriptions?', 'globalkeys' ),
-		'answer'   => __( 'Yes, when they are listed in the store. Details and region or country notes are shown on each product page.', 'globalkeys' ),
+		'question' => __( 'Can you also buy DLCs, gift cards, and subscriptions from GlobalKeys?', 'globalkeys' ),
+		'answer'   => __(
+			"Yes, when they are listed in the store. Besides full games you can find DLCs, selected gift cards, and subscription-style offers wherever suppliers and licenses allow.\n\n"
+			. "The catalogue changes over time. Each product page states platform, content, and restrictions—especially region and country—so check that before you buy.",
+			'globalkeys'
+		),
 		'category' => 'shop',
 	),
 	array(
-		'question' => __( 'How do you offer such competitive prices?', 'globalkeys' ),
-		'answer'   => __( 'We work with official partners and use regional offers. Premium members also benefit from exclusive discounts.', 'globalkeys' ),
+		'question' => __( 'How are GlobalKeys able to offer such competitive prices?', 'globalkeys' ),
+		'answer'   => __(
+			"Prices reflect publisher deals, promotions, currency, and how digital supply is sourced. GlobalKeys works with official partners so strong offers can sit next to a broad catalogue.\n\n"
+			. "Digital delivery avoids many costs of physical retail. Premium members can save more with extra discounts; everyone sees clear product information at checkout.",
+			'globalkeys'
+		),
 		'category' => 'payment',
 	),
 	array(
-		'question' => __( 'Which payment methods can I use?', 'globalkeys' ),
-		'answer'   => __( 'Available payment options are shown at checkout. Depending on your country, options may include card, PayPal, and other providers.', 'globalkeys' ),
+		'question' => __( 'Which payment methods can you use at GlobalKeys?', 'globalkeys' ),
+		'answer'   => __(
+			"Checkout only shows methods that work for your order and country—cards, PayPal or similar wallets, and sometimes local options, depending on rules and partners.\n\n"
+			. "If something you expected is missing, it is usually regional. Try another listed method or contact GlobalKeys Support with your country and a checkout screenshot.",
+			'globalkeys'
+		),
 		'category' => 'payment',
 	),
 	array(
-		'question' => __( 'Is the store trustworthy and secure?', 'globalkeys' ),
-		'answer'   => __( 'We use established payment providers and protect your account with common security standards. If you have questions, our support team can help.', 'globalkeys' ),
+		'question' => __( 'How safe and reliable is your shopping experience with GlobalKeys?', 'globalkeys' ),
+		'answer'   => __(
+			"Payments run through established providers using common industry security practices. You should get what you pay for, and your data is handled with care.\n\n"
+			. "Protect your account with a strong password and secure email. If a charge, key, or product looks wrong, contact GlobalKeys Support with your order details.",
+			'globalkeys'
+		),
 		'category' => 'trust',
 	),
 	array(
-		'question' => __( 'How can I contact you?', 'globalkeys' ),
-		'answer'   => __( 'Use the contact or help sections on the website, or email us at the address given in the legal notice. Response times may vary depending on volume.', 'globalkeys' ),
+		'question' => __( 'How can you contact the GlobalKeys Support if you need help?', 'globalkeys' ),
+		'answer'   => __(
+			"Use the Help or Contact section on the site, or the contact details in the legal notice (Imprint). Include your order number, purchase email, and a short note about what you see on screen.\n\n"
+			. "Replies can take longer during busy periods. Clear details (platform, product, error message, screenshots if useful) speed things up.",
+			'globalkeys'
+		),
 		'category' => 'trust',
 	),
 );
@@ -158,7 +182,9 @@ $gk_qa_extra = apply_filters( 'globalkeys_questions_answers_section_content', ''
 					<details class="gk-faq-item" data-category="<?php echo esc_attr( $gk_cat ); ?>">
 						<summary class="gk-faq-item__summary" id="<?php echo esc_attr( $gk_q_id ); ?>-label">
 							<span class="gk-faq-item__question"><?php echo esc_html( $gk_row['question'] ); ?></span>
-							<span class="gk-faq-item__chevron" aria-hidden="true"></span>
+							<span class="gk-faq-item__chevron" aria-hidden="true">
+								<svg class="gk-faq-item__chevron-svg" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+							</span>
 						</summary>
 						<div class="gk-faq-item__answer" role="region" aria-labelledby="<?php echo esc_attr( $gk_q_id ); ?>-label">
 							<div class="gk-faq-item__answer-inner">

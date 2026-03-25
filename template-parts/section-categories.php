@@ -13,23 +13,9 @@ $section    = get_query_var( 'gk_section', array( 'id' => 'section-categories', 
 $id         = ! empty( $section['id'] ) ? $section['id'] : 'section-categories';
 $aria_label = ! empty( $section['aria_label'] ) ? $section['aria_label'] : __( 'All Categories', 'globalkeys' );
 
-$gk_category_collection_names = array(
-	__( 'Survival', 'globalkeys' ),
-	__( 'Adventure', 'globalkeys' ),
-	__( 'Action', 'globalkeys' ),
-	__( 'RPG', 'globalkeys' ),
-	__( 'Shooter', 'globalkeys' ),
-	__( 'Simulation', 'globalkeys' ),
-	__( 'Sport', 'globalkeys' ),
-	__( 'Strategy', 'globalkeys' ),
-	__( 'Horror', 'globalkeys' ),
-	__( 'Indie', 'globalkeys' ),
-	__( 'Multiplayer', 'globalkeys' ),
-	__( 'Story', 'globalkeys' ),
-	__( 'Casual', 'globalkeys' ),
-	__( 'Open World', 'globalkeys' ),
-	__( 'New Releases', 'globalkeys' ),
-);
+$gk_category_collection_names = function_exists( 'globalkeys_get_homepage_category_collection_labels' )
+	? globalkeys_get_homepage_category_collection_labels()
+	: array();
 
 $gk_categories_bg_url = get_template_directory_uri() . '/Pictures/category-card-bg.svg';
 ?>

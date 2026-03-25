@@ -154,8 +154,16 @@
 		}
 
 		function bindVideoEvents(video) {
-			if (!video) return;
 			unbindVideoEvents();
+			if (!video) {
+				backupTimerId = setTimeout(function () {
+					backupTimerId = null;
+					if (autoEnabled) {
+						showSlide(currentIndex + 1);
+					}
+				}, timerMs);
+				return;
+			}
 			function onEnded() {
 				if (!autoEnabled) return;
 				showSlide(currentIndex + 1);

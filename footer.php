@@ -19,15 +19,51 @@ $privacy_url   = get_privacy_policy_url();
 						<span class="gk-footer-logo-green">G</span><span class="gk-footer-logo-white">aming. </span><span class="gk-footer-logo-green">G</span><span class="gk-footer-logo-white">lobalKeys</span><span class="gk-footer-logo-green">.</span>
 					</p>
 					<p class="gk-footer-desc">
-						<?php esc_html_e( 'GlobalKeys provides instant access to digital game keys with secure checkout, fast worldwide delivery, and reliable support you can trust. Our goal is to make gaming more accessible by offering great prices, the latest releases, and exclusive deals across multiple platforms.', 'globalkeys' ); ?>
+						<?php esc_html_e( 'GlobalKeys offers digital game keys with secure checkout, fast worldwide delivery, and reliable support. We aim to make gaming more accessible with competitive pricing, new releases, and deals across platforms.', 'globalkeys' ); ?>
 					</p>
-					<div class="gk-footer-newsletter">
-						<p class="gk-footer-newsletter-heading"><?php esc_html_e( 'Get launch deals first', 'globalkeys' ); ?></p>
-						<p class="gk-footer-newsletter-text"><?php esc_html_e( 'Join early for exclusive launch discounts, giveaways, and new releases.', 'globalkeys' ); ?></p>
-						<form class="gk-footer-newsletter-form" action="#" method="post" aria-label="<?php esc_attr_e( 'Newsletter', 'globalkeys' ); ?>">
-							<input type="email" name="email" placeholder="<?php esc_attr_e( 'Enter your email', 'globalkeys' ); ?>" class="gk-footer-newsletter-input" />
-						</form>
+					<p class="gk-footer-desc">
+						<?php esc_html_e( 'Every game, DLC, and wallet credit key is sourced directly from publishers—grey-market keys are excluded. GlobalKeys only sells legitimate keys so you get a trusted experience.', 'globalkeys' ); ?>
+					</p>
+					<div class="gk-footer-locale" role="group" aria-label="<?php esc_attr_e( 'Currency, language and country', 'globalkeys' ); ?>">
+						<div class="gk-footer-locale-inner">
+							<div class="gk-footer-locale-row">
+							<button type="button" class="gk-footer-locale-btn">
+								<svg class="gk-footer-locale-icon gk-footer-locale-icon--fill" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 48 48" fill="currentColor" aria-hidden="true">
+									<path d="M44,7.1V14a2,2,0,0,1-2,2H35a2,2,0,0,1-2-2.3A2.1,2.1,0,0,1,35.1,12h2.3A18,18,0,0,0,6.1,22.2a2,2,0,0,1-2,1.8h0a2,2,0,0,1-2-2.2A22,22,0,0,1,40,8.9V7a2,2,0,0,1,2.3-2A2.1,2.1,0,0,1,44,7.1Z"/>
+									<path d="M4,40.9V34a2,2,0,0,1,2-2h7a2,2,0,0,1,2,2.3A2.1,2.1,0,0,1,12.9,36H10.6A18,18,0,0,0,41.9,25.8a2,2,0,0,1,2-1.8h0a2,2,0,0,1,2,2.2A22,22,0,0,1,8,39.1V41a2,2,0,0,1-2.3,2A2.1,2.1,0,0,1,4,40.9Z"/>
+									<path d="M24.7,22c-3.5-.7-3.5-1.3-3.5-1.8s.2-.6.5-.9a3.4,3.4,0,0,1,1.8-.4,6.3,6.3,0,0,1,3.3.9,1.8,1.8,0,0,0,2.7-.5,1.9,1.9,0,0,0-.4-2.8A9.1,9.1,0,0,0,26,15.3V13a2,2,0,0,0-4,0v2.2c-3,.5-5,2.5-5,5.2s3.3,4.9,6.5,5.5,3.3,1.3,3.3,1.8-1.1,1.4-2.5,1.4h0a6.7,6.7,0,0,1-4.1-1.3,2,2,0,0,0-2.8.6,1.8,1.8,0,0,0,.3,2.6A10.9,10.9,0,0,0,22,32.8V35a2,2,0,0,0,4,0V32.8a6.3,6.3,0,0,0,3-1.3,4.9,4.9,0,0,0,2-4h0C31,23.8,27.6,22.6,24.7,22Z"/>
+								</svg>
+								<?php esc_html_e( 'Currency', 'globalkeys' ); ?>
+							</button>
+							<button type="button" class="gk-footer-locale-sep" tabindex="-1" aria-hidden="true"></button>
+							<button type="button" class="gk-footer-locale-btn">
+								<span class="gk-footer-locale-icon gk-footer-locale-icon--lang-mask" aria-hidden="true"></span>
+								<?php esc_html_e( 'Language', 'globalkeys' ); ?>
+							</button>
+							<button type="button" class="gk-footer-locale-sep" tabindex="-1" aria-hidden="true"></button>
+							<button type="button" class="gk-footer-locale-btn">
+								<svg class="gk-footer-locale-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+								<?php esc_html_e( 'Country', 'globalkeys' ); ?>
+							</button>
+							</div>
+						</div>
 					</div>
+					<script>
+					(function () {
+						var row = document.querySelector('.gk-footer-locale-row');
+						if (!row) {
+							return;
+						}
+						row.querySelectorAll('.gk-footer-locale-sep').forEach(function (sep) {
+							sep.addEventListener('click', function () {
+								var next = sep.nextElementSibling;
+								if (next && next.classList.contains('gk-footer-locale-btn')) {
+									next.click();
+								}
+							});
+						});
+					})();
+					</script>
 				</div>
 				<div class="gk-footer-right">
 					<div class="gk-footer-community">
