@@ -516,24 +516,52 @@ function globalkeys_premium_member_cta_icon_svg( $name ) {
 }
 
 /**
- * SVG-Icons für FAQ-Kategorie-Kacheln (Questions & Answers, currentColor).
+ * Lädt Pictures/info-gk.svg für FAQ-Kacheln (#33363F → currentColor, 32px).
  *
- * @param string $name shop|payment|trust|support.
+ * @return string SVG-Markup oder leerer String.
+ */
+function globalkeys_faq_category_icon_svg_from_pictures_file() {
+	$path = get_template_directory() . '/Pictures/info-gk.svg';
+	if ( ! is_readable( $path ) ) {
+		return '';
+	}
+	$raw = file_get_contents( $path );
+	if ( ! is_string( $raw ) || $raw === '' ) {
+		return '';
+	}
+	$raw = preg_replace( '/<\?xml[^?]*\?>\s*/i', '', $raw );
+	$raw = preg_replace( '/<!--.*?-->/s', '', $raw );
+	$raw = str_ireplace( '#33363F', 'currentColor', $raw );
+	$out = preg_replace_callback(
+		'/<svg\s+([^>]*?)>/i',
+		static function ( $m ) {
+			$attrs = trim( $m[1] );
+			$attrs = preg_replace( '/\bwidth="[^"]*"/i', 'width="32"', $attrs, 1 );
+			$attrs = preg_replace( '/\bheight="[^"]*"/i', 'height="32"', $attrs, 1 );
+			if ( ! preg_match( '/\bclass="/i', $attrs ) ) {
+				return '<svg class="gk-faq-category-icon__svg" ' . $attrs . ' aria-hidden="true">';
+			}
+			return '<svg ' . $attrs . ' aria-hidden="true">';
+		},
+		$raw,
+		1
+	);
+	return is_string( $out ) ? trim( $out ) : '';
+}
+
+/**
+ * SVG-Icons für FAQ-Kategorie-Kacheln (Questions & Answers, currentColor).
+ * Alle Kategorien: Pictures/info-gk.svg (Parameter $name nur API-Kompatibilität).
+ *
+ * @param string $name shop|payment|trust|support (unbenutzt).
  * @return string SVG (unescaped für Echo mit phpcs:ignore).
  */
 function globalkeys_faq_category_icon_svg( $name ) {
-	$s = (string) $name;
-	switch ( $s ) {
-		case 'payment':
-			return '<svg class="gk-faq-category-icon__svg" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>';
-		case 'trust':
-			return '<svg class="gk-faq-category-icon__svg" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>';
-		case 'support':
-			return '<svg class="gk-faq-category-icon__svg" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
-		case 'shop':
-		default:
-			return '<svg class="gk-faq-category-icon__svg" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>';
+	$svg = globalkeys_faq_category_icon_svg_from_pictures_file();
+	if ( $svg !== '' ) {
+		return $svg;
 	}
+	return '<svg class="gk-faq-category-icon__svg" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12.5 7.5C12.5 7.77614 12.2761 8 12 8C11.7239 8 11.5 7.77614 11.5 7.5C11.5 7.22386 11.7239 7 12 7C12.2761 7 12.5 7.22386 12.5 7.5Z" fill="currentColor" stroke="currentColor"/><path d="M12 17V10" stroke="currentColor" stroke-width="2"/></svg>';
 }
 
 /**
