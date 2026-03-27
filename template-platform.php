@@ -45,7 +45,6 @@ get_header();
 			<div class="gk-section-inner gk-section-featured-inner">
 				<?php get_template_part( 'template-parts/platform-featured-carousel' ); ?>
 			</div>
-			<?php get_template_part( 'template-parts/section-platform-pc-community-reviews' ); ?>
 			<?php get_template_part( 'template-parts/section-platform-trending' ); ?>
 			<?php get_template_part( 'template-parts/section-platform-best-with-friends' ); ?>
 			<?php get_template_part( 'template-parts/section-platform-spotlight-banner' ); ?>

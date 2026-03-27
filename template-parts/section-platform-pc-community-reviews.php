@@ -52,7 +52,6 @@ $gk_slides = array();
 for ( $i = 0; $i < 5; $i++ ) {
 	$p = isset( $gk_review_products[ $i ] ) && $gk_review_products[ $i ] instanceof WC_Product ? $gk_review_products[ $i ] : null;
 	$title     = $p ? $p->get_name() : __( 'Slay the Spire II', 'globalkeys' );
-	$price     = $p ? wc_price( wc_get_price_to_display( $p ) ) : wc_price( 22.99 );
 	$permalink = $p ? $p->get_permalink() : '#';
 	$image     = $gk_fallback_review_image;
 	$tags      = array();
@@ -99,7 +98,6 @@ for ( $i = 0; $i < 5; $i++ ) {
 
 	$gk_slides[] = array(
 		'title'        => $title,
-		'price'        => $price,
 		'permalink'    => $permalink,
 		'image'        => $image,
 		'tags'         => $tags,
@@ -112,12 +110,20 @@ for ( $i = 0; $i < 5; $i++ ) {
 $gk_fake_user_avatar = get_theme_file_uri( 'Pictures/andon.png' );
 $gk_pc_comm_section    = get_query_var( 'gk_section', array() );
 $gk_pc_comm_section_id = is_array( $gk_pc_comm_section ) && ! empty( $gk_pc_comm_section['id'] ) ? (string) $gk_pc_comm_section['id'] : '';
+$gk_pc_comm_title_id   = $gk_pc_comm_section_id !== '' ? $gk_pc_comm_section_id . '-title' : 'gk-pc-community-title';
 ?>
 
-<section<?php echo $gk_pc_comm_section_id !== '' ? ' id="' . esc_attr( $gk_pc_comm_section_id ) . '"' : ''; ?> class="gk-section gk-section-platform-pc-community" aria-labelledby="gk-pc-community-title">
+<section<?php echo $gk_pc_comm_section_id !== '' ? ' id="' . esc_attr( $gk_pc_comm_section_id ) . '"' : ''; ?> class="gk-section gk-section-platform-pc-community" role="region" aria-labelledby="<?php echo esc_attr( $gk_pc_comm_title_id ); ?>">
 	<div class="gk-section-inner gk-section-featured-inner">
-		<h2 id="gk-pc-community-title" class="gk-pc-community__title"><?php esc_html_e( 'DIE COMMUNITY EMPFIEHLT', 'globalkeys' ); ?></h2>
-		<p class="gk-pc-community__subtitle"><?php esc_html_e( 'SPIELEMPFEHLUNGEN DES TAGES VON DER COMMUNITY', 'globalkeys' ); ?></p>
+		<div class="gk-featured-heading-wrap">
+			<h2 id="<?php echo esc_attr( $gk_pc_comm_title_id ); ?>" class="gk-section-title gk-featured-heading">
+				<span class="gk-featured-heading-text-wrap">
+					<span class="gk-featured-heading-text"><?php esc_html_e( 'Die Community empfiehlt', 'globalkeys' ); ?></span>
+					<span class="gk-featured-title-underline" aria-hidden="true"></span>
+				</span>
+			</h2>
+		</div>
+		<p class="gk-pc-community__subtitle"><?php esc_html_e( 'Spielempfehlungen des Tages von der Community', 'globalkeys' ); ?></p>
 
 		<div class="gk-pc-community__carousel-wrap" tabindex="0">
 			<button type="button" class="gk-test-arrow gk-test-arrow--prev gk-pc-community__arrow gk-pc-community__arrow--prev" aria-label="<?php esc_attr_e( 'Vorherige', 'globalkeys' ); ?>">
@@ -129,7 +135,6 @@ $gk_pc_comm_section_id = is_array( $gk_pc_comm_section ) && ! empty( $gk_pc_comm
 					<div class="gk-pc-community__content<?php echo 0 === $i ? ' is-active' : ''; ?>" data-slide-index="<?php echo esc_attr( (string) $i ); ?>" aria-hidden="<?php echo 0 === $i ? 'false' : 'true'; ?>">
 						<a class="gk-pc-community__media" href="<?php echo esc_url( $gk_slide['permalink'] ); ?>" style="--gk-review-image: url('<?php echo esc_url( $gk_slide['image'] ); ?>');">
 							<span class="screen-reader-text"><?php echo esc_html( $gk_slide['title'] ); ?></span>
-							<span class="gk-pc-community__price"><?php echo wp_kses_post( $gk_slide['price'] ); ?></span>
 						</a>
 
 						<div class="gk-pc-community__review">

@@ -289,6 +289,50 @@ function globalkeys_single_product_purchase_actions_open() {
 }
 
 /**
+ * Section „About the Game“ auf Produktdetail (unter Keyart + Kaufkarte), nicht in der Kaufkarten-Spalte.
+ *
+ * Ausgabe über woocommerce_after_single_product_summary (Geschwister von .summary).
+ */
+function globalkeys_single_product_about_game_section() {
+	if ( ! globalkeys_single_product_is_purchase_card_active() ) {
+		return;
+	}
+	global $product;
+	$text = apply_filters( 'gk_purchase_card_about_game_heading_text', __( 'About the Game', 'globalkeys' ), $product );
+	if ( ! is_string( $text ) || $text === '' ) {
+		return;
+	}
+	$heading_id = 'gk-product-page-about-heading';
+	if ( $product && is_a( $product, 'WC_Product' ) ) {
+		$heading_id .= '-' . (int) $product->get_id();
+	}
+	echo '<section class="gk-product-page-about-game" aria-labelledby="' . esc_attr( $heading_id ) . '">';
+	echo '<div class="gk-section-inner gk-section-featured-inner">';
+	echo '<div class="gk-featured-heading-wrap gk-product-page-about-game__heading-wrap">';
+	echo '<h2 id="' . esc_attr( $heading_id ) . '" class="gk-section-title gk-featured-heading">';
+	echo '<span class="gk-featured-heading-text-wrap">';
+	echo '<span class="gk-featured-heading-text">' . esc_html( $text ) . '</span>';
+	echo '<span class="gk-featured-title-underline" aria-hidden="true"></span>';
+	echo '</span>';
+	echo '</h2>';
+	echo '</div>';
+
+	$intro = '';
+	if ( $product && is_a( $product, 'WC_Product' ) ) {
+		$intro = $product->get_meta( '_gk_about_game_intro' );
+	}
+	$intro = apply_filters( 'gk_about_game_intro_text', $intro, $product );
+	if ( is_string( $intro ) && $intro !== '' ) {
+		echo '<div class="gk-product-page-about-game__intro">';
+		echo wp_kses_post( wpautop( $intro ) );
+		echo '</div>';
+	}
+
+	echo '</div>';
+	echo '</section>';
+}
+
+/**
  * Öffnet Cluster Preis + Warenkorb (einfaches Produkt): Block per margin-top:auto ans untere Kartenende.
  */
 function globalkeys_single_product_purchase_cta_cluster_open_simple() {
@@ -359,6 +403,7 @@ function globalkeys_single_product_purchase_card_bootstrap() {
 		add_action( 'woocommerce_after_add_to_cart_form', 'globalkeys_single_product_purchase_cta_cluster_close_simple', 5 );
 	}
 
+	add_action( 'woocommerce_after_single_product_summary', 'globalkeys_single_product_about_game_section', 5 );
 	add_action( 'woocommerce_single_product_summary', 'globalkeys_single_product_purchase_status_bar', 5 );
 
 	add_action( 'woocommerce_before_add_to_cart_button', 'globalkeys_single_product_purchase_actions_open', 1 );

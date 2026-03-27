@@ -370,6 +370,11 @@
 		function updateSearchResultsPage() {
 			if ( ! document.body.classList.contains( 'gk-search-results-page' ) ) return;
 			var val = searchInput ? ( searchInput.value || '' ).trim() : '';
+			var budgetBannerQuick = document.getElementById( 'gk-budget-search-banner' );
+			if ( budgetBannerQuick && val.length > 0 ) {
+				budgetBannerQuick.setAttribute( 'hidden', '' );
+				budgetBannerQuick.setAttribute( 'aria-hidden', 'true' );
+			}
 			var gridWrap = document.getElementById( 'gk-search-results-grid' );
 			if ( ! gridWrap ) return;
 			var listEl = gridWrap.querySelector( '.gk-featured-products' );
@@ -603,6 +608,32 @@
 				window.scrollTo( 0, 0 );
 			} );
 		} );
+
+		var budgetBannerEl = document.getElementById( 'gk-budget-search-banner' );
+		if ( budgetBannerEl ) {
+			function gkSyncBudgetBannerWithPriceFilter() {
+				if ( budgetBannerEl.getAttribute( 'hidden' ) ) {
+					return;
+				}
+				var r = getPriceFilterRange();
+				var bmin = parseInt( budgetBannerEl.getAttribute( 'data-budget-min' ), 10 );
+				var bmax = parseInt( budgetBannerEl.getAttribute( 'data-budget-max' ), 10 );
+				if ( isNaN( bmin ) || isNaN( bmax ) ) {
+					return;
+				}
+				var data = typeof gkPillSearch !== 'undefined' && gkPillSearch.productsData;
+				var sliderMax = ( data && data.priceMax != null ) ? Math.ceil( data.priceMax ) : 100;
+				if ( sliderMax < 1 ) {
+					sliderMax = 1;
+				}
+				var maxOk = ( r.max === bmax ) || ( bmax > sliderMax && r.max === sliderMax );
+				if ( r.min !== bmin || ! maxOk ) {
+					budgetBannerEl.setAttribute( 'hidden', '' );
+					budgetBannerEl.setAttribute( 'aria-hidden', 'true' );
+				}
+			}
+			document.addEventListener( 'gk_search_filters_changed', gkSyncBudgetBannerWithPriceFilter );
+		}
 
 		function updateActiveFiltersBar() {
 			var bar = document.getElementById( 'gk-active-filters-bar' );

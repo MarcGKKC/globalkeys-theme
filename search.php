@@ -74,6 +74,24 @@ if ( $gk_product_search && class_exists( 'WooCommerce' ) ) {
 			<?php
 			$gk_total_count = ( $gk_product_query && $gk_product_query->found_posts >= 0 ) ? (int) $gk_product_query->found_posts : 0;
 			$gk_filters_launch_open = isset( $_GET['gk_filters'] ) && 'open' === sanitize_text_field( wp_unslash( (string) $_GET['gk_filters'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$gk_budget_banner_show  = false;
+			$gk_budget_banner_max   = 0;
+			$gk_budget_banner_title = '';
+			$gk_budget_from_get     = isset( $_GET['gk_budget_from'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['gk_budget_from'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			if ( 'home' === $gk_budget_from_get ) {
+				$gk_budget_pmin = isset( $_GET['gk_price_min'] ) ? (int) round( (float) wp_unslash( $_GET['gk_price_min'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				$gk_budget_pmax = isset( $_GET['gk_price_max'] ) ? (int) round( (float) wp_unslash( $_GET['gk_price_max'] ) ) : -1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				if ( 0 === $gk_budget_pmin && in_array( $gk_budget_pmax, array( 5, 10, 20 ), true ) ) {
+					$gk_budget_banner_show = true;
+					$gk_budget_banner_max  = $gk_budget_pmax;
+					$gk_budget_titles      = array(
+						5  => __( 'Spiele unter 5 $', 'globalkeys' ),
+						10 => __( 'Spiele unter 10 $', 'globalkeys' ),
+						20 => __( 'Spiele unter 20 $', 'globalkeys' ),
+					);
+					$gk_budget_banner_title = $gk_budget_titles[ $gk_budget_pmax ];
+				}
+			}
 			?>
 			<div id="gk-search-layout" class="gk-search-layout<?php echo $gk_filters_launch_open ? ' is-sidebar-open' : ''; ?>">
 				<aside id="gk-search-filter-sidebar" class="gk-search-filter-sidebar" role="complementary" aria-label="<?php esc_attr_e( 'Filters', 'globalkeys' ); ?>">
@@ -182,6 +200,45 @@ if ( $gk_product_search && class_exists( 'WooCommerce' ) ) {
 				<div class="gk-search-main">
 			<section id="gk-search-results-grid" class="gk-section gk-section-bestsellers gk-section-shop-results" role="region" aria-label="<?php esc_attr_e( 'Produkte', 'globalkeys' ); ?>">
 				<div class="gk-section-inner gk-section-featured-inner">
+			<?php
+			if ( $gk_budget_banner_show ) :
+				$gk_budget_shop_base     = add_query_arg( 'post_type', 'product', home_url( '/' ) );
+				$gk_budget_link_under_5  = add_query_arg(
+					array(
+						'gk_price_min'   => 0,
+						'gk_price_max'   => 5,
+						'gk_budget_from' => 'home',
+					),
+					$gk_budget_shop_base
+				);
+				$gk_budget_link_under_10 = add_query_arg(
+					array(
+						'gk_price_min'   => 0,
+						'gk_price_max'   => 10,
+						'gk_budget_from' => 'home',
+					),
+					$gk_budget_shop_base
+				);
+				?>
+					<div id="gk-budget-search-banner" class="gk-budget-search-banner" data-budget-min="0" data-budget-max="<?php echo esc_attr( (string) $gk_budget_banner_max ); ?>">
+						<div class="gk-budget-search-banner-inner">
+							<div class="gk-budget-search-banner-top">
+								<nav class="gk-budget-search-banner-breadcrumb" aria-label="<?php esc_attr_e( 'Breadcrumb', 'globalkeys' ); ?>">
+									<ol class="gk-budget-search-banner-breadcrumb-list">
+										<li><a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Home', 'globalkeys' ); ?></a></li>
+										<li><span class="gk-budget-search-banner-sep" aria-hidden="true"> / </span><span class="gk-budget-search-banner-breadcrumb-current"><?php echo esc_html( $gk_budget_banner_title ); ?></span></li>
+									</ol>
+								</nav>
+								<nav class="gk-budget-search-banner-quick" aria-label="<?php esc_attr_e( 'Budget quick links', 'globalkeys' ); ?>">
+									<a class="gk-budget-search-banner-quick-link<?php echo 5 === (int) $gk_budget_banner_max ? ' is-current' : ''; ?>" href="<?php echo esc_url( $gk_budget_link_under_5 ); ?>"<?php echo 5 === (int) $gk_budget_banner_max ? ' aria-current="page"' : ''; ?>><?php esc_html_e( 'Spiele unter 5 $', 'globalkeys' ); ?></a>
+									<span class="gk-budget-search-banner-quick-sep" aria-hidden="true"></span>
+									<a class="gk-budget-search-banner-quick-link<?php echo 10 === (int) $gk_budget_banner_max ? ' is-current' : ''; ?>" href="<?php echo esc_url( $gk_budget_link_under_10 ); ?>"<?php echo 10 === (int) $gk_budget_banner_max ? ' aria-current="page"' : ''; ?>><?php esc_html_e( 'Spiele unter 10 $', 'globalkeys' ); ?></a>
+								</nav>
+							</div>
+							<h1 class="gk-budget-search-banner-title"><?php echo esc_html( $gk_budget_banner_title ); ?></h1>
+						</div>
+					</div>
+			<?php endif; ?>
 					<div id="gk-active-filters-bar" class="gk-active-filters-bar" aria-hidden="true">
 						<div class="gk-active-filters-chips"></div>
 						<button type="button" class="gk-active-filters-clear-all" id="gk-active-filters-clear-all"><?php esc_html_e( 'Clear all', 'globalkeys' ); ?></button>

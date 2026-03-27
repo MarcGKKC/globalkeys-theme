@@ -97,7 +97,13 @@ function globalkeys_product_hero_image_field() {
 				'value'             => $trailer_value,
 			)
 		);
+		$about_intro = $post ? get_post_meta( $post->ID, '_gk_about_game_intro', true ) : '';
 		?>
+		<p class="form-field _gk_about_game_intro_field">
+			<label for="_gk_about_game_intro"><?php esc_html_e( 'About the Game – Einleitungstext', 'globalkeys' ); ?></label>
+			<textarea name="_gk_about_game_intro" id="_gk_about_game_intro" class="large-text" rows="8" style="width:100%;"><?php echo esc_textarea( is_string( $about_intro ) ? $about_intro : '' ); ?></textarea>
+			<span class="description"><?php esc_html_e( 'Wird unter der Überschrift „About the Game“ auf der Produktdetailseite angezeigt (Produkthero-Layout). Leerzeilen werden zu Absätzen.', 'globalkeys' ); ?></span>
+		</p>
 	</div>
 	<?php
 }
@@ -141,6 +147,15 @@ function globalkeys_save_product_hero_image_id( $product ) {
 			$product->delete_meta_data( '_gk_product_trailer_url' );
 		} else {
 			$product->update_meta_data( '_gk_product_trailer_url', $raw );
+		}
+	}
+
+	if ( isset( $_POST['_gk_about_game_intro'] ) ) {
+		$raw = sanitize_textarea_field( wp_unslash( $_POST['_gk_about_game_intro'] ) );
+		if ( $raw === '' ) {
+			$product->delete_meta_data( '_gk_about_game_intro' );
+		} else {
+			$product->update_meta_data( '_gk_about_game_intro', $raw );
 		}
 	}
 }

@@ -53,8 +53,9 @@ $gk_budget_bg_url = get_template_directory_uri() . '/Pictures/category-card-bg.s
 				if ( class_exists( 'WooCommerce' ) && $price_max > 0 ) {
 					$card_href = add_query_arg(
 						array(
-							'gk_price_min' => 0,
-							'gk_price_max' => max( 1, min( 999999, $price_max ) ),
+							'gk_price_min'   => 0,
+							'gk_price_max'   => max( 1, min( 999999, $price_max ) ),
+							'gk_budget_from' => 'home',
 						),
 						$gk_budget_browse_url
 					);
