@@ -763,51 +763,6 @@ function globalkeys_house_member_price_html( $html, $product ) {
 }
 add_filter( 'woocommerce_get_price_html', 'globalkeys_house_member_price_html', 20, 2 );
 
-/**
- * Produktseite: Hinweis auf extra Rabatt für Mitglieder.
- */
-function globalkeys_house_member_single_product_notice() {
-	if ( ! function_exists( 'is_product' ) || ! is_product() ) {
-		return;
-	}
-	$product = wc_get_product( get_the_ID() );
-	if ( ! $product || ! globalkeys_product_has_house_member_deal( $product ) ) {
-		return;
-	}
-	if ( globalkeys_user_has_house_member_access() ) {
-		echo '<div class="woocommerce-message gk-house-member-product-notice" role="status">';
-		if ( $product->is_type( 'variable' ) ) {
-			esc_html_e( 'Als House-Mitglied gilt für passende Varianten der günstigere Mitgliederpreis (siehe gewählte Variation).', 'globalkeys' );
-		} else {
-			$raw = globalkeys_get_product_house_member_price_raw( $product );
-			if ( $raw !== null ) {
-				printf(
-					/* translators: %s: member price */
-					esc_html__( 'Als House-Mitglied zahlst du %s.', 'globalkeys' ),
-					wp_kses_post( wc_price( $raw ) )
-				);
-			} else {
-				esc_html_e( 'House-Mitgliederpreis ist für dieses Produkt aktiv.', 'globalkeys' );
-			}
-		}
-		echo '</div>';
-		return;
-	}
-	$url = globalkeys_house_member_cta_url();
-	$raw = globalkeys_get_product_house_member_price_raw( $product );
-	echo '<div class="woocommerce-info gk-house-member-product-notice" role="status">';
-	echo wp_kses_post(
-		sprintf(
-			/* translators: 1: member price, 2: URL to membership */
-			__( 'Noch günstiger mit House: Mitglieder zahlen %1$s. <a href="%2$s">Zur Mitgliedschaft</a>', 'globalkeys' ),
-			wp_kses_post( wc_price( $raw ) ),
-			esc_url( $url )
-		)
-	);
-	echo '</div>';
-}
-add_action( 'woocommerce_before_single_product_summary', 'globalkeys_house_member_single_product_notice', 5 );
-
 /* --- WooCommerce Admin: Mitgliedspreis --- */
 
 /**

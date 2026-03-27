@@ -1,7 +1,7 @@
 <?php
 /**
  * Template für Plattform-Seiten (PC, PlayStation, Xbox, Nintendo).
- * PC: … Gift cards, Pre-orders, Our recommendations, Category grid (ganz unten).
+ * PC: … Gift cards, Pre-orders, Category grid (ganz unten).
  *
  * @package globalkeys
  */
@@ -50,7 +50,6 @@ get_header();
 			<?php get_template_part( 'template-parts/section-platform-spotlight-banner' ); ?>
 			<?php get_template_part( 'template-parts/section-platform-pc-gift-cards' ); ?>
 			<?php get_template_part( 'template-parts/section', 'preorders' ); ?>
-			<?php get_template_part( 'template-parts/section-platform-pc-recommendations' ); ?>
 			<?php get_template_part( 'template-parts/section-platform-pc-category-grid' ); ?>
 		<?php elseif ( $gk_platform_slug === 'playstation' ) : ?>
 			<div class="gk-platform-header">

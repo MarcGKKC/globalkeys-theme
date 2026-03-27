@@ -207,10 +207,12 @@ if ( ! $gk_account_login ) {
 					<span class="header-icon header-icon-favorite" aria-hidden="true"></span>
 				</a>
 				<a href="<?php echo esc_url( $cart_url ); ?>" class="header-icon-link header-cart-link" aria-label="<?php esc_attr_e( 'Warenkorb', 'globalkeys' ); ?>">
-					<span class="header-icon header-icon-cart" aria-hidden="true"></span>
-					<?php if ( class_exists( 'WooCommerce' ) && WC()->cart && WC()->cart->get_cart_contents_count() > 0 ) : ?>
-						<span class="header-cart-count"><?php echo absint( WC()->cart->get_cart_contents_count() ); ?></span>
-					<?php endif; ?>
+					<span class="header-cart-icon-wrap">
+						<span class="header-icon header-icon-cart" aria-hidden="true"></span>
+						<?php if ( class_exists( 'WooCommerce' ) && WC()->cart && WC()->cart->get_cart_contents_count() > 0 ) : ?>
+							<span class="header-cart-count"><?php echo absint( WC()->cart->get_cart_contents_count() ); ?></span>
+						<?php endif; ?>
+					</span>
 				</a>
 				<?php if ( is_user_logged_in() ) : ?>
 					<?php
