@@ -56,13 +56,27 @@ add_action( 'wp', 'globalkeys_single_product_remove_title', 20 );
 add_action( 'woocommerce_before_single_product', 'globalkeys_single_product_remove_title', 1 );
 
 /**
- * Kleines Key-Art-Bild oben in der Sidebar, falls Produktbild existiert.
+ * Links: Preview-Trailer (oEmbed) oder Key-Art-Bild.
  */
 function globalkeys_single_product_sidebar_keyart() {
 	global $product;
 	if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
 		return;
 	}
+
+	$trailer_url = $product->get_meta( '_gk_product_trailer_url' );
+	if ( is_string( $trailer_url ) && $trailer_url !== '' && function_exists( 'globalkeys_get_product_trailer_oembed_html' ) ) {
+		$embed = globalkeys_get_product_trailer_oembed_html( $trailer_url );
+		if ( $embed !== '' ) {
+			echo '<div class="gk-product-sidebar-keyart gk-product-sidebar-keyart--trailer">';
+			echo '<div class="gk-product-sidebar-keyart__embed">';
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- oEmbed vom Provider.
+			echo $embed;
+			echo '</div></div>';
+			return;
+		}
+	}
+
 	$img_id = $product->get_image_id();
 	if ( $img_id < 1 ) {
 		return;
@@ -83,6 +97,45 @@ function globalkeys_single_product_sidebar_keyart() {
 add_action( 'woocommerce_single_product_summary', 'globalkeys_single_product_sidebar_keyart', 1 );
 
 /**
+ * Produktbild rechts über der Überschrift (wenn links der Trailer läuft).
+ */
+function globalkeys_single_product_summary_product_thumb_above_title() {
+	if ( ! function_exists( 'is_product' ) || ! is_product() ) {
+		return;
+	}
+	global $product;
+	if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
+		return;
+	}
+	if ( ! function_exists( 'globalkeys_product_has_page_hero' ) || ! globalkeys_product_has_page_hero( $product ) ) {
+		return;
+	}
+	if ( ! function_exists( 'globalkeys_product_has_trailer_url' ) || ! globalkeys_product_has_trailer_url( $product ) ) {
+		return;
+	}
+	$img_id = $product->get_image_id();
+	if ( $img_id < 1 ) {
+		return;
+	}
+	$show = apply_filters( 'gk_show_product_summary_thumb_above_title', true, $product );
+	if ( ! $show ) {
+		return;
+	}
+	echo '<div class="gk-product-summary-main__thumb-wrap">';
+	echo wp_get_attachment_image(
+		$img_id,
+		'woocommerce_single',
+		false,
+		array(
+			'class'   => 'gk-product-summary-main__thumb-img',
+			'loading' => 'lazy',
+			'alt'     => esc_attr( $product->get_name() ),
+		)
+	);
+	echo '</div>';
+}
+
+/**
  * Produkttitel in der Summary, wenn ein Produkthero aktiv ist (title.php ist sonst leer).
  *
  * @see woocommerce/single-product/title.php
@@ -92,7 +145,7 @@ function globalkeys_single_product_hero_summary_title() {
 		return;
 	}
 	global $product;
-	if ( ! $product || ! is_a( $product, 'WC_Product' ) || ! $product->get_image_id() ) {
+	if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
 		return;
 	}
 	if ( ! function_exists( 'globalkeys_product_has_page_hero' ) || ! globalkeys_product_has_page_hero( $product ) ) {
@@ -100,7 +153,8 @@ function globalkeys_single_product_hero_summary_title() {
 	}
 	echo '<h1 class="product_title entry-title gk-purchase-card__title">' . esc_html( $product->get_name() ) . '</h1>';
 }
-add_action( 'woocommerce_single_product_summary', 'globalkeys_single_product_hero_summary_title', 3 );
+add_action( 'woocommerce_single_product_summary', 'globalkeys_single_product_summary_product_thumb_above_title', 3 );
+add_action( 'woocommerce_single_product_summary', 'globalkeys_single_product_hero_summary_title', 4 );
 
 /**
  * Öffnet die rechte Inhaltsspalte (Bild links = Keyart, Text rechts).
@@ -110,9 +164,10 @@ function globalkeys_single_product_summary_main_open() {
 		return;
 	}
 	global $product;
-	if ( ! $product || ! is_a( $product, 'WC_Product' ) || ! $product->get_image_id() ) {
+	if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
 		return;
 	}
+	/* Auch ohne Beitragsbild: Formular/Variationen liegen in derselben Spalte (Styles greifen). */
 	echo '<div class="gk-product-summary-main">';
 }
 
@@ -126,7 +181,7 @@ function globalkeys_single_product_summary_main_close() {
 		return;
 	}
 	global $product;
-	if ( ! $product || ! is_a( $product, 'WC_Product' ) || ! $product->get_image_id() ) {
+	if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
 		return;
 	}
 	echo '</div>';

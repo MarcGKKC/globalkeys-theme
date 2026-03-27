@@ -22,6 +22,7 @@ if ( function_exists( 'wc_get_orders' ) ) {
 		}
 	}
 }
+
 ?>
 
 <div class="gk-dashboard">

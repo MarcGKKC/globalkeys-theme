@@ -8,6 +8,16 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
+ * Bei fehlenden kaufbaren Variationen: select deaktivieren, bleibt aber sichtbar (Info).
+ *
+ * @param string $html Dropdown-Markup.
+ * @return string
+ */
+function globalkeys_variation_dropdown_select_disabled_html( $html ) {
+	return str_replace( '<select ', '<select disabled aria-disabled="true" ', $html, 1 );
+}
+
+/**
  * Aktive Kaufkarte: Produkthero + Produktbild (Keyart).
  *
  * @return bool
@@ -100,68 +110,129 @@ function globalkeys_single_product_purchase_status_bar() {
 		? globalkeys_get_product_platform_icon_url( $platform )
 		: '';
 
-	echo '<div class="gk-purchase-card__status" role="group" aria-label="' . esc_attr__( 'Produktstatus', 'globalkeys' ) . '">';
+	$chunks = array();
 
 	if ( $icon_url && $platform ) {
 		$plabel = isset( $labels[ $platform ] ) ? $labels[ $platform ] : ucfirst( (string) $platform );
+		ob_start();
 		echo '<span class="gk-purchase-card__status-item gk-purchase-card__status-item--platform">';
 		echo '<img class="gk-purchase-card__status-platform-icon" src="' . esc_url( $icon_url ) . '" width="22" height="22" alt="" decoding="async" loading="lazy" /> ';
 		echo '<span class="gk-purchase-card__status-label">' . esc_html( $plabel ) . '</span>';
 		echo '</span>';
+		$chunks[] = ob_get_clean();
 	}
 
+	ob_start();
 	if ( $product->is_in_stock() ) {
 		echo '<span class="gk-purchase-card__status-item gk-purchase-card__status-item--ok">';
 		echo '<span class="gk-purchase-card__check" aria-hidden="true"></span>';
-		echo esc_html__( 'Produkt auf Lager', 'globalkeys' );
+		echo esc_html__( 'In Stock', 'globalkeys' );
 		echo '</span>';
 	} else {
 		echo '<span class="gk-purchase-card__status-item gk-purchase-card__status-item--bad">';
-		echo esc_html__( 'Ausverkauft', 'globalkeys' );
+		echo esc_html__( 'Out of stock', 'globalkeys' );
 		echo '</span>';
 	}
+	$chunks[] = ob_get_clean();
 
-	if ( $product->is_virtual() || $product->is_downloadable() ) {
-		echo '<span class="gk-purchase-card__status-sep" aria-hidden="true"></span>';
+	$show_digital = (bool) apply_filters( 'gk_purchase_card_show_digital_download_status', true, $product );
+	if ( $show_digital ) {
+		ob_start();
 		echo '<span class="gk-purchase-card__status-item gk-purchase-card__status-item--ok">';
 		echo '<span class="gk-purchase-card__check" aria-hidden="true"></span>';
-		echo esc_html__( 'Digitaler Download', 'globalkeys' );
+		echo esc_html__( 'Digital Download', 'globalkeys' );
 		echo '</span>';
+		$chunks[] = ob_get_clean();
 	}
 
+	$chunks = array_values( array_filter( $chunks ) );
+	if ( empty( $chunks ) ) {
+		return;
+	}
+
+	echo '<div class="gk-purchase-card__status" role="group" aria-label="' . esc_attr__( 'Product status', 'globalkeys' ) . '">';
+	foreach ( $chunks as $i => $html ) {
+		if ( $i > 0 ) {
+			echo '<span class="gk-purchase-card__status-divider" aria-hidden="true"></span>';
+		}
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- gebaute Status-Fragmente, Inhalt bereits escaped.
+		echo $html;
+	}
 	echo '</div>';
 }
 
 /**
- * Social-Proof-Zeile (Zahl per Filter steuerbar; 0 = ausblenden).
+ * Einfaches Produkt: zwei „Dropdown“-Felder (nur Anzeige), da WooCommerce hier keine Variationen rendert.
+ * Wird im CTA-Cluster direkt über der Preiszeile ausgegeben (kein Leerraum durch flex).
  */
-function globalkeys_single_product_purchase_social_row() {
+function globalkeys_single_product_purchase_simple_selectors_row() {
 	if ( ! globalkeys_single_product_is_purchase_card_active() ) {
 		return;
 	}
 	global $product;
-	$count = (int) apply_filters( 'gk_purchase_card_live_users_count', 209, $product );
-	if ( $count < 1 ) {
+	if ( ! $product || ! $product->is_type( 'simple' ) ) {
 		return;
 	}
-	echo '<p class="gk-purchase-card__social" role="status">';
-	echo '<span class="gk-purchase-card__social-flame" aria-hidden="true">';
-	echo '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 22c4.97 0 8-3.58 8-7.5C20 9.5 17.5 7 15 5.5 14.5 8 12 9 12 9S9.5 8 9 5.5C6.5 7 4 9.5 4 14.5 4 18.42 7.03 22 12 22Z" fill="#ff7a2e"/><path d="M12 19a4 4 0 0 0 4-4c0-2.5-2-3.5-4-6-2 2.5-4 3.5-4 6a4 4 0 0 0 4 4Z" fill="#ffb14a"/></svg>';
-	echo '</span>';
-	echo '<span class="gk-purchase-card__social-text">';
-	echo esc_html(
-		sprintf(
-			/* translators: %d: number (override with filter gk_purchase_card_live_users_count, use 0 to hide). */
-			__( '%d Benutzer auf der Seite', 'globalkeys' ),
-			$count
-		)
+
+	$labels = array(
+		'playstation' => 'PlayStation',
+		'xbox'        => 'Xbox',
+		'nintendo'    => 'Nintendo',
+		'steam'       => 'Steam',
 	);
-	echo '</span>';
-	echo '</p>';
+
+	$platform_key = function_exists( 'globalkeys_get_product_platform_key' ) ? globalkeys_get_product_platform_key( $product ) : null;
+	$platform_display = ( $platform_key && isset( $labels[ $platform_key ] ) )
+		? $labels[ $platform_key ]
+		: ( $platform_key ? ucfirst( (string) $platform_key ) : __( 'PC', 'globalkeys' ) );
+
+	$platform_display = apply_filters( 'gk_purchase_card_simple_platform_display', $platform_display, $product );
+	$edition_display  = apply_filters( 'gk_purchase_card_simple_edition_label', __( 'Standard Edition', 'globalkeys' ), $product );
+
+	$rows = apply_filters(
+		'gk_purchase_card_simple_selector_rows',
+		array(
+			array(
+				'label' => __( 'Plattform', 'globalkeys' ),
+				'value' => $platform_display,
+			),
+			array(
+				'label' => __( 'Edition', 'globalkeys' ),
+				'value' => $edition_display,
+			),
+		),
+		$product
+	);
+
+	if ( empty( $rows ) || ! is_array( $rows ) ) {
+		return;
+	}
+
+	echo '<div class="gk-purchase-card__pseudo-variations-wrap">';
+	echo '<table class="variations variations--pseudo gk-variations-appearance" cellspacing="0" role="presentation"><tbody>';
+
+	foreach ( $rows as $row ) {
+		$lab = isset( $row['label'] ) ? (string) $row['label'] : '';
+		$val = isset( $row['value'] ) ? (string) $row['value'] : '';
+		if ( $lab === '' || $val === '' ) {
+			continue;
+		}
+		$id = 'gk-pseudo-' . sanitize_title( $lab . '-' . $product->get_id() );
+		echo '<tr>';
+		echo '<th class="label"><label for="' . esc_attr( $id ) . '">' . esc_html( $lab ) . '</label></th>';
+		echo '<td class="value">';
+		echo '<select id="' . esc_attr( $id ) . '" class="gk-pseudo-variation-select" disabled aria-disabled="true" tabindex="-1" aria-label="' . esc_attr( $lab . ': ' . $val ) . '">';
+		echo '<option selected>' . esc_html( $val ) . '</option>';
+		echo '</select>';
+		echo '</td>';
+		echo '</tr>';
+	}
+
+	echo '</tbody></table></div>';
 }
 
 /**
- * Preisblock (einfaches Produkt): Icon-Zeile + Rabatt + Woo-Preis.
+ * Preisblock (einfaches Produkt): Rabatt + Woo-Preis.
  */
 function globalkeys_single_product_purchase_price_block() {
 	if ( ! globalkeys_single_product_is_purchase_card_active() ) {
@@ -173,7 +244,6 @@ function globalkeys_single_product_purchase_price_block() {
 	}
 	echo '<div class="gk-purchase-card__price-row gk-purchase-card__price-row--simple">';
 	echo '<div class="gk-purchase-card__price-center-group">';
-	echo '<span class="gk-purchase-card__price-tag-icon" aria-hidden="true"></span>';
 	echo '<div class="gk-purchase-card__price-stack">';
 	globalkeys_single_product_purchase_print_discount_pct();
 	woocommerce_template_single_price();
@@ -189,7 +259,6 @@ function globalkeys_single_product_purchase_var_price_open() {
 	}
 	echo '<div class="gk-purchase-card__price-row gk-purchase-card__price-row--variable">';
 	echo '<div class="gk-purchase-card__price-center-group">';
-	echo '<span class="gk-purchase-card__price-tag-icon" aria-hidden="true"></span>';
 	echo '<div class="gk-purchase-card__price-stack">';
 	globalkeys_single_product_purchase_print_discount_pct();
 }
@@ -212,10 +281,9 @@ function globalkeys_single_product_purchase_actions_open() {
 		return;
 	}
 	$favorites_url = home_url( '/favorites/' );
-	$heart         = esc_url( get_template_directory_uri() . '/Pictures/heart2-gk.svg' );
 	echo '<div class="gk-purchase-card__actions">';
 	echo '<a class="gk-purchase-card__wishlist" href="' . esc_url( $favorites_url ) . '" aria-label="' . esc_attr__( 'Favoriten', 'globalkeys' ) . '">';
-	echo '<img src="' . $heart . '" width="30" height="30" alt="" decoding="async" loading="lazy" />';
+	echo '<span class="gk-purchase-card__wishlist-icon" aria-hidden="true"></span>';
 	echo '</a>';
 	echo '<div class="gk-purchase-card__actions-primary">';
 }
@@ -232,6 +300,7 @@ function globalkeys_single_product_purchase_cta_cluster_open_simple() {
 		return;
 	}
 	echo '<div class="gk-purchase-card__cta-cluster">';
+	globalkeys_single_product_purchase_simple_selectors_row();
 }
 
 /**
@@ -290,8 +359,7 @@ function globalkeys_single_product_purchase_card_bootstrap() {
 		add_action( 'woocommerce_after_add_to_cart_form', 'globalkeys_single_product_purchase_cta_cluster_close_simple', 5 );
 	}
 
-	add_action( 'woocommerce_single_product_summary', 'globalkeys_single_product_purchase_status_bar', 4 );
-	add_action( 'woocommerce_single_product_summary', 'globalkeys_single_product_purchase_social_row', 5 );
+	add_action( 'woocommerce_single_product_summary', 'globalkeys_single_product_purchase_status_bar', 5 );
 
 	add_action( 'woocommerce_before_add_to_cart_button', 'globalkeys_single_product_purchase_actions_open', 1 );
 	add_action( 'woocommerce_after_add_to_cart_button', 'globalkeys_single_product_purchase_actions_close', 999 );

@@ -362,6 +362,12 @@ function globalkeys_get_front_page_sections() {
 			'aria_label' => __( 'Pre-orders', 'globalkeys' ),
 		),
 		array(
+			'id'         => 'section-platform-pc-community',
+			'slug'       => 'platform-pc-community-reviews',
+			'label'      => __( 'Community recommends', 'globalkeys' ),
+			'aria_label' => __( 'Community-empfohlene Spiele', 'globalkeys' ),
+		),
+		array(
 			'id'        => 'section-gift-cards',
 			'slug'      => 'gift-cards',
 			'label'     => __( 'Gift Cards', 'globalkeys' ),

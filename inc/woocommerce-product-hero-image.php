@@ -84,6 +84,19 @@ function globalkeys_product_hero_image_field() {
 				),
 			)
 		);
+		$trailer_value = $post ? get_post_meta( $post->ID, '_gk_product_trailer_url', true ) : '';
+		woocommerce_wp_text_input(
+			array(
+				'id'                => '_gk_product_trailer_url',
+				'name'              => '_gk_product_trailer_url',
+				'label'             => __( 'Preview-Trailer (URL)', 'globalkeys' ),
+				'placeholder'       => 'https://www.youtube.com/watch?v=…',
+				'description'       => __( 'Optional: YouTube- oder Vimeo-Link. Ersetzt das große Bild links durch den eingebetteten Trailer; das Produktbild erscheint rechts über dem Titel.', 'globalkeys' ),
+				'desc_tip'          => true,
+				'type'              => 'url',
+				'value'             => $trailer_value,
+			)
+		);
 		?>
 	</div>
 	<?php
@@ -121,8 +134,56 @@ function globalkeys_save_product_hero_image_id( $product ) {
 			$product->update_meta_data( '_gk_single_product_hero_image_id', $single_id );
 		}
 	}
+
+	if ( isset( $_POST['_gk_product_trailer_url'] ) ) {
+		$raw = esc_url_raw( wp_unslash( $_POST['_gk_product_trailer_url'] ) );
+		if ( $raw === '' ) {
+			$product->delete_meta_data( '_gk_product_trailer_url' );
+		} else {
+			$product->update_meta_data( '_gk_product_trailer_url', $raw );
+		}
+	}
 }
 add_action( 'woocommerce_admin_process_product_object', 'globalkeys_save_product_hero_image_id', 12, 1 );
+
+/**
+ * HTML für eingebetteten Trailer (oEmbed).
+ *
+ * @param string $url Video-URL.
+ * @return string
+ */
+function globalkeys_get_product_trailer_oembed_html( $url ) {
+	$url = is_string( $url ) ? esc_url_raw( trim( $url ) ) : '';
+	if ( $url === '' ) {
+		return '';
+	}
+	if ( ! function_exists( 'wp_oembed_get' ) ) {
+		require_once ABSPATH . WPINC . '/media.php';
+	}
+	$html = wp_oembed_get(
+		$url,
+		array(
+			'width'  => 1280,
+			'height' => 720,
+		)
+	);
+	return is_string( $html ) ? $html : '';
+}
+
+/**
+ * @param WC_Product|null $product Produkt.
+ * @return bool
+ */
+function globalkeys_product_has_trailer_url( $product = null ) {
+	if ( ! $product ) {
+		global $product;
+	}
+	if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
+		return false;
+	}
+	$url = $product->get_meta( '_gk_product_trailer_url' );
+	return is_string( $url ) && $url !== '' && globalkeys_get_product_trailer_oembed_html( $url ) !== '';
+}
 
 /**
  * URL des Produktseiten-Hero-Bilds (Single Product) oder leer.
@@ -177,7 +238,10 @@ function globalkeys_product_has_page_hero( $product = null ) {
 	if ( ! $url ) {
 		$url = globalkeys_get_product_hero_image_url( $product );
 	}
-	return $url !== '';
+	if ( $url !== '' ) {
+		return true;
+	}
+	return globalkeys_product_has_trailer_url( $product );
 }
 
 /**
@@ -224,6 +288,18 @@ function globalkeys_single_product_hero_section() {
 	if ( ! $hero_url ) {
 		$hero_url = globalkeys_get_product_hero_image_url( $wc_product, 'full' );
 	}
+
+	$trailer_raw = $wc_product->get_meta( '_gk_product_trailer_url' );
+	$trailer_ok  = is_string( $trailer_raw ) && $trailer_raw !== '' && globalkeys_get_product_trailer_oembed_html( $trailer_raw ) !== '';
+
+	if ( ! $hero_url && $trailer_ok ) {
+		$rendered = true;
+		echo '<div class="gk-product-page-hero-root gk-product-page-hero-root--trailer-only">';
+		echo '<div class="gk-single-product-hero gk-single-product-hero--trailer-spacer" aria-hidden="true"></div>';
+		echo '</div>';
+		return;
+	}
+
 	if ( ! $hero_url ) {
 		return;
 	}
@@ -257,6 +333,11 @@ function globalkeys_single_product_hero_body_class( $classes ) {
 		$url = globalkeys_get_product_hero_image_url( $wc_product, 'full' );
 	}
 	if ( $url !== '' ) {
+		$classes[] = 'gk-has-product-page-hero';
+		return $classes;
+	}
+	$tr = $wc_product->get_meta( '_gk_product_trailer_url' );
+	if ( is_string( $tr ) && $tr !== '' && globalkeys_get_product_trailer_oembed_html( $tr ) !== '' ) {
 		$classes[] = 'gk-has-product-page-hero';
 	}
 	return $classes;

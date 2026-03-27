@@ -2,6 +2,9 @@
 /**
  * Variable product add to cart (Theme: Preiszeile getrennt von Menge/Button bei Produkthero-Kaufkarte).
  *
+ * Zusätzlich: Auswahlfelder bleiben sichtbar, wenn keine kaufbare Variation existiert
+ * (Woo-Standard blendet dann nur die Lager-Meldung ohne Dropdowns ein).
+ *
  * @package globalkeys
  * @version 9.6.0
  */
@@ -14,15 +17,25 @@ $attribute_keys  = array_keys( $attributes );
 $variations_json = wp_json_encode( $available_variations );
 $variations_attr = function_exists( 'wc_esc_json' ) ? wc_esc_json( $variations_json ) : _wp_specialchars( $variations_json, ENT_QUOTES, 'UTF-8', true );
 
+/** Keine kaufbare Variation, aber Attributdaten sind geladen (kein „false“-Sentinel). */
+$gk_no_variations_available = empty( $available_variations ) && false !== $available_variations;
+
 do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 
-<form class="variations_form cart" action="<?php echo esc_url( apply_filters( 'woocommerce_add_to_cart_form_action', $product->get_permalink() ) ); ?>" method="post" enctype='multipart/form-data' data-product_id="<?php echo absint( $product->get_id() ); ?>" data-product_variations="<?php echo $variations_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>">
+<form class="variations_form cart<?php echo $gk_no_variations_available ? ' gk-variations-form--no-purchasable' : ''; ?>" action="<?php echo esc_url( apply_filters( 'woocommerce_add_to_cart_form_action', $product->get_permalink() ) ); ?>" method="post" enctype='multipart/form-data' data-product_id="<?php echo absint( $product->get_id() ); ?>" data-product_variations="<?php echo $variations_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>">
 	<?php do_action( 'woocommerce_before_variations_form' ); ?>
 
-	<?php if ( empty( $available_variations ) && false !== $available_variations ) : ?>
-		<p class="stock out-of-stock"><?php echo esc_html( apply_filters( 'woocommerce_out_of_stock_message', __( 'This product is currently out of stock and unavailable.', 'woocommerce' ) ) ); ?></p>
-	<?php else : ?>
-		<table class="variations" cellspacing="0" role="presentation">
+	<?php if ( $gk_no_variations_available ) : ?>
+		<p class="stock out-of-stock gk-variation-unavailable-notice"><?php echo esc_html( apply_filters( 'woocommerce_out_of_stock_message', __( 'This product is currently out of stock and unavailable.', 'woocommerce' ) ) ); ?></p>
+	<?php endif; ?>
+
+	<?php if ( ! empty( $attributes ) ) : ?>
+		<?php
+		if ( $gk_no_variations_available && function_exists( 'globalkeys_variation_dropdown_select_disabled_html' ) ) {
+			add_filter( 'woocommerce_dropdown_variation_attribute_options_html', 'globalkeys_variation_dropdown_select_disabled_html', 10, 1 );
+		}
+		?>
+		<table class="variations gk-variations-appearance" cellspacing="0" role="presentation">
 			<tbody>
 				<?php foreach ( $attributes as $attribute_name => $options ) : ?>
 					<tr>
@@ -43,6 +56,11 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 				<?php endforeach; ?>
 			</tbody>
 		</table>
+		<?php
+		if ( $gk_no_variations_available && function_exists( 'globalkeys_variation_dropdown_select_disabled_html' ) ) {
+			remove_filter( 'woocommerce_dropdown_variation_attribute_options_html', 'globalkeys_variation_dropdown_select_disabled_html', 10 );
+		}
+		?>
 		<div class="reset_variations_alert screen-reader-text" role="alert" aria-live="polite" aria-relevant="all"></div>
 		<?php do_action( 'woocommerce_after_variations_table' ); ?>
 
@@ -66,6 +84,8 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 			}
 			?>
 		</div>
+	<?php else : ?>
+		<p class="gk-variations-empty-notice" role="status"><?php esc_html_e( 'Für dieses Produkt sind keine Auswahloptionen (Variationen) hinterlegt.', 'globalkeys' ); ?></p>
 	<?php endif; ?>
 
 	<?php do_action( 'woocommerce_after_variations_form' ); ?>
