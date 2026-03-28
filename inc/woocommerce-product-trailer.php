@@ -1,6 +1,6 @@
 <?php
 /**
- * Produkt-Meta: URL zu einem kurzen Preview-Video (WebM/MP4) pro WooCommerce-Produkt.
+ * Produkt-Meta: Preview-Trailer (WebM/MP4/YouTube), optional Haupttrailer „Game Trailer“ (Vimeo/YouTube), Carousel-HD.
  *
  * @package globalkeys
  */
@@ -22,11 +22,23 @@ function globalkeys_product_trailer_url_field() {
 			array(
 				'id'          => '_gk_product_trailer_url',
 				'name'        => '_gk_product_trailer_url',
-				'label'       => __( 'Preview-Video (URL)', 'globalkeys' ),
+				'label'       => __( 'Preview-Trailer (URL)', 'globalkeys' ),
 				'placeholder' => 'https://… oder /wp-content/themes/.../datei.webm',
-				'description' => __( 'Volle URL zur WebM- oder MP4-Datei (z. B. aus der Mediathek oder Theme-Ordner Previews/). Wird z. B. für Hover-Trailer auf Karten genutzt.', 'globalkeys' ),
+				'description' => __( 'Kurzer Clip: WebM/MP4-Datei oder z. B. YouTube-Link (oEmbed). Nutzung: Produktseite links in der Sidebar, Hover auf Karten, Hero ohne Key-Art. Nicht der lange Haupttrailer unter „Game Trailer“ – dafür das Feld „Haupttrailer“.', 'globalkeys' ),
 				'desc_tip'    => true,
 				'value'       => $value,
+			)
+		);
+		$value_main = $post ? get_post_meta( $post->ID, '_gk_product_main_trailer_url', true ) : '';
+		woocommerce_wp_text_input(
+			array(
+				'id'          => '_gk_product_main_trailer_url',
+				'name'        => '_gk_product_main_trailer_url',
+				'label'       => __( 'Haupttrailer – Game Trailer (URL)', 'globalkeys' ),
+				'placeholder' => 'https://vimeo.com/…',
+				'description' => __( 'Voller Trailer per oEmbed (z. B. Vimeo oder YouTube). Erscheint unter „Game Trailer“; Spielbilder stehen unter „Game Images“. Leer = dort kein Video in dieser Section.', 'globalkeys' ),
+				'desc_tip'    => true,
+				'value'       => $value_main,
 			)
 		);
 		woocommerce_wp_text_input(
@@ -66,6 +78,19 @@ function globalkeys_save_product_trailer_url( $product ) {
 				$safe = sanitize_text_field( $url );
 			}
 			$product->update_meta_data( '_gk_product_trailer_url', $safe );
+		}
+	}
+
+	if ( isset( $_POST['_gk_product_main_trailer_url'] ) ) {
+		$url = trim( wp_unslash( $_POST['_gk_product_main_trailer_url'] ) );
+		if ( $url === '' ) {
+			$product->delete_meta_data( '_gk_product_main_trailer_url' );
+		} else {
+			$safe = esc_url_raw( $url );
+			if ( $safe === '' ) {
+				$safe = sanitize_text_field( $url );
+			}
+			$product->update_meta_data( '_gk_product_main_trailer_url', $safe );
 		}
 	}
 
@@ -236,6 +261,23 @@ function globalkeys_get_product_trailer_url( $product ) {
 	}
 
 	return globalkeys_get_default_product_trailer_url( $product );
+}
+
+/**
+ * URL des Haupttrailers (Section „Game Trailer“) – typischerweise Vimeo/YouTube-oEmbed.
+ *
+ * @param WC_Product|int $product Produkt oder Post-ID.
+ * @return string
+ */
+function globalkeys_get_product_main_trailer_url( $product ) {
+	if ( is_numeric( $product ) ) {
+		$product = wc_get_product( (int) $product );
+	}
+	if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
+		return '';
+	}
+	$url = $product->get_meta( '_gk_product_main_trailer_url' );
+	return is_string( $url ) ? trim( $url ) : '';
 }
 
 /**

@@ -328,6 +328,213 @@ function globalkeys_single_product_about_game_section() {
 		echo '</div>';
 	}
 
+	$tag_terms = array();
+	if ( $product && is_a( $product, 'WC_Product' ) ) {
+		$raw_tags = get_the_terms( (int) $product->get_id(), 'product_tag' );
+		if ( is_array( $raw_tags ) && ! is_wp_error( $raw_tags ) ) {
+			$tag_terms = array_values(
+				array_filter(
+					$raw_tags,
+					static function ( $term ) {
+						return $term && isset( $term->slug, $term->name ) && $term->slug !== '';
+					}
+				)
+			);
+			usort(
+				$tag_terms,
+				static function ( $a, $b ) {
+					return strcasecmp( $a->name, $b->name );
+				}
+			);
+		}
+	}
+	$tag_terms = apply_filters( 'gk_about_game_product_tags', $tag_terms, $product );
+	if ( ! empty( $tag_terms ) ) {
+		$tags_label = apply_filters( 'gk_about_game_tags_label', __( 'Game-tags:', 'globalkeys' ), $product );
+		echo '<div class="gk-product-page-about-game__tags">';
+		echo '<div class="gk-product-page-about-game__tags-inner">';
+		echo '<p class="gk-product-hover-panel__tags-heading">' . esc_html( is_string( $tags_label ) ? $tags_label : __( 'Game-tags:', 'globalkeys' ) ) . '</p>';
+		echo '<ul class="gk-product-hover-panel__tag-list">';
+		foreach ( $tag_terms as $term ) {
+			$link = get_term_link( $term );
+			echo '<li>';
+			if ( ! is_wp_error( $link ) ) {
+				echo '<a class="gk-product-hover-panel__tag" href="' . esc_url( $link ) . '">' . esc_html( $term->name ) . '</a>';
+			} else {
+				echo '<span class="gk-product-hover-panel__tag">' . esc_html( $term->name ) . '</span>';
+			}
+			echo '</li>';
+		}
+		echo '</ul>';
+		echo '</div>';
+		echo '</div>';
+	}
+
+	echo '</div>';
+	echo '</section>';
+}
+
+/**
+ * Section „Game Trailer“ unter „About the Game“ – nur Haupttrailer, gleiche Überschriften-Optik wie „Game Images“.
+ *
+ * Inhalt: Standard = oEmbed aus _gk_product_main_trailer_url; ersetzbar per gk_visuals_section_content_html.
+ */
+function globalkeys_single_product_visuals_section() {
+	if ( ! globalkeys_single_product_is_purchase_card_active() ) {
+		return;
+	}
+	global $product;
+	$text = apply_filters( 'gk_visuals_section_heading_text', __( 'Game Trailer', 'globalkeys' ), $product );
+	if ( ! is_string( $text ) || $text === '' ) {
+		return;
+	}
+	$content     = apply_filters( 'gk_visuals_section_content_html', '', $product );
+	$has_default = function_exists( 'globalkeys_product_page_has_main_trailer_embed' ) && globalkeys_product_page_has_main_trailer_embed( $product );
+	if ( ( ! is_string( $content ) || $content === '' ) && ! $has_default ) {
+		return;
+	}
+	$heading_id = 'gk-product-page-visuals-heading';
+	if ( $product && is_a( $product, 'WC_Product' ) ) {
+		$heading_id .= '-' . (int) $product->get_id();
+	}
+	echo '<section class="gk-product-page-visuals" aria-labelledby="' . esc_attr( $heading_id ) . '">';
+	echo '<div class="gk-section-inner gk-section-featured-inner">';
+	echo '<div class="gk-featured-heading-wrap gk-product-page-visuals__heading-wrap">';
+	echo '<h2 id="' . esc_attr( $heading_id ) . '" class="gk-section-title gk-featured-heading">';
+	echo '<span class="gk-featured-heading-text-wrap">';
+	echo '<span class="gk-featured-heading-text">' . esc_html( $text ) . '</span>';
+	echo '<span class="gk-featured-title-underline" aria-hidden="true"></span>';
+	echo '</span>';
+	echo '</h2>';
+	echo '</div>';
+
+	if ( is_string( $content ) && $content !== '' ) {
+		echo '<div class="gk-product-page-visuals__body">';
+		echo wp_kses_post( $content );
+		echo '</div>';
+	} elseif ( function_exists( 'globalkeys_render_product_game_trailer_default' ) ) {
+		globalkeys_render_product_game_trailer_default( $product );
+	}
+
+	echo '</div>';
+	echo '</section>';
+}
+
+/**
+ * Section „Game Images“ unter „Game Trailer“ – Produktgalerie, gleiche Featured-Heading-Optik.
+ */
+function globalkeys_single_product_game_images_section() {
+	if ( ! globalkeys_single_product_is_purchase_card_active() ) {
+		return;
+	}
+	global $product;
+	$text = apply_filters( 'gk_game_images_section_heading_text', __( 'Game Images', 'globalkeys' ), $product );
+	if ( ! is_string( $text ) || $text === '' ) {
+		return;
+	}
+	$content     = apply_filters( 'gk_game_images_section_content_html', '', $product );
+	$has_default = function_exists( 'globalkeys_product_page_has_game_images' ) && globalkeys_product_page_has_game_images( $product );
+	if ( ( ! is_string( $content ) || $content === '' ) && ! $has_default ) {
+		return;
+	}
+	$heading_id = 'gk-product-page-game-images-heading';
+	if ( $product && is_a( $product, 'WC_Product' ) ) {
+		$heading_id .= '-' . (int) $product->get_id();
+	}
+	$game_images_count = function_exists( 'globalkeys_get_product_page_game_images_count' )
+		? globalkeys_get_product_page_game_images_count( $product )
+		: 0;
+	echo '<section class="gk-product-page-game-images" aria-labelledby="' . esc_attr( $heading_id ) . '">';
+	echo '<div class="gk-section-inner gk-section-featured-inner">';
+	echo '<div class="gk-featured-heading-wrap gk-product-page-game-images__heading-wrap">';
+	echo '<h2 id="' . esc_attr( $heading_id ) . '" class="gk-section-title gk-featured-heading">';
+	echo '<span class="gk-featured-heading-text-wrap">';
+	echo '<span class="gk-featured-heading-text">' . esc_html( $text ) . '</span>';
+	if ( $game_images_count > 0 ) {
+		echo '<span class="gk-product-page-game-images__heading-count">';
+		echo '(' . (int) $game_images_count . ')';
+		echo '</span>';
+	}
+	echo '<span class="gk-featured-title-underline" aria-hidden="true"></span>';
+	echo '</span>';
+	echo '</h2>';
+	echo '</div>';
+
+	if ( is_string( $content ) && $content !== '' ) {
+		echo '<div class="gk-product-page-game-images__body">';
+		echo wp_kses_post( $content );
+		echo '</div>';
+	} elseif ( function_exists( 'globalkeys_render_product_game_images_default' ) ) {
+		globalkeys_render_product_game_images_default( $product );
+	}
+
+	echo '</div>';
+	echo '</section>';
+}
+
+/**
+ * Ob für „Game Description“ ein Standardtext existiert (Lang- und/oder Kurzbeschreibung).
+ *
+ * @param WC_Product|null $product Produkt.
+ * @return bool
+ */
+function globalkeys_product_page_has_game_description_text( $product ) {
+	if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
+		return false;
+	}
+	foreach ( array( $product->get_description(), $product->get_short_description() ) as $html ) {
+		if ( is_string( $html ) && trim( wp_strip_all_tags( $html ) ) !== '' ) {
+			return true;
+		}
+	}
+	return (bool) apply_filters( 'gk_game_description_section_force_show', false, $product );
+}
+
+/**
+ * Section „Game Description“ unter „Game Images“ – Produkt-Langbeschreibung, sonst Kurzbeschreibung (viele Shops nutzen nur letztere).
+ */
+function globalkeys_single_product_game_description_section() {
+	if ( ! globalkeys_single_product_is_purchase_card_active() ) {
+		return;
+	}
+	global $product;
+	$text = apply_filters( 'gk_game_description_section_heading_text', __( 'Game Description', 'globalkeys' ), $product );
+	if ( ! is_string( $text ) || $text === '' ) {
+		return;
+	}
+	$content = apply_filters( 'gk_game_description_section_content_html', '', $product );
+	$has_default = globalkeys_product_page_has_game_description_text( $product );
+	if ( ( ! is_string( $content ) || $content === '' ) && ! $has_default ) {
+		return;
+	}
+	$heading_id = 'gk-product-page-game-description-heading';
+	if ( $product && is_a( $product, 'WC_Product' ) ) {
+		$heading_id .= '-' . (int) $product->get_id();
+	}
+	echo '<section class="gk-product-page-game-description" aria-labelledby="' . esc_attr( $heading_id ) . '">';
+	echo '<div class="gk-section-inner gk-section-featured-inner">';
+	echo '<div class="gk-featured-heading-wrap gk-product-page-game-description__heading-wrap">';
+	echo '<h2 id="' . esc_attr( $heading_id ) . '" class="gk-section-title gk-featured-heading">';
+	echo '<span class="gk-featured-heading-text-wrap">';
+	echo '<span class="gk-featured-heading-text">' . esc_html( $text ) . '</span>';
+	echo '<span class="gk-featured-title-underline" aria-hidden="true"></span>';
+	echo '</span>';
+	echo '</h2>';
+	echo '</div>';
+
+	echo '<div class="gk-product-page-game-description__body">';
+	if ( is_string( $content ) && $content !== '' ) {
+		echo wp_kses_post( $content );
+	} elseif ( $product && is_a( $product, 'WC_Product' ) && function_exists( 'wc_format_content' ) ) {
+		$body = $product->get_description();
+		if ( ! is_string( $body ) || trim( wp_strip_all_tags( $body ) ) === '' ) {
+			$body = $product->get_short_description();
+		}
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wc_format_content() liefert gefiltertes HTML wie in WooCommerce-Templates.
+		echo wc_format_content( is_string( $body ) ? $body : '' );
+	}
+	echo '</div>';
+
 	echo '</div>';
 	echo '</section>';
 }
@@ -404,12 +611,31 @@ function globalkeys_single_product_purchase_card_bootstrap() {
 	}
 
 	add_action( 'woocommerce_after_single_product_summary', 'globalkeys_single_product_about_game_section', 5 );
+	add_action( 'woocommerce_after_single_product_summary', 'globalkeys_single_product_visuals_section', 6 );
+	add_action( 'woocommerce_after_single_product_summary', 'globalkeys_single_product_game_images_section', 7 );
 	add_action( 'woocommerce_single_product_summary', 'globalkeys_single_product_purchase_status_bar', 5 );
 
 	add_action( 'woocommerce_before_add_to_cart_button', 'globalkeys_single_product_purchase_actions_open', 1 );
 	add_action( 'woocommerce_after_add_to_cart_button', 'globalkeys_single_product_purchase_actions_close', 999 );
 }
+
+/**
+ * WooCommerce-Tab „Beschreibung“ entfernen: gleicher Inhalt erscheint in Section „Game Description“.
+ *
+ * @param array<string, array<string, mixed>> $tabs Register tabs.
+ * @return array<string, array<string, mixed>>
+ */
+function globalkeys_single_product_remove_product_description_tab( $tabs ) {
+	if ( ! function_exists( 'is_product' ) || ! is_product() || ! globalkeys_single_product_is_purchase_card_active() ) {
+		return $tabs;
+	}
+	unset( $tabs['description'] );
+	return $tabs;
+}
+
 add_action( 'wp', 'globalkeys_single_product_purchase_card_bootstrap', 24 );
+add_action( 'woocommerce_after_single_product_summary', 'globalkeys_single_product_game_description_section', 8 );
+add_filter( 'woocommerce_product_tabs', 'globalkeys_single_product_remove_product_description_tab', 98 );
 
 add_filter(
 	'woocommerce_get_stock_html',

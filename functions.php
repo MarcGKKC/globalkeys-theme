@@ -47,6 +47,51 @@ function globalkeys_cart_checkout_disabled_notice() {
 add_action( 'woocommerce_before_cart', 'globalkeys_cart_checkout_disabled_notice', 5 );
 
 /**
+ * Warenkorb-Seite: Cross-Sells unter dem Warenkorb ausblenden.
+ */
+function globalkeys_cart_remove_cross_sells() {
+	if ( function_exists( 'is_cart' ) && is_cart() ) {
+		remove_action( 'woocommerce_cart_collaterals', 'woocommerce_cross_sell_display' );
+	}
+}
+add_action( 'wp', 'globalkeys_cart_remove_cross_sells' );
+
+/**
+ * Warenkorb-Seite (Woo Blocks): Standard-Block „New in store“ + Produktraster bei leerem Cart ausblenden.
+ */
+function globalkeys_cart_hide_new_in_store_empty_section( $block_content, $block ) {
+	if ( ! function_exists( 'is_cart' ) || ! is_cart() || empty( $block['blockName'] ) ) {
+		return $block_content;
+	}
+	if ( 'woocommerce/product-new' === $block['blockName'] ) {
+		return '';
+	}
+	if ( 'core/heading' === $block['blockName'] ) {
+		$attrs = isset( $block['attrs'] ) && is_array( $block['attrs'] ) ? $block['attrs'] : array();
+		$content = '';
+		if ( ! empty( $attrs['content'] ) ) {
+			$content = trim( wp_strip_all_tags( (string) $attrs['content'] ) );
+		}
+		if ( $content === '' ) {
+			return $block_content;
+		}
+		$wc_label = trim( wp_strip_all_tags( __( 'New in store', 'woocommerce' ) ) );
+		if ( $content === $wc_label ) {
+			return '';
+		}
+		// Häufige manuelle Übersetzungen im Block-Inhalt.
+		$aliases = array( 'Neu im Shop', 'Neu im Laden', 'Neu im Store', 'New in store' );
+		foreach ( $aliases as $alias ) {
+			if ( $content === $alias ) {
+				return '';
+			}
+		}
+	}
+	return $block_content;
+}
+add_filter( 'render_block', 'globalkeys_cart_hide_new_in_store_empty_section', 10, 2 );
+
+/**
  * Bestellung blockieren, falls jemand den Checkout doch erreicht.
  */
 function globalkeys_prevent_order_if_checkout_disabled() {
@@ -677,6 +722,7 @@ require get_template_directory() . '/inc/woocommerce-product-preorder.php';
 require get_template_directory() . '/inc/gk-house-member-access.php';
 require get_template_directory() . '/inc/woocommerce-product-elden-nightreign.php';
 require get_template_directory() . '/inc/woocommerce-product-hero-image.php';
+require get_template_directory() . '/inc/woocommerce-product-visuals.php';
 require get_template_directory() . '/inc/woocommerce-single-product-layout.php';
 require get_template_directory() . '/inc/woocommerce-single-product-purchase-card.php';
 require get_template_directory() . '/inc/woocommerce-single-product-shell.php';
@@ -3075,63 +3121,6 @@ function globalkeys_ajax_cart_drawer_data() {
 		$thumb = wc_placeholder_img_src( 'woocommerce_thumbnail' );
 	}
 
-	$exclude_product_ids = array();
-	foreach ( WC()->cart->get_cart() as $cart_item ) {
-		if ( empty( $cart_item['data'] ) || ! is_a( $cart_item['data'], 'WC_Product' ) ) {
-			continue;
-		}
-		$exclude_product_ids[] = (int) $cart_item['data']->get_id();
-	}
-	$exclude_product_ids[] = (int) $product->get_id();
-
-	$term_ids = wp_get_post_terms( $product->get_id(), 'product_cat', array( 'fields' => 'ids' ) );
-	$reco_args = array(
-		'status'  => 'publish',
-		'limit'   => 2,
-		'return'  => 'objects',
-		'exclude' => array_values( array_unique( array_map( 'intval', $exclude_product_ids ) ) ),
-	);
-	if ( ! empty( $term_ids ) && ! is_wp_error( $term_ids ) ) {
-		$reco_args['category'] = array_slice( array_values( array_unique( array_map( 'intval', $term_ids ) ) ), 0, 3 );
-	}
-	$reco_products = wc_get_products( $reco_args );
-	if ( empty( $reco_products ) ) {
-		$reco_products = wc_get_products(
-			array(
-				'status'  => 'publish',
-				'limit'   => 2,
-				'return'  => 'objects',
-				'exclude' => array_values( array_unique( array_map( 'intval', $exclude_product_ids ) ) ),
-			)
-		);
-	}
-
-	$reco = array();
-	foreach ( (array) $reco_products as $rp ) {
-		if ( ! $rp || ! is_a( $rp, 'WC_Product' ) ) {
-			continue;
-		}
-		$rp_thumb = '';
-		if ( function_exists( 'globalkeys_get_product_listing_thumbnail_url' ) ) {
-			$rp_thumb = globalkeys_get_product_listing_thumbnail_url( $rp, 'globalkeys-product-card' );
-		}
-		if ( ! $rp_thumb ) {
-			$rp_thumb = $rp->get_image_id() ? wp_get_attachment_image_url( $rp->get_image_id(), 'globalkeys-product-card' ) : '';
-		}
-		if ( ! $rp_thumb && function_exists( 'wc_placeholder_img_src' ) ) {
-			$rp_thumb = wc_placeholder_img_src( 'woocommerce_thumbnail' );
-		}
-		$reco[] = array(
-			'id'       => (int) $rp->get_id(),
-			'name'     => $rp->get_name(),
-			'price'    => html_entity_decode( wp_strip_all_tags( wc_price( wc_get_price_to_display( $rp ) ) ), ENT_QUOTES, 'UTF-8' ),
-			'image'    => $rp_thumb ? esc_url_raw( $rp_thumb ) : '',
-			'url'      => $rp->get_permalink(),
-			'store'    => globalkeys_cart_drawer_get_store_label( $rp ),
-			'discount' => globalkeys_cart_drawer_get_discount_label( $rp ),
-		);
-	}
-
 	$cart_items_payload = array();
 	foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 		if ( empty( $cart_item['data'] ) || ! is_a( $cart_item['data'], 'WC_Product' ) ) {
@@ -3182,8 +3171,8 @@ function globalkeys_ajax_cart_drawer_data() {
 				'checkoutUrl' => wc_get_checkout_url(),
 				'items'       => $cart_items_payload,
 			),
-			'cartItems' => $cart_items_payload,
-			'recommendations' => $reco,
+			'cartItems'       => $cart_items_payload,
+			'recommendations' => array(),
 		)
 	);
 }

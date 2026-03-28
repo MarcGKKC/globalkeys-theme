@@ -34,5 +34,14 @@ get_header();
 	</main><!-- #main -->
 
 <?php
-get_sidebar();
+$globalkeys_show_sidebar = true;
+if ( function_exists( 'is_cart' ) && is_cart() ) {
+	$globalkeys_show_sidebar = false;
+}
+if ( function_exists( 'is_checkout' ) && is_checkout() ) {
+	$globalkeys_show_sidebar = false;
+}
+if ( $globalkeys_show_sidebar ) {
+	get_sidebar();
+}
 get_footer();

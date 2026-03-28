@@ -5,9 +5,10 @@
  * @package globalkeys
  */
 
-$cart_url        = class_exists( 'WooCommerce' ) ? wc_get_page_permalink( 'cart' ) : '#';
-$account_url     = class_exists( 'WooCommerce' ) ? wc_get_page_permalink( 'myaccount' ) : wp_login_url();
+$cart_url         = class_exists( 'WooCommerce' ) ? wc_get_page_permalink( 'cart' ) : '#';
+$account_url      = class_exists( 'WooCommerce' ) ? wc_get_page_permalink( 'myaccount' ) : wp_login_url();
 $gk_account_login = function_exists( 'is_account_page' ) && is_account_page() && ! is_user_logged_in();
+$gk_is_cart_page  = function_exists( 'is_cart' ) && is_cart();
 ?>
 <!doctype html>
 <html <?php language_attributes(); ?><?php echo $gk_account_login ? ' class="gk-account-login-page"' : ''; ?>>
@@ -48,6 +49,50 @@ if ( ! $gk_account_login ) {
 	<?php endif; ?>
 
 	<?php if ( ! $gk_account_login ) : ?>
+		<?php if ( $gk_is_cart_page ) : ?>
+		<header id="masthead" class="site-header site-header--cart">
+			<div class="site-header-inner site-header-inner--cart">
+				<div class="site-branding">
+					<?php if ( has_custom_logo() ) : ?>
+						<?php the_custom_logo(); ?>
+					<?php else : ?>
+						<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="site-logo-link site-logo-link--svg" rel="home">
+							<img src="<?php echo esc_url( get_template_directory_uri() . '/Pictures/GlobalKeysOriginalLogo-gk.svg' ); ?>" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>" class="site-logo-img" width="180" height="36" />
+						</a>
+					<?php endif; ?>
+				</div>
+				<nav class="gk-cart-stepper" aria-label="<?php esc_attr_e( 'Checkout-Fortschritt', 'globalkeys' ); ?>">
+					<ol class="gk-cart-stepper__list">
+						<li class="gk-cart-stepper__step gk-cart-stepper__step--active" aria-current="step">
+							<span class="gk-cart-stepper__circle" aria-hidden="true">1</span>
+							<span class="gk-cart-stepper__label"><?php esc_html_e( 'Shopping cart', 'globalkeys' ); ?></span>
+						</li>
+						<li class="gk-cart-stepper__rule" aria-hidden="true"></li>
+						<li class="gk-cart-stepper__step">
+							<span class="gk-cart-stepper__circle" aria-hidden="true">2</span>
+							<span class="gk-cart-stepper__label"><?php esc_html_e( 'Payment', 'globalkeys' ); ?></span>
+						</li>
+						<li class="gk-cart-stepper__rule" aria-hidden="true"></li>
+						<li class="gk-cart-stepper__step">
+							<span class="gk-cart-stepper__circle" aria-hidden="true">3</span>
+							<span class="gk-cart-stepper__label"><?php esc_html_e( 'Game activation', 'globalkeys' ); ?></span>
+						</li>
+					</ol>
+				</nav>
+				<?php
+				$gk_cart_secure_svg = get_template_directory_uri() . '/Pictures/' . rawurlencode( 'Design ohne Titel (55).svg' );
+				?>
+				<div class="gk-cart-secure" style="<?php echo esc_attr( '--gk-cart-secure-svg:url(' . esc_url( $gk_cart_secure_svg ) . ')' ); ?>">
+					<span class="gk-cart-secure__icon" aria-hidden="true"></span>
+					<span class="gk-cart-secure__sep" aria-hidden="true"></span>
+					<div class="gk-cart-secure__text">
+						<span class="gk-cart-secure__title"><?php esc_html_e( 'Sichere Zahlung', 'globalkeys' ); ?></span>
+						<span class="gk-cart-secure__sub"><?php esc_html_e( '256-Bit SSL-verschlüsselt', 'globalkeys' ); ?></span>
+					</div>
+				</div>
+			</div>
+		</header><!-- #masthead -->
+		<?php else : ?>
 	<header id="masthead" class="site-header site-header--transparent">
 		<div class="site-header-inner">
 			<!-- Links: Logo -->
@@ -280,4 +325,5 @@ if ( ! $gk_account_login ) {
 			</div>
 		</div>
 	</header><!-- #masthead -->
+		<?php endif; ?>
 	<?php endif; ?>

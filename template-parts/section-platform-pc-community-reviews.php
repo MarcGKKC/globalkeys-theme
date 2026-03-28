@@ -47,6 +47,42 @@ $gk_member_since_dates = array(
 	'2022-05-18',
 	'2018-08-01',
 );
+/** Placeholder bis echte Community-Bewertungen angebunden sind */
+$gk_fake_rating_scores = array( 10, 9, 10, 8, 10 );
+$gk_fake_rating_counts = array( 4, 12, 7, 24, 9 );
+/** Kompakte Steam-Zeile pro Slide (Urteil + Anzahl, gleiche Spalte wie Community-Bewertung) */
+$gk_steam_rows_by_slide = array(
+	array(
+		array(
+			'verdict' => __( 'Äußerst positiv', 'globalkeys' ),
+			'count'   => 5305,
+		),
+	),
+	array(
+		array(
+			'verdict' => __( 'Sehr positiv', 'globalkeys' ),
+			'count'   => 842,
+		),
+	),
+	array(
+		array(
+			'verdict' => __( 'Äußerst positiv', 'globalkeys' ),
+			'count'   => 1204,
+		),
+	),
+	array(
+		array(
+			'verdict' => __( 'Positiv', 'globalkeys' ),
+			'count'   => 312,
+		),
+	),
+	array(
+		array(
+			'verdict' => __( 'Äußerst positiv', 'globalkeys' ),
+			'count'   => 2108,
+		),
+	),
+);
 $gk_fallback_review_image = get_template_directory_uri() . '/Pictures/2892.jpg';
 $gk_slides = array();
 for ( $i = 0; $i < 5; $i++ ) {
@@ -97,13 +133,16 @@ for ( $i = 0; $i < 5; $i++ ) {
 	}
 
 	$gk_slides[] = array(
-		'title'        => $title,
-		'permalink'    => $permalink,
-		'image'        => $image,
-		'tags'         => $tags,
-		'gamertag'     => $gk_fake_gamertags[ $i ],
-		'review'       => $gk_fake_reviews[ $i ],
-		'member_since' => date_i18n( 'M d, Y', strtotime( $gk_member_since_dates[ $i ] ) ),
+		'title'          => $title,
+		'permalink'      => $permalink,
+		'image'          => $image,
+		'tags'           => $tags,
+		'gamertag'       => $gk_fake_gamertags[ $i ],
+		'review'         => $gk_fake_reviews[ $i ],
+		'member_since'   => date_i18n( 'M d, Y', strtotime( $gk_member_since_dates[ $i ] ) ),
+		'rating_score'   => isset( $gk_fake_rating_scores[ $i ] ) ? (int) $gk_fake_rating_scores[ $i ] : 10,
+		'rating_count'   => isset( $gk_fake_rating_counts[ $i ] ) ? (int) $gk_fake_rating_counts[ $i ] : 4,
+		'steam_rows'     => isset( $gk_steam_rows_by_slide[ $i ] ) && is_array( $gk_steam_rows_by_slide[ $i ] ) ? $gk_steam_rows_by_slide[ $i ] : array(),
 	);
 }
 
@@ -138,10 +177,73 @@ $gk_pc_comm_title_id   = $gk_pc_comm_section_id !== '' ? $gk_pc_comm_section_id 
 						</a>
 
 						<div class="gk-pc-community__review">
-							<h3 class="gk-product-hover-panel__title gk-pc-community__review-title"><?php echo esc_html( $gk_slide['title'] ); ?></h3>
+							<?php
+							$gk_rs = isset( $gk_slide['rating_score'] ) ? max( 0, min( 10, (int) $gk_slide['rating_score'] ) ) : 10;
+							$gk_rc = isset( $gk_slide['rating_count'] ) ? max( 0, (int) $gk_slide['rating_count'] ) : 0;
+							$gk_rating_aria = sprintf(
+								/* translators: 1: score 0–10, 2: review count */
+								__( 'Community rating %1$d out of 10, based on %2$d reviews', 'globalkeys' ),
+								$gk_rs,
+								$gk_rc
+							);
+							$gk_ring_r  = 17;
+							$gk_circ    = 2 * M_PI * $gk_ring_r;
+							$gk_arc_len = ( max( 0, min( 10, $gk_rs ) ) / 10 ) * $gk_circ;
+							if ( $gk_rs >= 10 ) {
+								$gk_arc_len = $gk_circ;
+							}
+							$gk_dash_arc = number_format( $gk_arc_len, 4, '.', '' );
+							$gk_dash_gap = number_format( $gk_circ, 4, '.', '' );
+							?>
 							<blockquote class="gk-product-hover-panel__excerpt gk-pc-community__quote">
 								<?php echo esc_html( $gk_slide['review'] ); ?>
 							</blockquote>
+							<div class="gk-pc-community__rating-steam-row">
+								<div class="gk-pc-community__rating" role="group" aria-label="<?php echo esc_attr( $gk_rating_aria ); ?>">
+									<div class="gk-pc-community__rating-ring" aria-hidden="true">
+										<svg class="gk-pc-community__rating-ring-svg" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+											<circle class="gk-pc-community__rating-track" cx="22" cy="22" r="<?php echo esc_attr( (string) $gk_ring_r ); ?>" />
+											<circle class="gk-pc-community__rating-arc" cx="22" cy="22" r="<?php echo esc_attr( (string) $gk_ring_r ); ?>" transform="rotate(-90 22 22)" stroke-dasharray="<?php echo esc_attr( $gk_dash_arc . ' ' . $gk_dash_gap ); ?>" stroke-linecap="round" />
+										</svg>
+										<span class="gk-pc-community__rating-score"><?php echo esc_html( (string) $gk_rs ); ?></span>
+									</div>
+									<div class="gk-pc-community__rating-text" aria-hidden="true">
+										<span class="gk-pc-community__rating-based"><?php esc_html_e( 'Based on:', 'globalkeys' ); ?></span>
+										<span class="gk-pc-community__rating-count">
+											<?php
+											echo esc_html(
+												sprintf(
+													/* translators: %d: number of reviews */
+													_n( '%d review', '%d reviews', $gk_rc, 'globalkeys' ),
+													$gk_rc
+												)
+											);
+											?>
+										</span>
+									</div>
+								</div>
+								<?php if ( ! empty( $gk_slide['steam_rows'] ) ) : ?>
+									<span class="gk-pc-community__rating-steam-sep" aria-hidden="true"></span>
+									<div class="gk-pc-community__steam-inline">
+										<p class="gk-pc-community__steam-inline-heading"><?php esc_html_e( 'Neueste Steambewertungen:', 'globalkeys' ); ?></p>
+										<div class="gk-pc-community__steam-inline-rows">
+											<?php foreach ( $gk_slide['steam_rows'] as $gk_steam_row ) : ?>
+												<?php
+												$gk_s_count = isset( $gk_steam_row['count'] ) ? max( 0, (int) $gk_steam_row['count'] ) : 0;
+												$gk_s_count_fmt = number_format_i18n( $gk_s_count );
+												$gk_s_verdict = isset( $gk_steam_row['verdict'] ) ? (string) $gk_steam_row['verdict'] : '';
+												?>
+												<div class="gk-pc-community__steam-inline-row">
+													<span class="gk-pc-community__steam-inline-value">
+														<?php echo esc_html( $gk_s_verdict ); ?>
+														<span class="gk-pc-community__steam-inline-count">(<?php echo esc_html( $gk_s_count_fmt ); ?>)</span>
+													</span>
+												</div>
+											<?php endforeach; ?>
+										</div>
+									</div>
+								<?php endif; ?>
+							</div>
 							<?php if ( ! empty( $gk_slide['tags'] ) ) : ?>
 								<div class="gk-pc-community__tags gk-product-hover-panel__tags">
 									<p class="gk-product-hover-panel__tags-heading"><?php esc_html_e( 'Tags:', 'globalkeys' ); ?></p>

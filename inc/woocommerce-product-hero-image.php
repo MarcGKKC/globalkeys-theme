@@ -84,19 +84,6 @@ function globalkeys_product_hero_image_field() {
 				),
 			)
 		);
-		$trailer_value = $post ? get_post_meta( $post->ID, '_gk_product_trailer_url', true ) : '';
-		woocommerce_wp_text_input(
-			array(
-				'id'                => '_gk_product_trailer_url',
-				'name'              => '_gk_product_trailer_url',
-				'label'             => __( 'Preview-Trailer (URL)', 'globalkeys' ),
-				'placeholder'       => 'https://www.youtube.com/watch?v=…',
-				'description'       => __( 'Optional: YouTube- oder Vimeo-Link. Ersetzt das große Bild links durch den eingebetteten Trailer; das Produktbild erscheint rechts über dem Titel.', 'globalkeys' ),
-				'desc_tip'          => true,
-				'type'              => 'url',
-				'value'             => $trailer_value,
-			)
-		);
 		$about_intro = $post ? get_post_meta( $post->ID, '_gk_about_game_intro', true ) : '';
 		?>
 		<p class="form-field _gk_about_game_intro_field">
@@ -138,15 +125,6 @@ function globalkeys_save_product_hero_image_id( $product ) {
 			$product->delete_meta_data( '_gk_single_product_hero_image_id' );
 		} elseif ( wp_attachment_is_image( $single_id ) ) {
 			$product->update_meta_data( '_gk_single_product_hero_image_id', $single_id );
-		}
-	}
-
-	if ( isset( $_POST['_gk_product_trailer_url'] ) ) {
-		$raw = esc_url_raw( wp_unslash( $_POST['_gk_product_trailer_url'] ) );
-		if ( $raw === '' ) {
-			$product->delete_meta_data( '_gk_product_trailer_url' );
-		} else {
-			$product->update_meta_data( '_gk_product_trailer_url', $raw );
 		}
 	}
 

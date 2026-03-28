@@ -180,6 +180,9 @@ function globalkeys_single_product_layout_force_print( $suffix = '' ) {
 			align-items: center !important;
 			justify-content: center !important;
 			background: linear-gradient(165deg, #232b44 0%, #1a1f32 45%, #151827 100%) !important;
+			position: relative !important;
+			z-index: 1 !important;
+			transform: translateX(0.65rem) !important;
 		}
 		body.single-product.gk-has-product-page-hero main.site-main div.product:not(:has(.woocommerce-product-gallery)) .summary .gk-product-sidebar-keyart:not(.gk-product-sidebar-keyart--trailer),
 		body.single-product main.site-main:has(.gk-product-page-hero-root) div.product:not(:has(.woocommerce-product-gallery)) .summary .gk-product-sidebar-keyart:not(.gk-product-sidebar-keyart--trailer) {
@@ -204,13 +207,13 @@ function globalkeys_single_product_layout_force_print( $suffix = '' ) {
 		body.single-product main.site-main:has(.gk-product-page-hero-root) div.product:not(:has(.woocommerce-product-gallery)) .summary .gk-product-summary-main {
 			flex: 0 1 auto !important;
 			min-width: 0 !important;
-			max-width: min(34rem, 100%) !important;
-			width: min(34rem, 100%) !important;
+			max-width: min(36rem, 100%) !important;
+			width: min(36rem, 100%) !important;
 			display: flex !important;
 			flex-direction: column !important;
 			align-self: stretch !important;
 			box-sizing: border-box !important;
-			padding: 1.35rem 1.4rem 1.45rem !important;
+			padding: 1.35rem 2.4rem 1.45rem !important;
 			background: rgba(42, 39, 68, 0.72) !important;
 			-webkit-backdrop-filter: blur(18px) saturate(1.15) !important;
 			backdrop-filter: blur(18px) saturate(1.15) !important;
@@ -256,6 +259,7 @@ function globalkeys_single_product_layout_force_print( $suffix = '' ) {
 				max-width: min(28rem, 100%) !important;
 				width: 100% !important;
 				border-radius: 12px !important;
+				transform: none !important;
 			}
 			body.single-product.gk-has-product-page-hero main.site-main div.product:not(:has(.woocommerce-product-gallery)) .summary .gk-product-summary-main,
 			body.single-product main.site-main:has(.gk-product-page-hero-root) div.product:not(:has(.woocommerce-product-gallery)) .summary .gk-product-summary-main {

@@ -27,6 +27,14 @@ function globalkeys_body_classes( $classes ) {
 		$classes[] = 'has-front-page-sections';
 	}
 
+	// Warenkorb / Checkout: volle Breite wie ohne Sidebar (Widgets z. B. Search, Recent Posts entfallen).
+	if ( function_exists( 'is_cart' ) && is_cart() ) {
+		$classes[] = 'no-sidebar';
+	}
+	if ( function_exists( 'is_checkout' ) && is_checkout() ) {
+		$classes[] = 'no-sidebar';
+	}
+
 	// My Account Login/Register: Sidebar und Footer ausblenden.
 	if ( function_exists( 'is_account_page' ) && is_account_page() && ! is_user_logged_in() ) {
 		$classes[] = 'gk-account-login';
