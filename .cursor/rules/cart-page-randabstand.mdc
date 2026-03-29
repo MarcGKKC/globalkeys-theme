@@ -1,0 +1,14 @@
+---
+description: Warenkorb-Seite horizontale Raster / Randabstand (Theme globalkeys)
+globs: "**/style.css,**/cart-stage.php,**/content-page.php"
+---
+
+## Cart: feste Rand-Kette (Referenz)
+
+- **`main.site-main` (Cart):** `padding-left/right: max(1.25rem, safe-area)` (symmetrisch).
+- **`.gk-cart-stage-outer`:** wie `.gk-section` horizontal **`1rem`** links und rechts.
+- **`.gk-cart-stage.gk-section-inner.gk-section-featured-inner`:** **`max-width: 72rem`**, zentriert, **`padding-left/right: 1.5rem`**, **`overflow: visible`**.
+- **Banner in der Cart-Stage (`.gk-budget-search-banner`):** gleicher **Heading-Shift** wie Shop/Suche: **`--gk-heading-shift: calc(6.5rem + 8px)`**, Ausbruch per `margin`/`width` wie Suchergebnisse; zusätzlich **`--gk-cart-banner-left-trim`** (stark, auf dem Banner-Selektor) zieht die Fläche von links stark ein. **Hintergrund:** wie Filterleiste **`#13122a`**, **keine** Budget-Kachel-SVGs (`::before`/`::after` aus).
+- **`#page.site` auf Cart:** **`overflow-x: visible`**, damit der Shift nicht abgeschnitten wird.
+
+Änderungen am rechten Seitenrand der Box: **`margin-right`** der Cart-Banner-Regeln (768px+) nicht anpassen, wenn der rechte Randabstand beibehalten werden soll.

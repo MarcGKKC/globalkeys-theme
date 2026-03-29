@@ -188,12 +188,7 @@ if ( ! $gk_account_login ) {
 						/* Suche immer zur Startseite mit post_type=product – garantiert keine 404 */
 						$gk_search_action = home_url( '/' );
 						?>
-						<?php
-						$gk_browse_url = home_url( '/' );
-						if ( class_exists( 'WooCommerce' ) ) {
-							$gk_browse_url = add_query_arg( 'post_type', 'product', home_url( '/' ) );
-						}
-						?>
+						<?php $gk_browse_url = globalkeys_get_browse_all_games_url(); ?>
 						<form role="search" method="get" class="header-pill-search-form" action="<?php echo esc_url( $gk_search_action ); ?>">
 							<label for="gk-pill-search-input" class="screen-reader-text"><?php esc_html_e( 'Suchen', 'globalkeys' ); ?></label>
 							<?php if ( class_exists( 'WooCommerce' ) ) : ?><input type="hidden" name="post_type" value="product" /><?php endif; ?>

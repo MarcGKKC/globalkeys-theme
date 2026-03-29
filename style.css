@@ -5318,6 +5318,8 @@ body.gk-filter-sidebar-open.gk-search-results-page #colophon.gk-filter-sidebar-f
 html:has(body.woocommerce-cart) {
 	height: 100%;
 	scrollbar-gutter: auto;
+	/* Kein overflow-x:hidden hier: schneidet bei negativem Produkt-Einzug / Rail ab. */
+	overflow-x: visible;
 }
 body.woocommerce-cart {
 	min-height: 100%;
@@ -5329,34 +5331,32 @@ body.woocommerce-cart #page.site {
 	flex-direction: column;
 	width: 100%;
 	box-sizing: border-box;
-	overflow-x: clip;
+	overflow-x: visible;
 }
 /*
- * Header/Footer bündig bis zum Rand: 100vw allein reicht auf manchen Desktops nicht (Scrollbar/Gutter).
- * 100dvw passt sich besser an; margin zentriert die Viewport-Breite relativ zur #page-Breite.
+ * Volle Breite ohne 100vw/100dvw: die sind breiter als der Layout-Viewport mit Scrollbar → horizontale Scrollbar.
+ * #page ist 100% breit — 100% reicht für bündige Leiste.
  */
 body.woocommerce-cart #masthead {
 	flex-shrink: 0;
 	box-sizing: border-box;
-	width: 100vw;
-	max-width: 100vw;
-	margin-left: calc(50% - 50vw);
-	margin-right: calc(50% - 50vw);
-}
-
-@supports (width: 100dvw) {
-	body.woocommerce-cart #masthead {
-		width: 100dvw;
-		max-width: 100dvw;
-		margin-left: calc(50% - 50dvw);
-		margin-right: calc(50% - 50dvw);
-	}
+	width: 100%;
+	max-width: 100%;
+	margin-left: 0;
+	margin-right: 0;
+	position: sticky;
+	top: 0;
+	z-index: 120;
 }
 
 /* Warenkorb: schmale Sticky-Leiste wie Footer (#13122a), nur Logo – keine Pill, keine Header-Aktionen */
 body.woocommerce-cart {
 	--gk-main-padding-top: 5.875rem !important;
 	--gk-front-padding-top: 0 !important;
+	/* Eine Quelle für Leistenhöhe; Sticky-Summary: top = Leiste + main-padding (Viewport, nicht nur Abstand unter der Leiste). */
+	--gk-cart-masthead-bar-height: 5rem;
+	/* top minimal kleiner als die Ruheposition → mit der Produktspalte mitscrollen, dann sticky (Scroll-Strecke bis zum Kleben). */
+	--gk-cart-summary-pre-stick-travel: 1.65rem;
 }
 
 body.woocommerce-cart:not(.gk-header-scrolled) .site-header--cart,
@@ -5379,8 +5379,8 @@ body.woocommerce-cart .site-header-inner--cart {
 	max-width: 100%;
 	margin: 0;
 	padding: 0.8rem 1.25rem;
-	min-height: 5rem;
-	height: 5rem;
+	min-height: var(--gk-cart-masthead-bar-height);
+	height: var(--gk-cart-masthead-bar-height);
 	box-sizing: border-box;
 	transition: none;
 	column-gap: 0.75rem;
@@ -5567,18 +5567,24 @@ body.woocommerce-cart main.site-main > article {
 	padding-left: 0;
 	padding-right: 0;
 	box-sizing: border-box;
+	overflow: visible;
+	overflow-anchor: none;
 }
 
 body.woocommerce-cart .entry-header,
-body.woocommerce-cart .entry-content,
 body.woocommerce-cart .entry-footer {
 	display: none !important;
 }
 
+/* Warenkorb: Standard-Totals/Cross-Sells in .cart-collaterals — Summary-Box ersetzt das */
+body.woocommerce-cart .cart-collaterals {
+	display: none !important;
+}
+
 /*
- * Warenkorb-Stage: gleiche äußere Kette wie Shop (.site-main--shop 1.25rem + .gk-section 1rem).
- * Volle Breite dieser Innenfläche — ohne .gk-section-inner (640px-Falle) und ohne 72rem-Kappung,
- * damit die Box so breit ist wie die Produkt-Section (ul li .gk-featured-products).
+ * Rand-Kette (Referenz für weitere Cart-Blöcke):
+ * main 1.25rem → outer 1rem (wie .gk-section) → .gk-cart-stage 72rem + 1.5rem + overflow visible
+ * → Banner mit --gk-heading-shift wie Shop/Suche. Details: .cursor/rules/cart-page-randabstand.mdc
  */
 body.woocommerce-cart .gk-cart-stage-outer {
 	width: 100%;
@@ -5587,46 +5593,674 @@ body.woocommerce-cart .gk-cart-stage-outer {
 	padding-right: 1rem;
 }
 
-body.woocommerce-cart .gk-cart-stage {
+body.woocommerce-cart .gk-cart-stage.gk-section-inner.gk-section-featured-inner {
+	--gk-heading-shift: calc(6.5rem + 8px);
+	/* Summary: Abstand „Summary“-Titel → oberer Rand Banner; Linie links nutzt denselben Wert */
+	--gk-cart-title-to-banner-gap: 1.15rem;
+	/* Zeilenhöhe wie Summary-H2 — linke Kopfzeile nutzt dieselbe Blockhöhe, kleinere Schrift zentriert */
+	--gk-cart-summary-title-size: 1.25rem;
+	--gk-cart-summary-title-line-height: 1.2;
+	--gk-cart-summary-title-line-box: calc(var(--gk-cart-summary-title-size) * var(--gk-cart-summary-title-line-height));
+	max-width: 72rem;
+	margin-left: auto;
+	margin-right: auto;
+	padding-left: 1.5rem;
+	padding-right: 1.5rem;
+	box-sizing: border-box;
 	width: 100%;
-	max-width: none;
-	margin: 0;
-	padding: 0;
+	overflow: visible;
+}
+
+/*
+ * Produkte links, Summary rechts.
+ * Kein container-type: sonst kein position:sticky am Viewport. Breite wie früher 100cqw: --gk-cart-split-iw per JS (gk-cart-split-width.js).
+ */
+body.woocommerce-cart .gk-cart-page-split {
+	display: grid;
+	grid-template-columns: minmax(0, 1.38fr) minmax(0, 0.62fr);
+	column-gap: clamp(1rem, 3vw, 2rem);
+	align-items: start;
+	width: 100%;
 	box-sizing: border-box;
 }
 
-body.woocommerce-cart .gk-cart-stage-box {
+body.woocommerce-cart .gk-cart-page-split__products {
+	min-width: 0;
+	max-width: 100%;
+	position: relative;
+	z-index: 2;
 	box-sizing: border-box;
+	margin-left: clamp(-7rem, -11vw, -2.25rem);
+}
+
+body.woocommerce-cart .gk-cart-page-split__summary {
+	position: relative;
+	z-index: 1;
+	justify-self: end;
+	align-self: start;
+	min-width: 0;
+	box-sizing: border-box;
+}
+
+/*
+ * Zwei Spalten: Sticky auf der Grid-Zelle, Seiten-Scroll = Viewport.
+ * top ≈ Leiste + main-padding, minus --gk-cart-summary-pre-stick-travel: so lange scrollt die Zelle noch mit dem Grid mit,
+ * dann bleibt sie kleben (wäre top exakt = Ruheposition, würde sie sofort kleben ohne kurzes Mitlaufen).
+ */
+@media screen and (min-width: 900px) {
+	body.woocommerce-cart .gk-cart-page-split__summary {
+		align-self: start;
+		position: -webkit-sticky;
+		position: sticky;
+		top: calc(
+			var(--gk-cart-masthead-bar-height) + var(--gk-main-padding-top) + env(safe-area-inset-top, 0px) -
+				var(--gk-cart-summary-pre-stick-travel)
+		);
+		z-index: 3;
+	}
+}
+
+/* Über Produktliste; Linie ::after; vertikal bündig zu Summary-Titel + Banner-Oberkante (gap + line-box = wie rechts) */
+body.woocommerce-cart .gk-cart-products-head {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: var(--gk-cart-title-to-banner-gap);
+	margin: 0;
+	padding: 0;
+	border: none;
+	box-sizing: border-box;
+}
+
+/* Zeilenhöhe wie Summary-H2, aber Klickfläche nur Text+Pfeil (Link = inline-flex, nicht volle Breite) */
+body.woocommerce-cart .gk-cart-products-head__row {
+	display: flex;
+	align-items: center;
+	align-self: flex-start;
+	min-height: var(--gk-cart-summary-title-line-box);
+	box-sizing: border-box;
+}
+
+body.woocommerce-cart .gk-cart-products-head::after {
+	content: "";
+	display: block;
+	height: 1px;
+	width: calc(100% + clamp(2rem, 6vw, 4.25rem));
+	background: rgba(255, 255, 255, 0.45);
+	flex-shrink: 0;
+}
+
+body.woocommerce-cart .gk-cart-products-head__link {
+	display: inline-flex;
+	align-items: center;
+	gap: 1rem;
+	margin: 0;
+	padding: 0;
+	font-size: 1rem;
+	font-weight: 700;
+	line-height: var(--gk-cart-summary-title-line-height);
+	letter-spacing: 0.01em;
+	font-family: inherit;
+	color: #fff;
+	text-decoration: none;
+	transition: color 0.2s ease;
+	box-sizing: border-box;
+}
+
+body.woocommerce-cart .gk-cart-products-head__link:hover,
+body.woocommerce-cart .gk-cart-products-head__link:focus-visible {
+	color: #04da8d;
+}
+
+body.woocommerce-cart .gk-cart-products-head__link:focus-visible {
+	outline: 2px solid #04da8d;
+	outline-offset: 3px;
+}
+
+body.woocommerce-cart .gk-cart-products-head__chevron {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+
+body.woocommerce-cart .gk-cart-products-head__chevron svg {
+	display: block;
+	width: 0.42em;
+	height: 0.68em;
+}
+
+@media screen and (max-width: 899px) {
+	body.woocommerce-cart .gk-cart-page-split {
+		grid-template-columns: 1fr;
+		row-gap: 1.35rem;
+		column-gap: 0;
+	}
+
+	body.woocommerce-cart .gk-cart-page-split__summary {
+		order: -1;
+		justify-self: stretch;
+		max-width: none;
+	}
+
+	body.woocommerce-cart .gk-cart-page-split__products {
+		order: 1;
+	}
+}
+
+/* WooCommerce Cart Block: Sidebar mit Coupons / Estimated total / Proceed — ersetzt durch Theme-Summary */
+body.woocommerce-cart .wc-block-cart__sidebar,
+body.woocommerce-cart .wc-block-components-sidebar-layout .wc-block-components-sidebar,
+body.woocommerce-cart .wp-block-woocommerce-cart-order-summary-block {
+	display: none !important;
+}
+
+body.woocommerce-cart .wc-block-components-sidebar-layout .wc-block-components-main {
+	width: 100% !important;
+	max-width: 100% !important;
+	padding-right: 0 !important;
+	flex: 1 1 100% !important;
+}
+
+body.woocommerce-cart .wc-block-cart__submit-container {
+	display: none !important;
+}
+
+/* Classic: Checkout-Button unter Tabelle, falls noch gerendert */
+body.woocommerce-cart .woocommerce-cart-form .wc-proceed-to-checkout {
+	display: none !important;
+}
+
+/*
+ * Summary-Box: gleiche Formeln; erste Summe = volle Split-Breite (--gk-cart-split-iw von JS, Fallback 100% = Grid-Spalte).
+ */
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary.gk-cart-rail {
+	--gk-heading-shift: calc(6.5rem + 8px);
+	--gk-cart-banner-left-trim: calc(var(--gk-heading-shift) + clamp(17rem, 59vw, 49rem));
+	margin-left: calc(
+		-1 * var(--gk-heading-shift) + var(--gk-filter-offset, 0px) / var(--gk-filter-sidebar-width, 295px) * (var(--gk-heading-shift) - 0.25rem) + var(--gk-cart-banner-left-trim, 0px)
+	);
+	margin-right: 0;
+	width: calc(
+		var(--gk-cart-split-iw, 100%) + var(--gk-heading-shift) - var(--gk-filter-offset, 0px) / var(--gk-filter-sidebar-width, 295px) * var(--gk-heading-shift) - var(--gk-cart-banner-left-trim, 0px)
+	);
+	max-width: none;
+	box-sizing: border-box;
+}
+
+/* Summary-Block: Layout; Position siehe .gk-cart-rail */
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 0.25rem;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__top {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: var(--gk-cart-title-to-banner-gap);
 	width: 100%;
-	min-height: 14rem;
-	padding: 1.5rem;
-	border-radius: 12px;
+	box-sizing: border-box;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__title {
+	margin: 0;
+	padding: 0;
+	font-size: var(--gk-cart-summary-title-size);
+	font-weight: 700;
+	line-height: var(--gk-cart-summary-title-line-height);
+	color: #fff;
+	letter-spacing: 0.01em;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary .gk-budget-search-banner {
+	width: 100%;
+	margin: 0;
+	max-width: none;
+	box-sizing: border-box;
 	background: #13122a;
+	border: none;
+	box-shadow: none;
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-budget-search-banner::before,
+body.woocommerce-cart .gk-cart-stage .gk-budget-search-banner::after {
+	display: none;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-budget-search-banner-inner::before {
+	display: none;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-budget-search-banner-inner {
+	box-sizing: border-box;
+	min-height: 0;
+	padding: clamp(1.45rem, 3.5vh, 2rem) clamp(1.25rem, 4vw, 1.5rem) clamp(1.5rem, 3.75vh, 2rem);
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__stack {
+	display: flex;
+	flex-direction: column;
+	gap: 1.85rem;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__affiliate {
+	display: flex;
+	flex-direction: column;
+	gap: 0.65rem;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__affiliate-label-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	justify-content: flex-start;
+	gap: 0;
+	color: rgba(232, 230, 240, 0.92);
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__affiliate-label {
+	font-size: calc(0.9375rem + 1.5px);
+	font-weight: 600;
+	line-height: 1.35;
+	color: inherit;
+	margin: 0;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__affiliate-asterisk {
+	flex-shrink: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font: inherit;
+	font-weight: 600;
+	line-height: inherit;
+	color: inherit;
+	text-decoration: none;
+	transition: color 0.2s ease;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__affiliate-asterisk:hover,
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__affiliate-asterisk:focus-visible {
+	color: #04da8d;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__affiliate-asterisk:focus-visible {
+	outline: none;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__affiliate-input {
+	display: block;
+	width: 100%;
+	margin: 0;
+	padding: 0.84rem 0.9rem;
+	box-sizing: border-box;
+	border: 1px solid rgba(255, 255, 255, 0.18);
+	border-radius: 6px;
+	background: rgba(0, 0, 0, 0.25);
+	color: #fff;
+	font-size: 0.9375rem;
+	line-height: 1.35;
+	transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__affiliate-input::placeholder {
+	color: rgba(232, 230, 240, 0.45);
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__affiliate-input:hover {
+	border-color: rgba(255, 255, 255, 0.26);
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__affiliate-input:focus {
+	outline: none;
+	border-color: rgba(4, 218, 141, 0.65);
+	background: rgba(0, 0, 0, 0.32);
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__affiliate-footnote {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	align-items: start;
+	column-gap: 0.22rem;
+	row-gap: 0;
+	width: 100%;
+	max-width: none;
+	margin: 0;
+	padding: 0 0 0 calc(clamp(1.25rem, 4vw, 1.5rem) - 0.95rem);
+	box-sizing: border-box;
+	font-size: 0.75rem;
+	line-height: 1.45;
+	color: rgba(232, 230, 240, 0.52);
+	text-align: left;
+	align-self: stretch;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__affiliate-footnote-text {
+	margin: 0;
+	padding: 0;
+	min-width: 0;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__affiliate-footnote-asterisk {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font: inherit;
+	font-weight: inherit;
+	line-height: inherit;
+	color: inherit;
+	text-decoration: none;
+	transition: color 0.2s ease;
+	justify-self: start;
+	margin-top: 0.12em;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__affiliate-footnote-asterisk:hover,
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__affiliate-footnote-asterisk:focus-visible {
+	color: #04da8d;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__affiliate-footnote-asterisk:focus-visible {
+	outline: none;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__stack--empty {
+	align-items: stretch;
+	text-align: center;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__empty {
+	margin: 0;
+	font-size: 0.9375rem;
+	color: rgba(232, 230, 240, 0.65);
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__rows {
+	display: flex;
+	flex-direction: column;
+	gap: 1.05rem;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__row {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 1rem;
+	font-size: 0.9375rem;
+	line-height: 1.45;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__row--muted {
+	font-size: calc(0.9375rem + 1.5px);
+	color: rgba(180, 188, 210, 0.88);
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__row--muted .gk-cart-summary__value {
+	font-weight: 500;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__row--total {
+	margin-top: 0.35rem;
+	padding-top: 1rem;
+	border-top: 1px solid rgba(255, 255, 255, 0.1);
+	font-size: calc(1.0625rem + 3.5px);
+	font-weight: 700;
+	color: #fff;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__row--total .gk-cart-summary__value {
+	font-weight: 700;
+	font-size: clamp(calc(1.12rem - 0.5px), calc(2.25vw - 0.5px), calc(1.48rem - 0.5px));
+	line-height: 1.15;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__row--total .gk-cart-summary__value .woocommerce-Price-amount {
+	font-size: inherit;
+	font-weight: inherit;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__label {
+	flex-shrink: 0;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__value {
+	text-align: right;
+	white-space: nowrap;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__value .woocommerce-Price-amount {
+	font-weight: inherit;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__next {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	width: 100%;
+	margin: 0;
+	padding: 1.08rem 1.25rem;
+	box-sizing: border-box;
+	border: none;
+	border-radius: 6px;
+	background: #04da8d;
+	color: #fff !important;
+	font-size: 1.0625rem;
+	font-weight: 700;
+	text-decoration: none !important;
+	line-height: 1.2;
+	transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+	box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__next:hover,
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__next:focus-visible {
+	background: #03c47a;
+	color: #fff !important;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__next:focus-visible {
+	outline: 2px solid #04da8d;
+	outline-offset: 2px;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__next-chevron {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	margin-left: 0.1rem;
+}
+
+body.woocommerce-cart .gk-cart-stage .gk-cart-summary__next-chevron svg {
+	display: block;
+	width: 0.5em;
+	height: 0.8em;
+}
+
+@media screen and (min-width: 768px) {
+	body.woocommerce-cart .gk-cart-stage .gk-cart-summary.gk-cart-rail {
+		margin-right: calc(-1 * var(--gk-heading-shift) + var(--gk-filter-offset, 0px) / var(--gk-filter-sidebar-width, 295px) * var(--gk-heading-shift));
+		width: calc(
+			var(--gk-cart-split-iw, 100%) + 2 * var(--gk-heading-shift) - var(--gk-filter-offset, 0px) / var(--gk-filter-sidebar-width, 295px) * 2 * var(--gk-heading-shift) - var(--gk-cart-banner-left-trim, 0px)
+		);
+	}
+}
+
+body.woocommerce-cart .gk-cart-page-split__products .entry-content {
+	display: block;
+	margin-top: var(--gk-cart-title-to-banner-gap);
+	padding-top: 0;
+	padding-bottom: 0;
+	width: 100%;
+	max-width: 100%;
+	box-sizing: border-box;
+}
+
+body.woocommerce-cart .gk-cart-page-split__products .wc-block-cart,
+body.woocommerce-cart .gk-cart-page-split__products .woocommerce-cart-form,
+body.woocommerce-cart .gk-cart-page-split__products .woocommerce {
+	width: 100%;
+	max-width: 100%;
+	box-sizing: border-box;
+}
+
+/*
+ * Probe: jede Produktzeile als Karte (Mockup-Farbe), nur CSS — Markup unverändert.
+ * Kein extra padding-left auf der Produktspalte: der frühere --gk-heading-shift-Einzug war falsch
+ * (spiegelte nicht den sichtbaren Abstand zur Summary-Rechtskante und wirkte wie ein riesiger linker Rand).
+ * Linker/rechter Außenabstand kommt aus derselben Stage (.gk-cart-stage-outer + .gk-cart-stage padding).
+ */
+
+/* Cart Block: Tabellenzeile = eine Box, horizontal gestreckt */
+body.woocommerce-cart .gk-cart-page-split__products table.wc-block-cart-items {
+	border-collapse: separate;
+	border-spacing: 0 0.75rem;
+	width: 100%;
+	table-layout: fixed;
+}
+
+body.woocommerce-cart .gk-cart-page-split__products table.wc-block-cart-items thead {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+body.woocommerce-cart .gk-cart-page-split__products table.wc-block-cart-items tbody tr.wc-block-cart-items__row td {
+	background: #1e2845 !important;
+	border: 0;
+	vertical-align: middle;
+	min-height: 5rem;
+	padding: clamp(0.9rem, 2.2vw, 1.45rem) clamp(1rem, 2.6vw, 1.85rem) !important;
+	box-sizing: border-box;
+	overflow: hidden;
+}
+
+body.woocommerce-cart .gk-cart-page-split__products table.wc-block-cart-items tbody tr.wc-block-cart-items__row td.wc-block-cart-item__image {
+	width: 5.5rem;
+	max-width: 6.25rem;
+}
+
+body.woocommerce-cart .gk-cart-page-split__products table.wc-block-cart-items tbody tr.wc-block-cart-items__row td.wc-block-cart-item__product {
+	width: auto;
+	min-width: 0;
+	word-break: break-word;
+}
+
+body.woocommerce-cart .gk-cart-page-split__products table.wc-block-cart-items tbody tr.wc-block-cart-items__row td.wc-block-cart-item__total {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	justify-content: center;
+	width: 11.5rem;
+	min-width: 0;
+	max-width: 12.5rem;
+	word-break: break-word;
+}
+
+body.woocommerce-cart .gk-cart-page-split__products .wc-block-cart-item__total-price-and-sale-badge-wrapper {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	justify-content: center;
+	gap: 0.4rem;
+	width: 100%;
+	max-width: 100%;
+	text-align: right;
+}
+
+body.woocommerce-cart .gk-cart-page-split__products table.wc-block-cart-items tbody tr.wc-block-cart-items__row td:first-child {
+	border-radius: 14px 0 0 14px;
+	padding-left: clamp(1.1rem, 2.6vw, 1.9rem) !important;
+}
+
+body.woocommerce-cart .gk-cart-page-split__products table.wc-block-cart-items tbody tr.wc-block-cart-items__row td:last-child {
+	border-radius: 0 14px 14px 0;
+	padding-right: clamp(1.1rem, 2.6vw, 1.9rem) !important;
+}
+
+body.woocommerce-cart .gk-cart-page-split__products table.wc-block-cart-items tbody tr.wc-block-cart-items__row td:only-child {
+	border-radius: 14px;
+}
+
+/* Classic Cart: gleiche Karten-Probe */
+body.woocommerce-cart .gk-cart-page-split__products table.shop_table.cart {
+	border-collapse: separate;
+	border-spacing: 0 0.75rem;
+	width: 100%;
+}
+
+body.woocommerce-cart .gk-cart-page-split__products table.shop_table.cart thead {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+body.woocommerce-cart .gk-cart-page-split__products table.shop_table.cart tbody tr.cart_item td {
+	background: #1e2845 !important;
+	border: 0;
+	vertical-align: middle;
+	min-height: 5rem;
+	padding: clamp(0.9rem, 2.2vw, 1.45rem) clamp(1rem, 2.6vw, 1.85rem) !important;
+	box-sizing: border-box;
+	overflow: hidden;
+	word-break: break-word;
+}
+
+body.woocommerce-cart .gk-cart-page-split__products table.shop_table.cart tbody tr.cart_item .product-thumbnail {
+	width: 5.5rem;
+}
+
+body.woocommerce-cart .gk-cart-page-split__products table.shop_table.cart tbody tr.cart_item .product-name {
+	width: auto;
+}
+
+body.woocommerce-cart .gk-cart-page-split__products table.shop_table.cart tbody tr.cart_item td:first-child {
+	border-radius: 14px 0 0 14px;
+	padding-left: clamp(1.1rem, 2.6vw, 1.9rem) !important;
+}
+
+body.woocommerce-cart .gk-cart-page-split__products table.shop_table.cart tbody tr.cart_item td:last-child {
+	border-radius: 0 14px 14px 0;
+	padding-right: clamp(1.1rem, 2.6vw, 1.9rem) !important;
+}
+
+body.woocommerce-cart .gk-cart-page-split__products table.shop_table.cart tbody tr.cart_item td:only-child {
+	border-radius: 14px;
 }
 
 body.woocommerce-cart #colophon.gk-footer {
 	flex-shrink: 0;
 	margin-top: 0;
 	margin-bottom: 0 !important;
-	margin-left: calc(50% - 50vw) !important;
-	margin-right: calc(50% - 50vw) !important;
-	width: 100vw !important;
-	max-width: 100vw !important;
+	margin-left: 0 !important;
+	margin-right: 0 !important;
+	width: 100% !important;
+	max-width: 100% !important;
 	box-sizing: border-box !important;
 	position: relative;
 	z-index: 2;
 	background: #13122a;
 	border-top: none;
 	padding: 0;
-}
-
-@supports (width: 100dvw) {
-	body.woocommerce-cart #colophon.gk-footer {
-		width: 100dvw !important;
-		max-width: 100dvw !important;
-		margin-left: calc(50% - 50dvw) !important;
-		margin-right: calc(50% - 50dvw) !important;
-	}
 }
 body.woocommerce-cart #colophon.gk-footer .gk-footer-inner,
 body.woocommerce-cart #colophon.gk-footer .gk-footer-payment-bar {
@@ -6811,10 +7445,19 @@ body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-p
 	box-sizing: border-box;
 }
 
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements {
+	width: 100%;
+	max-width: min(var(--gk-product-hero-row-max, 72rem), 100%);
+	margin: 2.25rem auto 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-about-game .gk-section-featured-inner,
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-visuals .gk-section-featured-inner,
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-images .gk-section-featured-inner,
-body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-section-featured-inner {
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-section-featured-inner,
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-section-featured-inner {
 	padding-left: 0.1rem;
 	margin-left: 0;
 }
@@ -6824,7 +7467,8 @@ body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-p
  */
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-visuals .gk-section-featured-inner,
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-images .gk-section-featured-inner,
-body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-section-featured-inner {
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-section-featured-inner,
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-section-featured-inner {
 	max-width: min(var(--gk-product-hero-row-max, 72rem), 100%);
 	box-sizing: border-box;
 }
@@ -6833,7 +7477,8 @@ body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-p
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-about-game .gk-product-page-about-game__heading-wrap,
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-visuals .gk-product-page-visuals__heading-wrap,
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-images .gk-product-page-game-images__heading-wrap,
-body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-product-page-game-description__heading-wrap {
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-product-page-game-description__heading-wrap,
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-product-page-system-requirements__heading-wrap {
 	transform: none;
 	margin-bottom: 2.15rem;
 }
@@ -6842,7 +7487,8 @@ body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-p
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-about-game .gk-section-title.gk-featured-heading,
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-visuals .gk-section-title.gk-featured-heading,
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-images .gk-section-title.gk-featured-heading,
-body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-section-title.gk-featured-heading {
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-section-title.gk-featured-heading,
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-section-title.gk-featured-heading {
 	margin: 0;
 	gap: 0;
 	font-size: calc(2.75rem - 5px);
@@ -6867,13 +7513,15 @@ body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-p
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-about-game .gk-featured-title-underline,
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-visuals .gk-featured-title-underline,
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-images .gk-featured-title-underline,
-body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-featured-title-underline {
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-featured-title-underline,
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-featured-title-underline {
 	height: 3px;
 }
 
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-visuals .gk-product-page-visuals__body,
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-images .gk-product-page-game-images__body,
-body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-product-page-game-description__body {
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-product-page-game-description__body,
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-product-page-system-requirements__body {
 	max-width: 100%;
 	width: 100%;
 	color: rgba(255, 255, 255, 0.88);
@@ -6882,39 +7530,323 @@ body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-p
 	box-sizing: border-box;
 }
 
-body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-product-page-game-description__body {
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-product-page-game-description__body,
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-product-page-system-requirements__body {
 	max-width: min(48rem, 100%);
 }
 
-body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-product-page-game-description__body > p:first-child {
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-product-page-game-description__body > p:first-child,
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-product-page-system-requirements__body > p:first-child {
 	font-size: 1.06rem;
 	font-weight: 600;
 	color: #fff;
 	line-height: 1.35;
 }
 
-body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-product-page-game-description__body p {
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-product-page-game-description__body p,
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-product-page-system-requirements__body p {
 	margin: 0 0 0.85em;
 }
 
-body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-product-page-game-description__body p:last-child {
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-product-page-game-description__body p:last-child,
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-product-page-system-requirements__body p:last-child {
 	margin-bottom: 0;
 }
 
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-product-page-game-description__body ul,
-body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-product-page-game-description__body ol {
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-product-page-game-description__body ol,
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-product-page-system-requirements__body ul,
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-product-page-system-requirements__body ol {
 	margin: 0 0 0.85em;
 	padding-left: 1.25rem;
 }
 
-body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-product-page-game-description__body a {
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-product-page-game-description__body a,
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-product-page-system-requirements__body a {
 	color: rgba(160, 195, 255, 0.95);
 	text-decoration: underline;
 	text-underline-offset: 0.15em;
 }
 
-body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-product-page-game-description__body a:hover {
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-product-page-game-description__body a:hover,
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-product-page-system-requirements__body a:hover {
 	color: #fff;
+}
+
+/* Game Description: Layout mit Text- und Bildpaar-Blöcken – volle Zeilenbreite bis rechts (wie Game Images-Bleed) */
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-product-page-game-description__body:has(.gk-game-desc-layout) {
+	--gk-game-desc-bleed: clamp(0.88rem, 2.45vw, 1.68rem);
+	max-width: none;
+	width: calc(100% + var(--gk-game-desc-bleed));
+	margin-left: 0;
+	margin-right: 0;
+	box-sizing: border-box;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-layout {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	gap: clamp(1.35rem, 3.2vw, 2.15rem);
+	box-sizing: border-box;
+}
+
+/* Abschnittsüberschrift: etwas größer als About-Intro-Erstzeile (1.06rem), gleiches Gewicht */
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__title {
+	margin: 0 0 0.65rem;
+	padding: 0;
+	font-size: 1.2rem;
+	font-weight: 600;
+	line-height: 1.3;
+	color: #fff;
+	text-align: left;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block--text {
+	max-width: 100%;
+	width: 100%;
+}
+
+/* Fließtext wie „About the Game“ (.gk-product-page-about-game__intro) */
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__body {
+	margin: 0;
+	max-width: 100%;
+	width: 100%;
+	color: rgba(255, 255, 255, 0.88);
+	font-size: 0.98rem;
+	line-height: 1.58;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__body p {
+	margin: 0 0 0.85em;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__body p:last-child {
+	margin-bottom: 0;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__body p:first-of-type {
+	font-size: 1.06rem;
+	font-weight: 600;
+	color: #fff;
+	line-height: 1.35;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__body ul,
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__body ol {
+	margin: 0 0 0.85em;
+	padding-left: 1.25rem;
+	color: rgba(255, 255, 255, 0.88);
+	font-size: 0.98rem;
+	line-height: 1.58;
+}
+
+/*
+ * Game Description – Bildblöcke: gleiches Raster/Featured-Styling wie „Game Images“
+ * (Wrapper .gk-game-desc-block__game-images-body + Klassen gk-product-page-game-images__*).
+ */
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__game-images-body {
+	--gk-game-images-gallery-gap: 0.65rem;
+	--gk-game-images-featured-nudge: clamp(0.74rem, 1.72vw, 1.42rem);
+	--gk-game-images-visual-column-gap: calc(var(--gk-game-images-gallery-gap) + var(--gk-game-images-featured-nudge));
+	--gk-game-desc-pair-mid-gap: clamp(2.65rem, 5.4vw, 4.1rem);
+	--gk-game-desc-pair-img-max-h: min(68vh, 46rem);
+	/* Kein zweites horizontales Bleed: .gk-product-page-game-description__body ist bei Layout schon verbreitert. */
+	width: 100%;
+	max-width: min(72rem, 100%);
+	margin-left: auto;
+	margin-right: auto;
+	box-sizing: border-box;
+}
+
+/* Zwei Spalten: vertikaler Strich exakt in der Mitte (50 %) – symmetrischer Abstand durch gleiches column-gap, kein border auf nur einer Seite. */
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__game-images-body:has(.gk-product-page-game-images__column:nth-child(2)) {
+	position: relative;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__game-images-body:has(.gk-product-page-game-images__column:nth-child(2))::after {
+	content: '';
+	position: absolute;
+	left: 50%;
+	top: clamp(1rem, 2.6vw, 1.85rem);
+	bottom: clamp(1rem, 2.6vw, 1.85rem);
+	width: 1px;
+	transform: translateX(-50%);
+	background: rgba(255, 255, 255, 0.22);
+	pointer-events: none;
+	z-index: 1;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__game-images-body .gk-product-page-game-images__grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	column-gap: var(--gk-game-images-visual-column-gap, 1.35rem);
+	row-gap: 0;
+	width: 100%;
+	align-items: start;
+	box-sizing: border-box;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__game-images-body:has(.gk-product-page-game-images__column:nth-child(2)) .gk-product-page-game-images__grid:not(.gk-product-page-game-images__grid--single) {
+	column-gap: var(--gk-game-desc-pair-mid-gap, clamp(2.65rem, 5.4vw, 4.1rem));
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__game-images-body .gk-product-page-game-images__grid--single {
+	grid-template-columns: minmax(0, 1fr);
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__game-images-body .gk-product-page-game-images__column {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: var(--gk-game-images-gallery-gap, 0.65rem);
+	min-width: 0;
+	box-sizing: border-box;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__game-images-body:has(.gk-product-page-game-images__column:nth-child(2) > .gk-product-page-game-images__gallery--featured-cell) .gk-product-page-game-images__column {
+	gap: calc(var(--gk-game-images-gallery-gap, 0.65rem) + var(--gk-game-images-featured-nudge, clamp(0.74rem, 1.72vw, 1.42rem)));
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__game-images-body .gk-product-page-game-images__gallery {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	width: 100%;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__game-images-body .gk-product-page-game-images__gallery--featured-cell {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	width: 100%;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__game-images-body .gk-product-page-game-images__gallery-item {
+	margin: 0;
+	padding: 0;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__game-images-body .gk-product-page-game-images__gallery-img {
+	display: block;
+	width: 100%;
+	height: auto;
+	border-radius: 8px;
+	vertical-align: middle;
+	object-fit: cover;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__game-images-body .gk-product-page-game-images__gallery-link {
+	display: block;
+	text-decoration: none;
+	color: inherit;
+	border-radius: 8px;
+	overflow: hidden;
+	line-height: 0;
+	outline-offset: 3px;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__game-images-body .gk-product-page-game-images__gallery--featured-cell .gk-product-page-game-images__gallery-link {
+	border-radius: 12px;
+}
+
+/* Zwei gleich breite Spalten: identische Bildfläche (Rahmen), Bild zentriert mit contain. */
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__game-images-body:has(.gk-product-page-game-images__column:nth-child(2)) .gk-product-page-game-images__gallery--featured-cell .gk-product-page-game-images__gallery-link {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	aspect-ratio: 16 / 9;
+	max-height: var(--gk-game-desc-pair-img-max-h, min(68vh, 46rem));
+	overflow: hidden;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__game-images-body .gk-product-page-game-images__gallery-link:focus-visible {
+	outline: 2px solid rgba(200, 210, 255, 0.65);
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__game-images-body .gk-product-page-game-images__gallery-link:hover .gk-product-page-game-images__gallery-img,
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__game-images-body .gk-product-page-game-images__gallery-link:hover .gk-product-page-game-images__gallery-img--featured,
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__game-images-body .gk-product-page-game-images__gallery-link:hover .gk-game-desc-block__loop-video {
+	opacity: 0.92;
+	transition: opacity 0.15s ease;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__game-images-body .gk-product-page-game-images__gallery--featured-cell .gk-product-page-game-images__gallery-item--featured {
+	min-width: 0;
+	width: 100%;
+	max-width: 100%;
+	overflow: hidden;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__game-images-body .gk-product-page-game-images__gallery--featured-cell .gk-product-page-game-images__gallery-item--featured .gk-product-page-game-images__gallery-img--featured {
+	display: block;
+	width: 100%;
+	max-width: 100%;
+	height: auto;
+	margin: 0;
+	max-height: var(--gk-game-desc-pair-img-max-h, min(68vh, 46rem));
+	object-fit: contain;
+	object-position: center;
+	border-radius: 12px;
+	vertical-align: middle;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__game-images-body .gk-product-page-game-images__gallery--featured-cell .gk-product-page-game-images__gallery-item--featured video.gk-game-desc-block__loop-video {
+	display: block;
+	width: 100%;
+	max-width: 100%;
+	height: auto;
+	margin: 0;
+	max-height: var(--gk-game-desc-pair-img-max-h, min(68vh, 46rem));
+	object-fit: contain;
+	object-position: center;
+	border-radius: 12px;
+	vertical-align: middle;
+	pointer-events: none;
+	background: #0a0a12;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__game-images-body:has(.gk-product-page-game-images__column:nth-child(2)) .gk-product-page-game-images__gallery--featured-cell .gk-product-page-game-images__gallery-item--featured .gk-product-page-game-images__gallery-img--featured,
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block__game-images-body:has(.gk-product-page-game-images__column:nth-child(2)) .gk-product-page-game-images__gallery--featured-cell .gk-product-page-game-images__gallery-item--featured video.gk-game-desc-block__loop-video {
+	width: auto;
+	max-width: 100%;
+	height: auto;
+	max-height: 100%;
+	margin: 0 auto;
+}
+
+/* Nur ein Video: gleiche effektive Spaltenbreite wie bei zwei Videos, horizontal zentriert */
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block--videos .gk-game-desc-block__game-images-body .gk-product-page-game-images__grid--single {
+	display: flex;
+	justify-content: center;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block--videos .gk-game-desc-block__game-images-body .gk-product-page-game-images__grid--single .gk-product-page-game-images__column {
+	width: calc((100% - var(--gk-game-desc-pair-mid-gap, clamp(2.65rem, 5.4vw, 4.1rem))) / 2);
+	max-width: calc((100% - var(--gk-game-desc-pair-mid-gap, clamp(2.65rem, 5.4vw, 4.1rem))) / 2);
+	min-width: 0;
+	flex: 0 0 auto;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block--videos .gk-game-desc-block__game-images-body .gk-product-page-game-images__grid--single .gk-product-page-game-images__gallery--featured-cell .gk-product-page-game-images__gallery-link {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	aspect-ratio: 16 / 9;
+	max-height: var(--gk-game-desc-pair-img-max-h, min(68vh, 46rem));
+	overflow: hidden;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-game-desc-block--videos .gk-game-desc-block__game-images-body .gk-product-page-game-images__grid--single .gk-product-page-game-images__gallery--featured-cell .gk-product-page-game-images__gallery-item--featured video.gk-game-desc-block__loop-video {
+	width: auto;
+	max-width: 100%;
+	height: auto;
+	max-height: 100%;
+	margin: 0 auto;
 }
 
 /*
@@ -8461,10 +9393,15 @@ body.single-product main.site-main div.product .summary .woocommerce-product-det
 		margin-top: 1.85rem;
 	}
 
+	body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements {
+		margin-top: 1.85rem;
+	}
+
 	body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-about-game .gk-section-featured-inner,
 	body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-visuals .gk-section-featured-inner,
 	body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-images .gk-section-featured-inner,
-	body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-section-featured-inner {
+	body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-section-featured-inner,
+	body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-section-featured-inner {
 		padding-left: 0.1rem;
 		padding-right: 1rem;
 		margin-left: 0;

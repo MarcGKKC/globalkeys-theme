@@ -482,6 +482,9 @@ function globalkeys_product_page_has_game_description_text( $product ) {
 	if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
 		return false;
 	}
+	if ( function_exists( 'globalkeys_product_page_has_game_description_layout' ) && globalkeys_product_page_has_game_description_layout( $product ) ) {
+		return true;
+	}
 	foreach ( array( $product->get_description(), $product->get_short_description() ) as $html ) {
 		if ( is_string( $html ) && trim( wp_strip_all_tags( $html ) ) !== '' ) {
 			return true;
@@ -525,6 +528,8 @@ function globalkeys_single_product_game_description_section() {
 	echo '<div class="gk-product-page-game-description__body">';
 	if ( is_string( $content ) && $content !== '' ) {
 		echo wp_kses_post( $content );
+	} elseif ( function_exists( 'globalkeys_render_game_description_blocks' ) && function_exists( 'globalkeys_product_page_has_game_description_layout' ) && globalkeys_product_page_has_game_description_layout( $product ) ) {
+		globalkeys_render_game_description_blocks( $product );
 	} elseif ( $product && is_a( $product, 'WC_Product' ) && function_exists( 'wc_format_content' ) ) {
 		$body = $product->get_description();
 		if ( ! is_string( $body ) || trim( wp_strip_all_tags( $body ) ) === '' ) {

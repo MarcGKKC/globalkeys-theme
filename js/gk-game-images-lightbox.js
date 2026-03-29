@@ -5,7 +5,7 @@
 	'use strict';
 
 	var MODAL_ID = 'gk-game-images-lightbox';
-	var rootSel = '.gk-product-page-game-images__body';
+	var rootSel = '.gk-product-page-game-images__body, .gk-game-desc-block__game-images-body';
 	var linkSel = 'a.gk-product-page-game-images__gallery-link[href]';
 
 	function getI18n(key, fallback) {
@@ -168,8 +168,10 @@
 		}
 	}
 
-	function openModal(startIndex) {
-		var root = document.querySelector(rootSel);
+	function openModal(startIndex, root) {
+		if (!root) {
+			root = document.querySelector('.gk-product-page-game-images__body') || document.querySelector('.gk-game-desc-block__game-images-body');
+		}
 		if (!root) {
 			return;
 		}
@@ -290,7 +292,7 @@
 		if (isNaN(idx)) {
 			idx = 0;
 		}
-		openModal(idx);
+		openModal(idx, root);
 	}
 
 	function init() {

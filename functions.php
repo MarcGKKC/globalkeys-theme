@@ -57,6 +57,27 @@ function globalkeys_cart_remove_cross_sells() {
 add_action( 'wp', 'globalkeys_cart_remove_cross_sells' );
 
 /**
+ * Warenkorb: Body-Klasse bei nicht-leerem Korb (z. B. sticky Summary nur dann sinnvoll).
+ */
+function globalkeys_cart_body_class( $classes ) {
+	if ( function_exists( 'is_cart' ) && is_cart() && class_exists( 'WooCommerce' ) && WC()->cart && ! WC()->cart->is_empty() ) {
+		$classes[] = 'gk-cart-has-items';
+	}
+	return $classes;
+}
+add_filter( 'body_class', 'globalkeys_cart_body_class' );
+
+/**
+ * URL wie „Browse all Games“ in der Pill: Startseite mit post_type=product (alle Produkte / Suchfenster).
+ */
+function globalkeys_get_browse_all_games_url() {
+	if ( ! class_exists( 'WooCommerce' ) ) {
+		return home_url( '/' );
+	}
+	return add_query_arg( 'post_type', 'product', home_url( '/' ) );
+}
+
+/**
  * Warenkorb-Seite (Woo Blocks): Standard-Block „New in store“ + Produktraster bei leerem Cart ausblenden.
  */
 function globalkeys_cart_hide_new_in_store_empty_section( $block_content, $block ) {
@@ -725,6 +746,8 @@ require get_template_directory() . '/inc/woocommerce-product-hero-image.php';
 require get_template_directory() . '/inc/woocommerce-product-visuals.php';
 require get_template_directory() . '/inc/woocommerce-single-product-layout.php';
 require get_template_directory() . '/inc/woocommerce-single-product-purchase-card.php';
+require get_template_directory() . '/inc/woocommerce-game-description-layout.php';
+require get_template_directory() . '/inc/woocommerce-product-system-requirements.php';
 require get_template_directory() . '/inc/woocommerce-single-product-shell.php';
 require get_template_directory() . '/inc/woocommerce-single-product-layout-force.php';
 require get_template_directory() . '/inc/gk-product-hover-panel.php';
@@ -2736,6 +2759,18 @@ function globalkeys_scripts() {
 	$gk_drawer_ver = (string) filemtime( get_template_directory() . '/js/gk-account-drawer.js' );
 	wp_enqueue_script( 'globalkeys-account-drawer', get_template_directory_uri() . '/js/gk-account-drawer.js', array(), $gk_drawer_ver, true );
 	if ( class_exists( 'WooCommerce' ) ) {
+		if ( function_exists( 'is_cart' ) && is_cart() ) {
+			$gk_cart_split_js = get_template_directory() . '/js/gk-cart-split-width.js';
+			if ( file_exists( $gk_cart_split_js ) ) {
+				wp_enqueue_script(
+					'globalkeys-cart-split-width',
+					get_template_directory_uri() . '/js/gk-cart-split-width.js',
+					array(),
+					(string) filemtime( $gk_cart_split_js ),
+					true
+				);
+			}
+		}
 		$gk_cart_drawer_js = get_template_directory() . '/js/gk-cart-added-drawer.js';
 		if ( file_exists( $gk_cart_drawer_js ) ) {
 			$gk_last_added = WC()->session ? WC()->session->get( 'gk_last_added_to_cart' ) : null;
