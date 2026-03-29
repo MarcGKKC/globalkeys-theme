@@ -29,3 +29,14 @@ function globalkeys_single_product_shell_close() {
 
 add_action( 'woocommerce_before_main_content', 'globalkeys_single_product_shell_open', 5 );
 add_action( 'woocommerce_after_main_content', 'globalkeys_single_product_shell_close', 999 );
+
+/**
+ * Shop-Sidebar auf der Produktdetailseite abmelden (falls do_action( 'woocommerce_sidebar' ) noch greift).
+ */
+function globalkeys_single_product_remove_wc_sidebar_callback() {
+	if ( ! function_exists( 'is_product' ) || ! is_product() ) {
+		return;
+	}
+	remove_action( 'woocommerce_sidebar', 'woocommerce_get_sidebar', 10 );
+}
+add_action( 'wp', 'globalkeys_single_product_remove_wc_sidebar_callback', 99 );

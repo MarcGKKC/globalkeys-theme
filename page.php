@@ -21,7 +21,11 @@ get_header();
 		while ( have_posts() ) :
 			the_post();
 
-			get_template_part( 'template-parts/content', 'page' );
+			if ( function_exists( 'globalkeys_is_wishlist_page' ) && globalkeys_is_wishlist_page() ) {
+				get_template_part( 'template-parts/wishlist', 'page' );
+			} else {
+				get_template_part( 'template-parts/content', 'page' );
+			}
 
 			// If comments are open or we have at least one comment, load up the comment template.
 			if ( comments_open() || get_comments_number() ) :
@@ -39,6 +43,9 @@ if ( function_exists( 'is_cart' ) && is_cart() ) {
 	$globalkeys_show_sidebar = false;
 }
 if ( function_exists( 'is_checkout' ) && is_checkout() ) {
+	$globalkeys_show_sidebar = false;
+}
+if ( function_exists( 'globalkeys_is_wishlist_page' ) && globalkeys_is_wishlist_page() ) {
 	$globalkeys_show_sidebar = false;
 }
 if ( $globalkeys_show_sidebar ) {

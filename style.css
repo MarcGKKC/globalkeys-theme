@@ -71,6 +71,7 @@ html {
 	-webkit-text-size-adjust: 100%;
 	margin: 0;
 	padding: 0;
+	height: 100%;
 	overflow-x: hidden;
 	scrollbar-gutter: stable; /* Reserviert Platz für Scrollbar, verhindert Layout-Sprünge beim Header-Wechsel */
 }
@@ -484,6 +485,12 @@ big {
 body {
 	background: var(--gk-bg-color);
 	transition: padding-bottom 0.4s ease-out;
+	/* Kurze Seiten: #page füllt die Höhe, kein Streifen unter dem Footer */
+	min-height: 100%;
+	min-height: 100vh;
+	min-height: 100dvh;
+	display: flex;
+	flex-direction: column;
 	/* Sync: Variablen auf Body, Main liest sie – Header + Padding gleicher Update-Zyklus */
 	--gk-main-padding-top: 8rem;
 	--gk-front-padding-top: 0;
@@ -499,6 +506,32 @@ body.gk-header-scrolled {
 	padding: 0;
 	width: 100%;
 	border: none;
+	/* Sticky Footer: wächst mit Body (flex), Main füllt die Mitte */
+	flex: 1 0 auto;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+}
+
+#masthead {
+	flex-shrink: 0;
+}
+
+main#primary.site-main,
+main.site-main {
+	flex: 1 1 auto;
+	width: 100%;
+	min-height: 0;
+}
+
+#secondary.widget-area,
+aside#secondary.widget-area {
+	flex-shrink: 0;
+}
+
+#colophon.site-footer,
+footer#colophon.site-footer {
+	flex-shrink: 0;
 }
 
 /* Skip-Link komplett aus dem sichtbaren Bereich, damit keine 1px-Linie oben erscheint */
@@ -1957,6 +1990,12 @@ body.gk-drawer-open #masthead {
 	padding: var(--gk-main-padding-top, 8rem) 1.25rem 3rem;
 }
 
+/* 404: nur Header/Footer/Hintergrund, kein sichtbarer Text im Content */
+.site-main--404-empty .error-404 {
+	margin: 0;
+	padding: 0;
+}
+
 .gk-search-results-header {
 	margin-bottom: 1.5rem;
 }
@@ -2122,13 +2161,7 @@ body.gk-search-results-page .site-header-inner {
 	width: 100%;
 }
 
-/* Produktsuche: bei wenig Treffern Footer am unteren Viewport (nicht „schwebend“ neben voller Filter-Sidebar) */
-body.gk-search-results-page #page.site {
-	min-height: 100vh;
-	display: flex;
-	flex-direction: column;
-}
-
+/* Produktsuche: bei wenig Treffern Main füllt die Höhe (Footer global per #page Flex) */
 body.gk-search-results-page #masthead,
 body.gk-search-results-page #colophon {
 	flex-shrink: 0;
@@ -5275,6 +5308,7 @@ body.gk-nav-section-page .site-main.site-main--nav-section {
 	background: #13122a;
 	color: #fff;
 	margin-top: 0;
+	margin-bottom: 0;
 	margin-left: calc(-50vw + 50%);
 	margin-right: calc(-50vw + 50%);
 	width: 100vw;
@@ -7530,9 +7564,13 @@ body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-p
 	box-sizing: border-box;
 }
 
-body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-product-page-game-description__body,
-body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-product-page-system-requirements__body {
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-product-page-game-description__body {
 	max-width: min(48rem, 100%);
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-product-page-system-requirements__body {
+	/* Volle Breite wie Section (72rem-Cap am Parent) – längere Zeilen vor Umbruch */
+	max-width: 100%;
 }
 
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-product-page-game-description__body > p:first-child,
@@ -7571,6 +7609,219 @@ body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-p
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-product-page-game-description__body a:hover,
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-product-page-system-requirements__body a:hover {
 	color: #fff;
+}
+
+/* System Requirements: Spaltenüberschriften wie Game-Description-Blocktitel; Inhalt wie Block-Fließtext */
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-product-page-system-requirements__body {
+	/* Etwas weniger Abstand zwischen Minimum/Recommended → breitere Wertspalten, weniger frühe Umbrüche */
+	--gk-game-desc-pair-mid-gap: clamp(1.65rem, 3.2vw, 2.65rem);
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-game-desc-block__title {
+	margin: 0 0 0.65rem;
+	padding: 0;
+	font-size: 1.2rem;
+	font-weight: 600;
+	line-height: 1.3;
+	color: #fff;
+	text-align: left;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-game-desc-block__body {
+	margin: 0;
+	max-width: 100%;
+	width: 100%;
+	color: rgba(255, 255, 255, 0.88);
+	font-size: 0.98rem;
+	line-height: 1.5;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-product-page-system-requirements__columns {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: var(--gk-game-desc-pair-mid-gap, clamp(2.65rem, 5.4vw, 4.1rem));
+	width: 100%;
+	align-items: start;
+	box-sizing: border-box;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-product-page-system-requirements__columns--single {
+	grid-template-columns: minmax(0, 1fr);
+	justify-items: center;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-product-page-system-requirements__columns--single .gk-product-page-system-requirements__column {
+	width: 100%;
+	max-width: calc((100% - var(--gk-game-desc-pair-mid-gap, clamp(2.65rem, 5.4vw, 4.1rem))) / 2);
+	min-width: 0;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-product-page-system-requirements__column {
+	min-width: 0;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-product-page-system-requirements__dl {
+	display: grid;
+	/* Eine Spalte so breit wie das längste Label; Werte starten dicht daneben auf einer Linie. */
+	grid-template-columns: max-content minmax(0, 1fr);
+	column-gap: clamp(0.55rem, 1.4vw, 0.95rem);
+	row-gap: 0.38em;
+	align-items: start;
+	margin: 0;
+	padding: 0;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-product-page-system-requirements__dt {
+	font-size: 0.98rem;
+	font-weight: 600;
+	color: #fff;
+	line-height: 1.5;
+	margin: 0;
+	padding: 0;
+	text-align: left;
+	white-space: normal;
+	hyphens: auto;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-product-page-system-requirements__dd {
+	margin: 0;
+	padding: 0;
+	font-size: 0.98rem;
+	font-weight: 400;
+	color: rgba(255, 255, 255, 0.88);
+	line-height: 1.5;
+	min-width: 0;
+}
+
+/* Franchise: „More about this franchise“ + Produktkarten wie Shop */
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-franchise {
+	width: 100%;
+	max-width: min(var(--gk-product-hero-row-max, 72rem), 100%);
+	margin: 2.25rem auto 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-franchise .gk-section-featured-inner {
+	padding-left: 0.1rem;
+	margin-left: 0;
+	max-width: min(var(--gk-product-hero-row-max, 72rem), 100%);
+	box-sizing: border-box;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-franchise .gk-product-page-franchise__heading-wrap {
+	transform: none;
+	margin-bottom: 2.15rem;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-franchise .gk-section-title.gk-featured-heading {
+	margin: 0;
+	gap: 0;
+	font-size: calc(2.75rem - 5px);
+	font-weight: 600;
+	line-height: 1.2;
+	color: #fff;
+	text-align: left;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-franchise .gk-featured-title-underline {
+	height: 3px;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-franchise .gk-product-page-franchise__subline {
+	margin: 0.55rem 0 0;
+	font-size: 1.05rem;
+	font-weight: 600;
+	color: rgba(255, 255, 255, 0.82);
+	line-height: 1.35;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-franchise .gk-product-page-franchise__body {
+	max-width: 100%;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+/* Franchise: kein Startseiten-Heading-Bleed; Raster bündig, minimal nach rechts verbreitert → Karten ganz leicht größer */
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-franchise .gk-product-page-franchise__bestsellers.gk-section-bestsellers {
+	background: transparent;
+	padding-top: 0;
+	padding-bottom: 0;
+	margin: 0;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-franchise .gk-product-page-franchise__bestsellers .gk-featured-products {
+	--gk-franchise-cards-bleed-right: clamp(0.45rem, 1.15vw, 0.95rem);
+	margin-left: 0;
+	margin-right: calc(-1 * var(--gk-franchise-cards-bleed-right));
+	width: calc(100% + var(--gk-franchise-cards-bleed-right));
+	max-width: none;
+	box-sizing: border-box;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-franchise .gk-product-page-franchise__empty {
+	margin: 0;
+	max-width: min(42rem, 100%);
+	font-size: 0.98rem;
+	line-height: 1.55;
+	color: rgba(255, 255, 255, 0.78);
+}
+
+/* Similar products: gleiche Sektions- und Kartenoptik wie Franchise */
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-similar {
+	width: 100%;
+	max-width: min(var(--gk-product-hero-row-max, 72rem), 100%);
+	margin: 2.25rem auto 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-similar .gk-section-featured-inner {
+	padding-left: 0.1rem;
+	margin-left: 0;
+	max-width: min(var(--gk-product-hero-row-max, 72rem), 100%);
+	box-sizing: border-box;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-similar .gk-product-page-similar__heading-wrap {
+	transform: none;
+	margin-bottom: 2.15rem;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-similar .gk-section-title.gk-featured-heading {
+	margin: 0;
+	gap: 0;
+	font-size: calc(2.75rem - 5px);
+	font-weight: 600;
+	line-height: 1.2;
+	color: #fff;
+	text-align: left;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-similar .gk-featured-title-underline {
+	height: 3px;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-similar .gk-product-page-similar__body {
+	max-width: 100%;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-similar .gk-product-page-similar__bestsellers.gk-section-bestsellers {
+	background: transparent;
+	padding-top: 0;
+	padding-bottom: 0;
+	margin: 0;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-similar .gk-product-page-similar__bestsellers .gk-featured-products {
+	--gk-similar-cards-bleed-right: clamp(0.45rem, 1.15vw, 0.95rem);
+	margin-left: 0;
+	margin-right: calc(-1 * var(--gk-similar-cards-bleed-right));
+	width: calc(100% + var(--gk-similar-cards-bleed-right));
+	max-width: none;
+	box-sizing: border-box;
 }
 
 /* Game Description: Layout mit Text- und Bildpaar-Blöcken – volle Zeilenbreite bis rechts (wie Game Images-Bleed) */
@@ -8867,6 +9118,151 @@ body.gk-purchase-card-ui .gk-purchase-card__wishlist-icon {
 	transition: background-color 0.2s ease;
 }
 
+/*
+ * Wishlist-Seite: Body-Text ist global #404040 — auf dunklem BG unsichtbar.
+ */
+body.gk-wishlist-page #primary.site-main,
+body.gk-wishlist-page .gk-wishlist__products {
+	color: rgba(255, 255, 255, 0.9);
+}
+
+body.gk-wishlist-page .gk-wishlist__products a {
+	color: #04da8d;
+}
+
+body.gk-wishlist-page .gk-wishlist__products a:hover,
+body.gk-wishlist-page .gk-wishlist__products a:focus {
+	color: #6ef5c8;
+}
+
+/*
+ * Wishlist-Seite: gleiche max-Breite wie Shop; links etwas engerer Rand (leicht nach links).
+ */
+body.gk-wishlist-page .gk-wishlist-outer {
+	width: 100%;
+	box-sizing: border-box;
+	padding-left: 0;
+	padding-right: 1rem;
+}
+
+body.gk-wishlist-page .gk-wishlist.gk-section-inner.gk-section-featured-inner {
+	max-width: 72rem;
+	margin-left: auto;
+	margin-right: auto;
+	padding-left: 0;
+	padding-right: 1.5rem;
+	box-sizing: border-box;
+	width: 100%;
+}
+
+/* Keine Kasten-Optik: nur Avatar + Text auf Seitenhintergrund */
+body.gk-wishlist-page .gk-wishlist__bar {
+	background: transparent;
+	border-radius: 0;
+	margin-bottom: 1.25rem;
+	/* Leicht nach links (Profil + Schrift); schmal: begrenzt */
+	margin-left: clamp(-5rem, -8.65vw, -1.05rem);
+}
+
+body.gk-wishlist-page .gk-wishlist__bar-inner {
+	display: flex;
+	align-items: center;
+	gap: 0.85rem;
+	padding: 0;
+	min-height: 0;
+	box-sizing: border-box;
+}
+
+body.gk-wishlist-page .gk-wishlist__avatar {
+	flex-shrink: 0;
+	width: 68px;
+	height: 68px;
+	box-sizing: border-box;
+	border: 2px solid #66c0f4;
+	overflow: hidden;
+	background: rgba(0, 0, 0, 0.2);
+}
+
+body.gk-wishlist-page .gk-wishlist__avatar-img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: center bottom;
+}
+
+body.gk-wishlist-page .gk-wishlist__title {
+	margin: 0;
+	font-size: clamp(1.05rem, 2.45vw, 1.65rem);
+	font-weight: 600;
+	line-height: 1.2;
+	color: #fff;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 0.28rem 0.45rem;
+}
+
+body.gk-wishlist-page .gk-wishlist__title-name {
+	font-weight: 700;
+}
+
+body.gk-wishlist-page .gk-wishlist__bar--guest .gk-wishlist__guest-copy {
+	flex: 1;
+	min-width: 0;
+}
+
+body.gk-wishlist-page .gk-wishlist__title--guest {
+	text-transform: none;
+	letter-spacing: normal;
+	font-size: clamp(0.98rem, 1.95vw, 1.2rem);
+}
+
+body.gk-wishlist-page .gk-wishlist__guest-hint {
+	margin: 0.35rem 0 0;
+	font-size: clamp(0.88rem, 1.55vw, 1.02rem);
+	font-weight: 400;
+	line-height: 1.45;
+	color: rgba(255, 255, 255, 0.75);
+	text-transform: none;
+	letter-spacing: normal;
+}
+
+body.gk-wishlist-page .gk-wishlist__guest-link {
+	color: #04da8d;
+	font-weight: 600;
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+body.gk-wishlist-page .gk-wishlist__guest-link:hover,
+body.gk-wishlist-page .gk-wishlist__guest-link:focus {
+	color: #6ef5c8;
+}
+
+body.gk-wishlist-page .gk-wishlist__avatar--guest {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-color: rgba(102, 192, 244, 0.45);
+}
+
+body.gk-wishlist-page .gk-wishlist__avatar-placeholder {
+	display: block;
+	width: 34px;
+	height: 34px;
+	opacity: 0.55;
+	background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='1.75'%3E%3Cpath d='M12 12c2.2 0 4-1.8 4-4s-1.8-4-4-4-4 1.8-4 4 1.8 4 4 4Z'/%3E%3Cpath d='M4 22c0-4.4 3.6-8 8-8s8 3.6 8 8'/%3E%3C/svg%3E")
+		center / contain no-repeat;
+}
+
+body.gk-wishlist-page .gk-wishlist__edit-footer {
+	margin-top: 2rem;
+	padding-top: 0.5rem;
+}
+
 body.gk-purchase-card-ui .gk-purchase-card__actions-primary {
 	flex: 1;
 	display: flex;
@@ -9397,11 +9793,21 @@ body.single-product main.site-main div.product .summary .woocommerce-product-det
 		margin-top: 1.85rem;
 	}
 
+	body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-franchise {
+		margin-top: 1.85rem;
+	}
+
+	body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-similar {
+		margin-top: 1.85rem;
+	}
+
 	body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-about-game .gk-section-featured-inner,
 	body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-visuals .gk-section-featured-inner,
 	body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-images .gk-section-featured-inner,
 	body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-game-description .gk-section-featured-inner,
-	body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-section-featured-inner {
+	body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-section-featured-inner,
+	body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-franchise .gk-section-featured-inner,
+	body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-similar .gk-section-featured-inner {
 		padding-left: 0.1rem;
 		padding-right: 1rem;
 		margin-left: 0;

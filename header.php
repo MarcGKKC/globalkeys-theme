@@ -229,8 +229,8 @@ if ( ! $gk_account_login ) {
 			<?php
 			$cart_icon_url      = esc_url( get_template_directory_uri() . '/Pictures/cart.g.svg' );
 			$signin_icon_url    = esc_url( get_template_directory_uri() . '/Pictures/sign-in-button.svg' );
-			$favorite_icon_url  = esc_url( get_template_directory_uri() . '/Pictures/heart2-gk.svg' );
-			$favorites_url      = esc_url( home_url( '/favorites/' ) );
+			$favorite_icon_url = esc_url( get_template_directory_uri() . '/Pictures/heart2-gk.svg' );
+			$favorites_url     = esc_url( function_exists( 'globalkeys_get_wishlist_url' ) ? globalkeys_get_wishlist_url() : home_url( '/wishlist/' ) );
 			?>
 			<style>
 			.header-icon-cart { -webkit-mask-image: url('<?php echo $cart_icon_url; ?>'); mask-image: url('<?php echo $cart_icon_url; ?>'); }
@@ -243,7 +243,7 @@ if ( ! $gk_account_login ) {
 					<img src="<?php echo esc_url( get_template_directory_uri() . '/Pictures/Rewards-gk.svg' ); ?>" alt="" class="header-rewards-icon" width="88" height="23">
 				</a>
 				<span class="header-actions-divider" aria-hidden="true"></span>
-				<a href="<?php echo esc_url( $favorites_url ); ?>" class="header-icon-link header-favorites-link" aria-label="<?php esc_attr_e( 'Favoriten', 'globalkeys' ); ?>">
+				<a href="<?php echo esc_url( $favorites_url ); ?>" class="header-icon-link header-favorites-link" aria-label="<?php esc_attr_e( 'Wishlist', 'globalkeys' ); ?>">
 					<span class="header-icon header-icon-favorite" aria-hidden="true"></span>
 				</a>
 				<a href="<?php echo esc_url( $cart_url ); ?>" class="header-icon-link header-cart-link" aria-label="<?php esc_attr_e( 'Warenkorb', 'globalkeys' ); ?>">

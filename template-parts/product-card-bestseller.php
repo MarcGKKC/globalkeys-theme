@@ -16,7 +16,8 @@ $product = isset( $product ) ? $product : get_query_var( 'product' );
 if ( ! $product && isset( $GLOBALS['product'] ) ) {
 	$product = $GLOBALS['product'];
 }
-if ( ! $product || ! is_a( $product, 'WC_Product' ) || ! $product->is_visible() ) {
+$gk_product_card_skip_visibility = (bool) get_query_var( 'gk_product_card_skip_visibility', false );
+if ( ! $product || ! is_a( $product, 'WC_Product' ) || ( ! $gk_product_card_skip_visibility && ! $product->is_visible() ) ) {
 	return;
 }
 

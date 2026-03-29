@@ -36,5 +36,7 @@ get_header();
 	</main><!-- #main -->
 
 <?php
-get_sidebar();
+if ( ! function_exists( 'is_product' ) || ! is_product() ) {
+	get_sidebar();
+}
 get_footer();

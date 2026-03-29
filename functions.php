@@ -216,6 +216,12 @@ function globalkeys_setup() {
 			'flex-height' => true,
 		)
 	);
+
+	/*
+	 * WooCommerce: Theme als unterstützt markieren, damit der WC-Template-Loader greift
+	 * (woocommerce/single-product.php statt single.php + Sidebar-Widgets).
+	 */
+	add_theme_support( 'woocommerce' );
 }
 add_action( 'after_setup_theme', 'globalkeys_setup' );
 
@@ -748,11 +754,14 @@ require get_template_directory() . '/inc/woocommerce-single-product-layout.php';
 require get_template_directory() . '/inc/woocommerce-single-product-purchase-card.php';
 require get_template_directory() . '/inc/woocommerce-game-description-layout.php';
 require get_template_directory() . '/inc/woocommerce-product-system-requirements.php';
+require get_template_directory() . '/inc/woocommerce-product-franchise.php';
+require get_template_directory() . '/inc/woocommerce-product-similar.php';
 require get_template_directory() . '/inc/woocommerce-single-product-shell.php';
 require get_template_directory() . '/inc/woocommerce-single-product-layout-force.php';
 require get_template_directory() . '/inc/gk-product-hover-panel.php';
 require get_template_directory() . '/inc/gk-product-platform-badge.php';
 require get_template_directory() . '/inc/woocommerce-account-endpoints.php';
+require get_template_directory() . '/inc/wishlist-public-page.php';
 
 /**
  * Produktsuche: is_search() für ?post_type=product (Suche oder Browse all).
@@ -2850,9 +2859,9 @@ function globalkeys_scripts() {
 		wp_enqueue_script( 'globalkeys-hero-stats-count', get_template_directory_uri() . '/js/hero-stats-count.js', array(), _S_VERSION, true );
 		wp_enqueue_script( 'globalkeys-hero-stats-bar-scroll', get_template_directory_uri() . '/js/hero-stats-bar-scroll.js', array(), _S_VERSION, true );
 	}
-	/* Bestseller-Trailer: überall wo Front-Sections (inkl. Bestseller) vorkommen – nicht nur strikt is_front_page() */
+	/* Bestseller-Trailer: Front-Sections, Shop/Suche, Franchise-Karten auf der Produktseite */
 	$gk_product_search = is_search() && isset( $_GET['post_type'] ) && $_GET['post_type'] === 'product'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-	$gk_load_bestseller_trailer = is_front_page() || is_shop() || $gk_product_search || ( function_exists( 'globalkeys_has_front_page_sections' ) && globalkeys_has_front_page_sections() );
+	$gk_load_bestseller_trailer = is_front_page() || is_shop() || $gk_product_search || ( function_exists( 'globalkeys_has_front_page_sections' ) && globalkeys_has_front_page_sections() ) || ( function_exists( 'is_product' ) && is_product() );
 	if ( $gk_load_bestseller_trailer ) {
 		$gk_bestseller_trailer_js = get_template_directory() . '/js/gk-bestseller-trailer-hover.js';
 		wp_enqueue_script(

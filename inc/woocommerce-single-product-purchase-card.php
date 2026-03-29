@@ -280,7 +280,7 @@ function globalkeys_single_product_purchase_actions_open() {
 	if ( ! globalkeys_single_product_is_purchase_card_active() ) {
 		return;
 	}
-	$favorites_url = home_url( '/favorites/' );
+	$favorites_url = function_exists( 'globalkeys_get_wishlist_url' ) ? globalkeys_get_wishlist_url() : home_url( '/wishlist/' );
 	echo '<div class="gk-purchase-card__actions">';
 	echo '<a class="gk-purchase-card__wishlist" href="' . esc_url( $favorites_url ) . '" aria-label="' . esc_attr__( 'Favoriten', 'globalkeys' ) . '">';
 	echo '<span class="gk-purchase-card__wishlist-icon" aria-hidden="true"></span>';
