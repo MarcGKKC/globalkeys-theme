@@ -94,15 +94,34 @@ if ( $cart && ! $cart->is_empty() ) {
 						</div>
 					<?php else : ?>
 						<div class="gk-cart-summary__stack gk-cart-summary__stack--empty">
-							<p class="gk-cart-summary__empty"><?php esc_html_e( 'Your cart is empty.', 'globalkeys' ); ?></p>
-							<a class="gk-cart-summary__next" href="<?php echo esc_url( globalkeys_get_browse_all_games_url() ); ?>">
-								<span class="gk-cart-summary__next-text"><?php esc_html_e( 'Continue shopping', 'globalkeys' ); ?></span>
+							<div class="gk-cart-summary__affiliate">
+								<div class="gk-cart-summary__affiliate-label-row">
+									<label class="gk-cart-summary__affiliate-label" for="gk-cart-affiliate-code-empty"><?php esc_html_e( 'Affiliate code', 'globalkeys' ); ?></label><a class="gk-cart-summary__affiliate-asterisk" href="<?php echo esc_url( $gk_affiliate_dashboard_url ); ?>" aria-label="<?php esc_attr_e( 'Affiliate program and account dashboard', 'globalkeys' ); ?>">*</a>
+								</div>
+								<input
+									type="text"
+									id="gk-cart-affiliate-code-empty"
+									class="gk-cart-summary__affiliate-input"
+									name="gk_affiliate_code_empty"
+									value=""
+									autocomplete="off"
+									placeholder="<?php esc_attr_e( 'Enter code', 'globalkeys' ); ?>"
+								/>
+							</div>
+							<div class="gk-cart-summary__rows">
+								<div class="gk-cart-summary__row gk-cart-summary__row--total gk-cart-summary__row--total-only">
+									<span class="gk-cart-summary__label"><?php esc_html_e( 'Total', 'globalkeys' ); ?></span>
+									<span class="gk-cart-summary__value"><?php echo wp_kses_post( wc_price( 0 ) ); ?></span>
+								</div>
+							</div>
+							<button type="button" class="gk-cart-summary__next gk-cart-summary__next--disabled" disabled aria-disabled="true">
+								<span class="gk-cart-summary__next-text"><?php esc_html_e( 'Next', 'globalkeys' ); ?></span>
 								<span class="gk-cart-summary__next-chevron" aria-hidden="true">
 									<svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false">
 										<path d="M1.5 1L8 8l-6.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 									</svg>
 								</span>
-							</a>
+							</button>
 						</div>
 					<?php endif; ?>
 				</div>

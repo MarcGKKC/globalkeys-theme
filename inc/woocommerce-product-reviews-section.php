@@ -47,7 +47,7 @@ function globalkeys_single_product_remove_reviews_tab( $tabs ) {
 add_filter( 'woocommerce_product_tabs', 'globalkeys_single_product_remove_reviews_tab', 99 );
 
 /**
- * Skript für 10er-Block-Bewertung + Formularlogik (Modal).
+ * Skript für Sterne-Bewertung + Formularlogik (Modal).
  */
 function globalkeys_product_reviews_enqueue_assets() {
 	$is_product_page = ( function_exists( 'woocommerce_is_product_page' ) && woocommerce_is_product_page() )
@@ -78,7 +78,7 @@ function globalkeys_product_reviews_enqueue_assets() {
 add_action( 'wp_enqueue_scripts', 'globalkeys_product_reviews_enqueue_assets', 99 );
 
 /**
- * Zusätzliche 10er-Skalen unter „Weitere Kategorien“ (Slug => sichtbares Label).
+ * Optional: Zusatz-Kategorien (Filter für Erweiterungen; Standard-Formular nutzt sie nicht).
  *
  * @return array<string, string>
  */
@@ -94,37 +94,30 @@ function globalkeys_review_extra_rating_categories() {
 }
 
 /**
- * 10er-Block-Skala (Allgemein / Kategorien).
- *
- * @param string $field_name POST-Name (z. B. gk_rating_general).
- * @param string $id_base    ID für Hidden-Input und Label.
- * @param string $label      Kategorie-Überschrift.
- * @param bool   $is_required Nur für data-Attribut / JS (Hidden hat kein HTML-required).
+ * 5-Sterne-Bewertung (ohne Überschrift; synchron mit WooCommerce #rating).
  */
-function globalkeys_product_review_print_10_scale( $field_name, $id_base, $label, $is_required = false ) {
-	$req = $is_required ? '1' : '0';
+function globalkeys_product_review_print_5_star_rating() {
+	$aria_group = __( 'Sternbewertung', 'globalkeys' );
 	?>
-	<div class="gk-review-scale" data-gk-review-scale data-required="<?php echo esc_attr( $req ); ?>">
-		<div class="gk-review-scale__label" id="<?php echo esc_attr( $id_base ); ?>-label"><?php echo esc_html( $label ); ?></div>
-		<div class="gk-review-scale__row" role="group" aria-labelledby="<?php echo esc_attr( $id_base ); ?>-label">
+	<div class="gk-review-stars" data-gk-review-stars data-required="1">
+		<div class="gk-review-stars__row" role="group" aria-label="<?php echo esc_attr( $aria_group ); ?>">
 			<?php
-			for ( $i = 1; $i <= 10; $i++ ) {
+			for ( $i = 1; $i <= 5; $i++ ) {
 				printf(
-					'<button type="button" class="gk-review-scale__block" data-value="%1$d" aria-pressed="false" aria-label="%2$s"></button>',
+					'<button type="button" class="gk-review-stars__star" data-value="%1$d" aria-pressed="false" aria-label="%2$s"><span class="gk-review-stars__glyph" aria-hidden="true">★</span></button>',
 					(int) $i,
 					esc_attr(
 						sprintf(
-							/* translators: 1: number 1-10, 2: category name */
-							__( '%1$d von 10 – %2$s', 'globalkeys' ),
-							$i,
-							$label
+							/* translators: %d: rating 1–5 */
+							__( '%d von 5 Sternen', 'globalkeys' ),
+							$i
 						)
 					)
 				);
 			}
 			?>
 		</div>
-		<input type="hidden" name="<?php echo esc_attr( $field_name ); ?>" id="<?php echo esc_attr( $id_base ); ?>" value="" autocomplete="off" />
+		<input type="hidden" name="gk_rating_general" id="gk_rating_general" value="" autocomplete="off" />
 	</div>
 	<?php
 }
@@ -148,24 +141,8 @@ function globalkeys_product_review_save_extended_meta( $comment_id, $approved, $
 
 	// phpcs:ignore WordPress.Security.NonceVerification.Missing
 	$general = isset( $_POST['gk_rating_general'] ) ? absint( wp_unslash( $_POST['gk_rating_general'] ) ) : 0;
-	if ( $general >= 1 && $general <= 10 ) {
+	if ( $general >= 1 && $general <= 5 ) {
 		update_comment_meta( $comment_id, 'gk_rating_general', $general );
-	}
-
-	foreach ( globalkeys_review_extra_rating_categories() as $slug => $_lab ) {
-		$slug = sanitize_key( $slug );
-		if ( $slug === '' ) {
-			continue;
-		}
-		$key = 'gk_rating_' . $slug;
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing
-		if ( ! isset( $_POST[ $key ] ) ) {
-			continue;
-		}
-		$v = absint( wp_unslash( $_POST[ $key ] ) );
-		if ( $v >= 1 && $v <= 10 ) {
-			update_comment_meta( $comment_id, $key, $v );
-		}
 	}
 
 	// phpcs:ignore WordPress.Security.NonceVerification.Missing

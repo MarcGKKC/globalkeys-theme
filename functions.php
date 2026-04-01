@@ -60,8 +60,12 @@ add_action( 'wp', 'globalkeys_cart_remove_cross_sells' );
  * Warenkorb: Body-Klasse bei nicht-leerem Korb (z. B. sticky Summary nur dann sinnvoll).
  */
 function globalkeys_cart_body_class( $classes ) {
-	if ( function_exists( 'is_cart' ) && is_cart() && class_exists( 'WooCommerce' ) && WC()->cart && ! WC()->cart->is_empty() ) {
-		$classes[] = 'gk-cart-has-items';
+	if ( function_exists( 'is_cart' ) && is_cart() && class_exists( 'WooCommerce' ) && WC()->cart ) {
+		if ( WC()->cart->is_empty() ) {
+			$classes[] = 'gk-cart-empty';
+		} else {
+			$classes[] = 'gk-cart-has-items';
+		}
 	}
 	return $classes;
 }
@@ -2769,6 +2773,16 @@ function globalkeys_scripts() {
 	wp_localize_script( 'globalkeys-header-pill-search', 'gkPillSearch', $gk_pill_search_vars );
 	$gk_drawer_ver = (string) filemtime( get_template_directory() . '/js/gk-account-drawer.js' );
 	wp_enqueue_script( 'globalkeys-account-drawer', get_template_directory_uri() . '/js/gk-account-drawer.js', array(), $gk_drawer_ver, true );
+	$gk_locale_modal_js = get_template_directory() . '/js/gk-footer-locale-modal.js';
+	if ( file_exists( $gk_locale_modal_js ) ) {
+		wp_enqueue_script(
+			'globalkeys-footer-locale-modal',
+			get_template_directory_uri() . '/js/gk-footer-locale-modal.js',
+			array(),
+			(string) filemtime( $gk_locale_modal_js ),
+			true
+		);
+	}
 	if ( class_exists( 'WooCommerce' ) ) {
 		$gk_wishlist_js = get_template_directory() . '/js/gk-wishlist-toggle.js';
 		if ( file_exists( $gk_wishlist_js ) ) {
@@ -3467,6 +3481,82 @@ function globalkeys_cart_platform_label( $product ) {
 }
 
 /**
+ * Discovery-Links fuer leeren Warenkorb.
+ *
+ * @return array<int,array<string,string>>
+ */
+function globalkeys_cart_get_empty_discovery_links() {
+	$trending    = home_url( '/trending-games/' );
+	$bestsellers = home_url( '/#section-bestsellers' );
+	$preorders   = home_url( '/preorders/' );
+
+	if ( function_exists( 'is_front_page' ) && is_front_page() && class_exists( 'WooCommerce' ) ) {
+		$trending  = add_query_arg(
+			array(
+				'post_type'  => 'product',
+				'gk_filters' => 'open',
+			),
+			home_url( '/' )
+		);
+		$preorders = add_query_arg(
+			array(
+				'post_type'  => 'product',
+				'gk_filters' => 'open',
+				'gk_pt'      => 'pre-orders',
+			),
+			home_url( '/' )
+		);
+	}
+
+	return array(
+		array(
+			'label' => __( 'Trending', 'globalkeys' ),
+			'url'   => $trending,
+		),
+		array(
+			'label' => __( 'Bestseller', 'globalkeys' ),
+			'url'   => $bestsellers,
+		),
+		array(
+			'label' => __( 'Pre-orders', 'globalkeys' ),
+			'url'   => $preorders,
+		),
+	);
+}
+
+/**
+ * Leerer Zustand links in der Cart-Produktspalte.
+ *
+ * @return string
+ */
+function globalkeys_cart_get_empty_state_html() {
+	$links    = globalkeys_cart_get_empty_discovery_links();
+	$cart_svg = esc_url( get_template_directory_uri() . '/Pictures/cart.g.svg' );
+	$title    = __( 'Dein Warenkorb ist leer', 'globalkeys' );
+	$copy     = __( 'Entdecke Trending, Bestseller und Pre-orders und lege Produkte in deinen Warenkorb.', 'globalkeys' );
+	$aria     = esc_attr__( 'Leerer Warenkorb', 'globalkeys' );
+
+	$link_parts = array();
+	foreach ( $links as $item ) {
+		if ( empty( $item['url'] ) ) {
+			continue;
+		}
+		$link_parts[] = '<a href="' . esc_url( $item['url'] ) . '">' . esc_html( $item['label'] ) . '</a>';
+	}
+	$links_html = implode( '<span class="gk-cart-empty-state__sep" aria-hidden="true">•</span>', $link_parts );
+	$icon_style = '-webkit-mask-image:url(\'' . $cart_svg . '\');mask-image:url(\'' . $cart_svg . '\')';
+
+	return (
+		'<section class="gk-cart-empty-state" aria-label="' . $aria . '">' .
+			'<div class="gk-cart-empty-state__icon" aria-hidden="true"><span class="gk-cart-empty-state__icon-shape" style="' . esc_attr( $icon_style ) . '"></span></div>' .
+			'<h2 class="gk-cart-empty-state__title">' . esc_html( $title ) . '</h2>' .
+			'<p class="gk-cart-empty-state__copy">' . esc_html( $copy ) . '</p>' .
+			( $links_html ? '<div class="gk-cart-empty-state__links">' . $links_html . '</div>' : '' ) .
+		'</section>'
+	);
+}
+
+/**
  * Plattform-Icon URL für Cart-Karte.
  *
  * @param WC_Product $product Produkt.
@@ -3491,12 +3581,18 @@ function globalkeys_cart_platform_icon_url( $product ) {
  * Originalzeilen werden per CSS ausgeblendet, Woo-Form bleibt für Update/Nonce erhalten.
  */
 function globalkeys_render_cart_custom_cards_before_table() {
-	if ( ! function_exists( 'is_cart' ) || ! is_cart() || ! class_exists( 'WooCommerce' ) || ! WC()->cart || WC()->cart->is_empty() ) {
+	if ( ! function_exists( 'is_cart' ) || ! is_cart() || ! class_exists( 'WooCommerce' ) || ! WC()->cart ) {
 		return;
 	}
 	$gk_cart_ajax_url   = admin_url( 'admin-ajax.php' );
 	$gk_cart_ajax_nonce = wp_create_nonce( 'gk_cart_drawer' );
 	echo '<div id="gk-cart-custom-static" class="gk-cart-custom-static" data-gk-cart-ajax-url="' . esc_url( $gk_cart_ajax_url ) . '" data-gk-cart-ajax-nonce="' . esc_attr( $gk_cart_ajax_nonce ) . '">';
+	if ( WC()->cart->is_empty() ) {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML nur aus escaped Fragments.
+		echo globalkeys_cart_get_empty_state_html();
+		echo '</div>';
+		return;
+	}
 	$gk_cart_product_ids = array();
 	foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 		$product = isset( $cart_item['data'] ) ? $cart_item['data'] : null;

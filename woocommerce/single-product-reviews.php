@@ -149,35 +149,15 @@ if ( ! $reviews_open && ! $has_reviews ) {
 					}
 
 					$comment_form['comment_field'] = '';
+					$gk_wc_review_ratings           = wc_review_ratings_enabled();
 
-					if ( wc_review_ratings_enabled() ) {
+					if ( $gk_wc_review_ratings ) {
 						ob_start();
 						echo '<div class="gk-product-reviews__blocks-wrap">';
-						globalkeys_product_review_print_10_scale(
-							'gk_rating_general',
-							'gk_rating_general',
-							__( 'Allgemein', 'globalkeys' ),
-							true
-						);
+						globalkeys_product_review_print_5_star_rating();
 
-						echo '<button type="button" class="gk-review-extra-cats__toggle" id="gk-review-extra-cats-toggle" aria-expanded="false" aria-controls="gk-review-extra-cats">';
-						esc_html_e( 'Weitere Kategorien bewerten', 'globalkeys' );
-						echo '</button>';
-
-						echo '<div class="gk-review-extra-cats" id="gk-review-extra-cats" hidden>';
-						foreach ( globalkeys_review_extra_rating_categories() as $slug => $cat_label ) {
-							$slug = sanitize_key( $slug );
-							if ( $slug === '' ) {
-								continue;
-							}
-							globalkeys_product_review_print_10_scale(
-								'gk_rating_' . $slug,
-								'gk_scale_' . $slug,
-								$cat_label,
-								false
-							);
-						}
-						echo '</div>';
+						echo '<hr class="gk-review-stars__divider" role="presentation" />';
+						echo '<p class="gk-review-opinion-heading" id="gk-review-opinion-heading">' . esc_html__( 'Your Opinion about this Game', 'globalkeys' ) . '</p>';
 
 						echo '<div class="gk-product-reviews__rating-field gk-product-reviews__rating-field--woo-sync screen-reader-text">';
 						echo '<label for="rating">' . esc_html__( 'Shop-Bewertung (1–5)', 'globalkeys' ) . '</label>';
@@ -192,18 +172,24 @@ if ( ! $reviews_open && ! $has_reviews ) {
 						$comment_form['comment_field'] .= ob_get_clean();
 					}
 
-					$comment_form['comment_field'] .= '<div class="gk-review-pro-con">';
-					$comment_form['comment_field'] .= '<div class="gk-review-pro-con__col"><span class="gk-review-pro-con__heading">' . esc_html__( 'Pro', 'globalkeys' ) . '</span>';
-					for ( $gk_pc = 0; $gk_pc < 4; $gk_pc++ ) {
-						$comment_form['comment_field'] .= '<input type="text" class="gk-review-pro-con__line" name="gk_review_pro[]" maxlength="220" placeholder="' . esc_attr__( 'Was dir gefällt …', 'globalkeys' ) . '" />';
+					$comment_form['comment_field'] .= '<p class="comment-form-comment gk-product-reviews__field"><textarea id="comment" name="comment" cols="45" rows="8" required';
+					if ( $gk_wc_review_ratings ) {
+						$comment_form['comment_field'] .= ' aria-labelledby="gk-review-opinion-heading"';
+					} else {
+						$comment_form['comment_field'] .= ' aria-label="' . esc_attr__( 'Deine Bewertung', 'globalkeys' ) . '"';
 					}
-					$comment_form['comment_field'] .= '</div><div class="gk-review-pro-con__col"><span class="gk-review-pro-con__heading">' . esc_html__( 'Kontra', 'globalkeys' ) . '</span>';
-					for ( $gk_pc = 0; $gk_pc < 4; $gk_pc++ ) {
-						$comment_form['comment_field'] .= '<input type="text" class="gk-review-pro-con__line" name="gk_review_con[]" maxlength="220" placeholder="' . esc_attr__( 'Was dir weniger gefällt …', 'globalkeys' ) . '" />';
+					$comment_form['comment_field'] .= '></textarea></p>';
+
+					$comment_form['comment_field'] .= '<div class="gk-review-pro-con" aria-label="' . esc_attr__( 'Good and Bad (optional)', 'globalkeys' ) . '">';
+					$comment_form['comment_field'] .= '<div class="gk-review-pro-con__col"><span class="gk-review-pro-con__heading">' . esc_html__( 'Good', 'globalkeys' ) . ' <span class="gk-review-pro-con__optional">(' . esc_html__( 'optional', 'globalkeys' ) . ')</span></span>';
+					for ( $gk_pc = 0; $gk_pc < 3; $gk_pc++ ) {
+						$comment_form['comment_field'] .= '<input type="text" class="gk-review-pro-con__line" name="gk_review_pro[]" maxlength="220" autocomplete="off" />';
+					}
+					$comment_form['comment_field'] .= '</div><div class="gk-review-pro-con__col"><span class="gk-review-pro-con__heading">' . esc_html__( 'Bad', 'globalkeys' ) . ' <span class="gk-review-pro-con__optional">(' . esc_html__( 'optional', 'globalkeys' ) . ')</span></span>';
+					for ( $gk_pc = 0; $gk_pc < 3; $gk_pc++ ) {
+						$comment_form['comment_field'] .= '<input type="text" class="gk-review-pro-con__line" name="gk_review_con[]" maxlength="220" autocomplete="off" />';
 					}
 					$comment_form['comment_field'] .= '</div></div>';
-
-					$comment_form['comment_field'] .= '<p class="comment-form-comment gk-product-reviews__field"><label for="comment">' . esc_html__( 'Deine Bewertung', 'globalkeys' ) . '&nbsp;<span class="required">*</span></label><textarea id="comment" name="comment" cols="45" rows="8" required></textarea></p>';
 
 					$comment_form['label_submit'] = esc_html__( 'Submit my review', 'globalkeys' );
 

@@ -1,5 +1,5 @@
 /**
- * Produktbewertung: 10er-Blöcke, Zusatzkategorien, Woo-rating-Sync, Submit-Validierung.
+ * Produktbewertung: 5 Sterne, Woo-rating-Sync, Submit-Validierung.
  * Modal öffnen/schließen: inc/woocommerce-product-reviews-section.php (Footer-Inline).
  */
 (function () {
@@ -7,36 +7,28 @@
 
 	var MODAL_ID = 'gk-review-modal';
 
-	function map10toWooStars(n) {
-		var v = parseInt(n, 10);
-		if (v < 1 || v > 10) {
-			return '';
-		}
-		return String(Math.min(5, Math.max(1, Math.round(v / 2))));
-	}
-
-	function syncWooRatingFromGeneral(generalHidden) {
+	function syncWooRatingFromGeneral(hidden) {
 		var sel = document.getElementById('rating');
-		if (!sel || !generalHidden) {
+		if (!sel || !hidden) {
 			return;
 		}
-		var g = parseInt(generalHidden.value, 10);
-		if (g >= 1 && g <= 10) {
-			sel.value = map10toWooStars(g);
+		var g = parseInt(hidden.value, 10);
+		if (g >= 1 && g <= 5) {
+			sel.value = String(g);
 		} else {
 			sel.value = '';
 		}
 		sel.dispatchEvent(new Event('change', { bubbles: true }));
 	}
 
-	function setScaleValue(scaleRoot, value) {
-		var hidden = scaleRoot.querySelector('input[type="hidden"]');
-		var blocks = scaleRoot.querySelectorAll('.gk-review-scale__block');
+	function setStarsValue(starsRoot, value) {
+		var hidden = starsRoot.querySelector('input[type="hidden"]');
+		var stars = starsRoot.querySelectorAll('.gk-review-stars__star');
 		var num = parseInt(value, 10) || 0;
 		if (hidden) {
-			hidden.value = num >= 1 && num <= 10 ? String(num) : '';
+			hidden.value = num >= 1 && num <= 5 ? String(num) : '';
 		}
-		blocks.forEach(function (btn) {
+		stars.forEach(function (btn) {
 			var dv = parseInt(btn.getAttribute('data-value'), 10);
 			var on = num >= 1 && dv <= num;
 			btn.classList.toggle('is-selected', on);
@@ -47,50 +39,22 @@
 		}
 	}
 
-	function initScale(scaleRoot) {
-		if (!scaleRoot || scaleRoot.getAttribute('data-gk-scale-init') === '1') {
+	function initStars(starsRoot) {
+		if (!starsRoot || starsRoot.getAttribute('data-gk-stars-init') === '1') {
 			return;
 		}
-		scaleRoot.setAttribute('data-gk-scale-init', '1');
-		var hidden = scaleRoot.querySelector('input[type="hidden"]');
+		starsRoot.setAttribute('data-gk-stars-init', '1');
 
-		scaleRoot.addEventListener('click', function (ev) {
-			var btn = ev.target.closest('.gk-review-scale__block');
-			if (!btn || !scaleRoot.contains(btn)) {
+		starsRoot.addEventListener('click', function (ev) {
+			var btn = ev.target.closest('.gk-review-stars__star');
+			if (!btn || !starsRoot.contains(btn)) {
 				return;
 			}
 			ev.preventDefault();
 			var val = parseInt(btn.getAttribute('data-value'), 10);
-			setScaleValue(scaleRoot, val);
+			setStarsValue(starsRoot, val);
 			validateForm();
 		});
-	}
-
-	function toggleExtraCats() {
-		var panel = document.getElementById('gk-review-extra-cats');
-		var btn = document.getElementById('gk-review-extra-cats-toggle');
-		if (!panel || !btn) {
-			return;
-		}
-		var open = panel.hasAttribute('hidden');
-		if (open) {
-			panel.removeAttribute('hidden');
-			btn.setAttribute('aria-expanded', 'true');
-			btn.classList.add('is-open');
-		} else {
-			panel.setAttribute('hidden', '');
-			btn.setAttribute('aria-expanded', 'false');
-			btn.classList.remove('is-open');
-			panel.querySelectorAll('[data-gk-review-scale]').forEach(function (sc) {
-				setScaleValue(sc, 0);
-			});
-		}
-		validateForm();
-	}
-
-	function extraCatsOpen() {
-		var panel = document.getElementById('gk-review-extra-cats');
-		return panel && !panel.hasAttribute('hidden');
 	}
 
 	function canSubmit(form) {
@@ -101,22 +65,11 @@
 		var rating = form.querySelector('#rating');
 		if (rating) {
 			var gv = general ? parseInt(general.value, 10) : 0;
-			if (gv < 1 || gv > 10) {
+			if (gv < 1 || gv > 5) {
 				return false;
 			}
 			if (!rating.value) {
 				return false;
-			}
-		}
-
-		if (extraCatsOpen()) {
-			var extra = document.getElementById('gk-review-extra-cats');
-			var scales = extra ? extra.querySelectorAll('[data-gk-review-scale] input[type="hidden"]') : [];
-			for (var i = 0; i < scales.length; i++) {
-				var x = parseInt(scales[i].value, 10);
-				if (x < 1 || x > 10) {
-					return false;
-				}
 			}
 		}
 
@@ -167,14 +120,7 @@
 			}
 		});
 
-		var toggle = document.getElementById('gk-review-extra-cats-toggle');
-		if (toggle) {
-			toggle.addEventListener('click', function () {
-				toggleExtraCats();
-			});
-		}
-
-		form.querySelectorAll('[data-gk-review-scale]').forEach(initScale);
+		form.querySelectorAll('[data-gk-review-stars]').forEach(initStars);
 		validateForm();
 	}
 
@@ -195,7 +141,6 @@
 		initModalForm();
 	}
 
-	/* Nach Portal an body: Form kann später im DOM sein – einmal bei open hooken fehlt; Modal ist schon da. */
 	document.addEventListener(
 		'click',
 		function (ev) {
