@@ -10,7 +10,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Veröffentlichte Wishlist-Seiten-ID (Option oder Seite mit Slug wishlist).
+ * Mögliche Seiten-Slugs für die öffentliche Wishlist (Theme + Shops mit DE-URL).
+ *
+ * @return string[]
+ */
+function globalkeys_wishlist_page_slugs() {
+	$slugs = array( 'wishlist', 'wunschliste' );
+	return array_values( array_unique( array_filter( array_map( 'sanitize_title', apply_filters( 'globalkeys_wishlist_page_slugs', $slugs ) ) ) ) );
+}
+
+/**
+ * Veröffentlichte Wishlist-Seiten-ID (Option oder erste passende Seite per Slug).
  *
  * @return int
  */
@@ -19,9 +29,11 @@ function globalkeys_get_wishlist_page_id() {
 	if ( $wid && get_post_status( $wid ) === 'publish' ) {
 		return $wid;
 	}
-	$existing = get_page_by_path( 'wishlist', OBJECT, 'page' );
-	if ( $existing && $existing->post_status === 'publish' ) {
-		return (int) $existing->ID;
+	foreach ( globalkeys_wishlist_page_slugs() as $slug ) {
+		$existing = get_page_by_path( $slug, OBJECT, 'page' );
+		if ( $existing && $existing->post_status === 'publish' ) {
+			return (int) $existing->ID;
+		}
 	}
 	return 0;
 }
@@ -38,12 +50,20 @@ function globalkeys_is_wishlist_page() {
 	if ( $wid && $pid === $wid ) {
 		return true;
 	}
-	// Fallback: Slug (z. B. wenn Option noch nicht gesetzt).
-	if ( is_page( 'wishlist' ) ) {
-		return true;
+	foreach ( globalkeys_wishlist_page_slugs() as $slug ) {
+		if ( is_page( $slug ) ) {
+			return true;
+		}
 	}
 	$obj = get_queried_object();
-	return $obj instanceof WP_Post && 'wishlist' === $obj->post_name;
+	if ( $obj instanceof WP_Post ) {
+		foreach ( globalkeys_wishlist_page_slugs() as $slug ) {
+			if ( $obj->post_name === $slug ) {
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 /**
@@ -129,3 +149,31 @@ function globalkeys_wishlist_page_body_class( $classes ) {
 	return $classes;
 }
 add_filter( 'body_class', 'globalkeys_wishlist_page_body_class' );
+
+/**
+ * Toolbar-Layout-CSS einmal ausgeben (direkt im Template neben der Toolbar — kein wp_head/body-Klasse nötig).
+ *
+ * Referenz Breiten (mit style.css + wishlist-page.php abstimmen):
+ * – Grid #gk-wishlist-toolbar-row: Suche + Buttons, column-gap .4rem
+ * – Produktanzahl + Sort; Suchfeld max-width; Sort min-width 17.5rem
+ * – Trennlinie: Abstände nur in style.css (kein margin !important hier)
+ */
+function globalkeys_wishlist_toolbar_print_layout_css() {
+	static $printed = false;
+	if ( $printed ) {
+		return;
+	}
+	$printed = true;
+	echo '<style id="gk-wishlist-toolbar-layout">';
+	echo '.gk-wishlist__toolbar{display:block!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important}';
+	echo '#gk-wishlist-toolbar-row{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:stretch!important;column-gap:.55rem!important;row-gap:.55rem!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important}';
+	echo '#gk-wishlist-toolbar-row .gk-wishlist__search-wrap{min-width:0!important;max-width:100%!important;width:100%!important;justify-self:stretch!important;box-sizing:border-box!important}';
+	echo '#gk-wishlist-toolbar-row .gk-wishlist__search-input,#gk-wishlist-toolbar-row input[type=search]{display:block!important;width:100%!important;max-width:none!important;min-width:0!important;padding-left:1.15rem!important;padding-right:1.15rem!important;box-sizing:border-box!important;-webkit-appearance:textfield!important;appearance:textfield!important}';
+	echo '#gk-wishlist-toolbar-row .gk-wishlist__toolbar-actions{display:flex!important;flex-flow:row nowrap!important;align-items:stretch!important;gap:.55rem!important;flex-shrink:0!important;width:auto!important;max-width:100%!important;box-sizing:border-box!important}';
+	echo '#gk-wishlist-toolbar-row .gk-wishlist__toolbar-actions .gk-wishlist__tb-count{margin:0!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;min-width:13.5rem!important;min-height:3.125rem!important;padding:0 1.35rem!important;box-sizing:border-box!important;border-radius:4px!important;border:1px solid rgba(255,255,255,.12)!important;background:#2b2744!important;color:rgba(255,255,255,.92)!important;font-size:calc(.9375rem + 1px)!important;font-weight:500!important;line-height:1.2!important;white-space:nowrap!important;flex-shrink:0!important}';
+	echo '#gk-wishlist-toolbar-row .gk-wishlist__toolbar-actions .gk-wishlist__tb-sort-wrap{position:relative!important;min-width:17.5rem!important;flex-shrink:0!important}';
+	echo '#gk-wishlist-toolbar-row .gk-wishlist__toolbar-actions .gk-wishlist__tb-sort-wrap .gk-wishlist__tb-btn--sort{min-width:17.5rem!important;width:100%!important;padding-left:1.5rem!important;padding-right:1.35rem!important;box-sizing:border-box!important}';
+	echo '@media screen and (max-width:36rem){#gk-wishlist-toolbar-row{grid-template-columns:minmax(0,1fr)!important;row-gap:.65rem!important}#gk-wishlist-toolbar-row .gk-wishlist__search-wrap{max-width:none!important;justify-self:stretch!important}#gk-wishlist-toolbar-row .gk-wishlist__toolbar-actions{flex-wrap:wrap!important;width:100%!important}#gk-wishlist-toolbar-row .gk-wishlist__toolbar-actions .gk-wishlist__tb-sort-wrap{flex:1 1 100%!important;min-width:0!important}#gk-wishlist-toolbar-row .gk-wishlist__toolbar-actions .gk-wishlist__tb-sort-wrap .gk-wishlist__tb-btn--sort{min-width:0!important}}';
+	echo '#gk-wishlist-toolbar-rule.gk-wishlist__toolbar-rule{display:block!important;box-sizing:border-box!important;width:100%!important;height:1px!important;min-height:1px!important;padding:0!important;border:0!important;overflow:hidden!important;background-color:rgba(255,255,255,.2)!important}';
+	echo '</style>' . "\n";
+}

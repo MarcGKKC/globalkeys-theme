@@ -280,9 +280,25 @@ function globalkeys_single_product_purchase_actions_open() {
 	if ( ! globalkeys_single_product_is_purchase_card_active() ) {
 		return;
 	}
+	global $product;
 	$favorites_url = function_exists( 'globalkeys_get_wishlist_url' ) ? globalkeys_get_wishlist_url() : home_url( '/wishlist/' );
+	$wish_pid      = ( $product && is_a( $product, 'WC_Product' ) ) ? (int) $product->get_id() : 0;
+	$in_wishlist   = false;
+	if ( $wish_pid && is_user_logged_in() && function_exists( 'globalkeys_wishlist_user_has_product' ) ) {
+		$in_wishlist = globalkeys_wishlist_user_has_product( get_current_user_id(), $wish_pid );
+	}
+	$wl_href = $favorites_url;
+	if ( $wish_pid > 0 && is_user_logged_in() ) {
+		$wl_href = add_query_arg(
+			array(
+				'gk_wl_add'    => $wish_pid,
+				'gk_wl_nonce' => wp_create_nonce( 'gk_wl_add_' . $wish_pid ),
+			),
+			$favorites_url
+		);
+	}
 	echo '<div class="gk-purchase-card__actions">';
-	echo '<a class="gk-purchase-card__wishlist" href="' . esc_url( $favorites_url ) . '" aria-label="' . esc_attr__( 'Favoriten', 'globalkeys' ) . '">';
+	echo '<a class="gk-purchase-card__wishlist" href="' . esc_url( $wl_href ) . '" data-product-id="' . esc_attr( (string) $wish_pid ) . '" aria-pressed="' . ( $in_wishlist ? 'true' : 'false' ) . '" aria-label="' . esc_attr__( 'Favoriten', 'globalkeys' ) . '">';
 	echo '<span class="gk-purchase-card__wishlist-icon" aria-hidden="true"></span>';
 	echo '</a>';
 	echo '<div class="gk-purchase-card__actions-primary">';

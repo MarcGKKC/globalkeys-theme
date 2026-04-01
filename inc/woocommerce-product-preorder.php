@@ -306,6 +306,49 @@ function globalkeys_product_preorder_fields() {
 				'cbvalue'     => 'yes',
 			)
 		);
+		$steam_verdict = $product->get_meta( '_gk_steam_review_verdict' );
+		$steam_verdict = is_string( $steam_verdict ) ? $steam_verdict : '';
+		$steam_count   = $product->get_meta( '_gk_steam_review_count' );
+		$steam_count   = ( $steam_count !== '' && $steam_count !== null ) ? (string) absint( $steam_count ) : '';
+		$stage_lbl     = $product->get_meta( '_gk_product_stage_label' );
+		$stage_lbl     = is_string( $stage_lbl ) ? $stage_lbl : '';
+		woocommerce_wp_text_input(
+			array(
+				'id'          => '_gk_steam_review_verdict',
+				'name'        => '_gk_steam_review_verdict',
+				'label'       => __( 'Steam-Rezension (Anzeige Wunschliste)', 'globalkeys' ),
+				'placeholder' => __( 'z. B. Sehr positiv', 'globalkeys' ),
+				'description' => __( 'Kurztext wie die Steam-Bewertungssummary (Wunschlisten-Karte). Optional: Anzahl unten.', 'globalkeys' ),
+				'desc_tip'    => true,
+				'value'       => $steam_verdict,
+			)
+		);
+		woocommerce_wp_text_input(
+			array(
+				'id'                => '_gk_steam_review_count',
+				'name'              => '_gk_steam_review_count',
+				'label'             => __( 'Steam-Rezensionen: Anzahl', 'globalkeys' ),
+				'type'              => 'number',
+				'custom_attributes' => array(
+					'min'  => '0',
+					'step' => '1',
+				),
+				'description'         => __( 'Optional. Wird in Klammern neben dem Urteil angezeigt.', 'globalkeys' ),
+				'desc_tip'          => true,
+				'value'             => $steam_count,
+			)
+		);
+		woocommerce_wp_text_input(
+			array(
+				'id'          => '_gk_product_stage_label',
+				'name'        => '_gk_product_stage_label',
+				'label'       => __( 'Produkt-Stadium (Wunschliste)', 'globalkeys' ),
+				'placeholder' => __( 'z. B. Early Access', 'globalkeys' ),
+				'description' => __( 'Optional. Kleines Badge über dem Plattform-Icon auf der Wunschliste.', 'globalkeys' ),
+				'desc_tip'    => true,
+				'value'       => $stage_lbl,
+			)
+		);
 		?>
 	</div>
 	<?php
@@ -336,6 +379,33 @@ function globalkeys_save_product_preorder_fields( $product ) {
 		$product->update_meta_data( '_gk_list_as_preorder', 'yes' );
 	} else {
 		$product->delete_meta_data( '_gk_list_as_preorder' );
+	}
+
+	if ( isset( $_POST['_gk_steam_review_verdict'] ) ) {
+		$sv = sanitize_text_field( wp_unslash( $_POST['_gk_steam_review_verdict'] ) );
+		if ( $sv === '' ) {
+			$product->delete_meta_data( '_gk_steam_review_verdict' );
+		} else {
+			$product->update_meta_data( '_gk_steam_review_verdict', $sv );
+		}
+	}
+
+	if ( isset( $_POST['_gk_steam_review_count'] ) ) {
+		$sc = absint( wp_unslash( $_POST['_gk_steam_review_count'] ) );
+		if ( $sc < 1 ) {
+			$product->delete_meta_data( '_gk_steam_review_count' );
+		} else {
+			$product->update_meta_data( '_gk_steam_review_count', $sc );
+		}
+	}
+
+	if ( isset( $_POST['_gk_product_stage_label'] ) ) {
+		$st = sanitize_text_field( wp_unslash( $_POST['_gk_product_stage_label'] ) );
+		if ( $st === '' ) {
+			$product->delete_meta_data( '_gk_product_stage_label' );
+		} else {
+			$product->update_meta_data( '_gk_product_stage_label', $st );
+		}
 	}
 }
 add_action( 'woocommerce_admin_process_product_object', 'globalkeys_save_product_preorder_fields', 15, 1 );

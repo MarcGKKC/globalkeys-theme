@@ -31,6 +31,11 @@
 					<header class="entry-header">
 						<?php the_title( '<h1 class="entry-title">', '</h1>' ); ?>
 					</header>
+					<?php
+					if ( function_exists( 'globalkeys_render_cart_custom_cards_before_table' ) ) {
+						globalkeys_render_cart_custom_cards_before_table();
+					}
+					?>
 					<div class="entry-content">
 						<?php
 						the_content();
