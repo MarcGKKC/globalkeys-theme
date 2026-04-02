@@ -2858,6 +2858,28 @@ function globalkeys_scripts() {
 					true
 				);
 			}
+			$gk_cart_affiliate_js = get_template_directory() . '/js/gk-cart-affiliate-collapsible.js';
+			if ( file_exists( $gk_cart_affiliate_js ) ) {
+				wp_enqueue_script(
+					'globalkeys-cart-affiliate-collapse',
+					get_template_directory_uri() . '/js/gk-cart-affiliate-collapsible.js',
+					array(),
+					(string) filemtime( $gk_cart_affiliate_js ),
+					true
+				);
+				wp_localize_script(
+					'globalkeys-cart-affiliate-collapse',
+					'gkCartAffiliateCollapse',
+					array(
+						'i18n' => array(
+							'show'          => __( 'Show affiliate code field', 'globalkeys' ),
+							'hide'          => __( 'Hide affiliate code field', 'globalkeys' ),
+							'showDiscount'  => __( 'Show discount code field', 'globalkeys' ),
+							'hideDiscount'  => __( 'Hide discount code field', 'globalkeys' ),
+						),
+					)
+				);
+			}
 		}
 		$gk_cart_drawer_js = get_template_directory() . '/js/gk-cart-added-drawer.js';
 		if ( file_exists( $gk_cart_drawer_js ) ) {

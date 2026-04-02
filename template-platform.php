@@ -46,6 +46,7 @@ get_header();
 				<?php get_template_part( 'template-parts/platform-featured-carousel' ); ?>
 			</div>
 			<?php get_template_part( 'template-parts/section-platform-trending' ); ?>
+			<?php get_template_part( 'template-parts/section-platform-pc-top-games-2026' ); ?>
 			<?php get_template_part( 'template-parts/section-platform-best-with-friends' ); ?>
 			<?php get_template_part( 'template-parts/section-platform-spotlight-banner' ); ?>
 			<?php get_template_part( 'template-parts/section-platform-pc-gift-cards' ); ?>

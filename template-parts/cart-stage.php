@@ -55,19 +55,54 @@ if ( $cart && ! $cart->is_empty() ) {
 				<div class="gk-budget-search-banner-inner gk-cart-summary__inner">
 					<?php if ( $cart && ! $cart->is_empty() ) : ?>
 						<div class="gk-cart-summary__stack">
-							<div class="gk-cart-summary__affiliate">
-								<div class="gk-cart-summary__affiliate-label-row">
-									<label class="gk-cart-summary__affiliate-label" for="gk-cart-affiliate-code"><?php esc_html_e( 'Affiliate code', 'globalkeys' ); ?></label><a class="gk-cart-summary__affiliate-asterisk" href="<?php echo esc_url( $gk_affiliate_dashboard_url ); ?>" aria-label="<?php esc_attr_e( 'Affiliate program and account dashboard', 'globalkeys' ); ?>">*</a>
+							<div class="gk-cart-summary__affiliate gk-cart-summary__affiliate--collapsible is-expanded">
+								<div class="gk-cart-summary__affiliate-header" data-gk-affiliate-header>
+									<div class="gk-cart-summary__affiliate-leading">
+										<button type="button" class="gk-cart-summary__affiliate-row-btn" id="gk-cart-affiliate-row-trigger" data-gk-affiliate-row aria-expanded="true" aria-controls="gk-cart-affiliate-panel">
+											<span class="gk-cart-summary__affiliate-label"><?php esc_html_e( 'Affiliate code', 'globalkeys' ); ?></span>
+										</button>
+										<a class="gk-cart-summary__affiliate-asterisk" href="<?php echo esc_url( $gk_affiliate_dashboard_url ); ?>" aria-label="<?php esc_attr_e( 'Affiliate program and account dashboard', 'globalkeys' ); ?>">*</a>
+									</div>
+									<button type="button" class="gk-cart-summary__affiliate-toggle-btn" data-gk-affiliate-toggle-icon aria-expanded="true" aria-controls="gk-cart-affiliate-panel" aria-label="<?php esc_attr_e( 'Hide affiliate code field', 'globalkeys' ); ?>">
+										<span aria-hidden="true" data-gk-affiliate-icon-char>&#8722;</span>
+									</button>
 								</div>
-								<input
-									type="text"
-									id="gk-cart-affiliate-code"
-									class="gk-cart-summary__affiliate-input"
-									name="gk_affiliate_code"
-									value=""
-									autocomplete="off"
-									placeholder="<?php esc_attr_e( 'Enter code', 'globalkeys' ); ?>"
-								/>
+								<div class="gk-cart-summary__affiliate-panel" id="gk-cart-affiliate-panel">
+									<input
+										type="text"
+										id="gk-cart-affiliate-code"
+										class="gk-cart-summary__affiliate-input"
+										name="gk_affiliate_code"
+										value=""
+										autocomplete="off"
+										placeholder="<?php esc_attr_e( 'Enter code', 'globalkeys' ); ?>"
+										aria-labelledby="gk-cart-affiliate-row-trigger"
+									/>
+								</div>
+							</div>
+							<div class="gk-cart-summary__discount gk-cart-summary__discount--collapsible is-collapsed">
+								<div class="gk-cart-summary__discount-header" data-gk-discount-header>
+									<div class="gk-cart-summary__discount-leading">
+										<button type="button" class="gk-cart-summary__discount-row-btn" id="gk-cart-discount-row-trigger" data-gk-discount-row aria-expanded="false" aria-controls="gk-cart-discount-panel">
+											<span class="gk-cart-summary__discount-label"><?php esc_html_e( 'Discount code', 'globalkeys' ); ?></span>
+										</button>
+									</div>
+									<button type="button" class="gk-cart-summary__discount-toggle-btn" data-gk-discount-toggle-icon aria-expanded="false" aria-controls="gk-cart-discount-panel" aria-label="<?php esc_attr_e( 'Show discount code field', 'globalkeys' ); ?>">
+										<span aria-hidden="true" data-gk-discount-icon-char>+</span>
+									</button>
+								</div>
+								<div class="gk-cart-summary__discount-panel" id="gk-cart-discount-panel" hidden>
+									<input
+										type="text"
+										id="gk-cart-discount-code"
+										class="gk-cart-summary__discount-input"
+										name="coupon_code"
+										value=""
+										autocomplete="off"
+										placeholder="<?php esc_attr_e( 'Enter code', 'globalkeys' ); ?>"
+										aria-labelledby="gk-cart-discount-row-trigger"
+									/>
+								</div>
 							</div>
 							<div class="gk-cart-summary__rows">
 								<div class="gk-cart-summary__row gk-cart-summary__row--muted">
@@ -94,19 +129,54 @@ if ( $cart && ! $cart->is_empty() ) {
 						</div>
 					<?php else : ?>
 						<div class="gk-cart-summary__stack gk-cart-summary__stack--empty">
-							<div class="gk-cart-summary__affiliate">
-								<div class="gk-cart-summary__affiliate-label-row">
-									<label class="gk-cart-summary__affiliate-label" for="gk-cart-affiliate-code-empty"><?php esc_html_e( 'Affiliate code', 'globalkeys' ); ?></label><a class="gk-cart-summary__affiliate-asterisk" href="<?php echo esc_url( $gk_affiliate_dashboard_url ); ?>" aria-label="<?php esc_attr_e( 'Affiliate program and account dashboard', 'globalkeys' ); ?>">*</a>
+							<div class="gk-cart-summary__affiliate gk-cart-summary__affiliate--collapsible is-expanded">
+								<div class="gk-cart-summary__affiliate-header" data-gk-affiliate-header>
+									<div class="gk-cart-summary__affiliate-leading">
+										<button type="button" class="gk-cart-summary__affiliate-row-btn" id="gk-cart-affiliate-row-trigger-empty" data-gk-affiliate-row aria-expanded="true" aria-controls="gk-cart-affiliate-panel-empty">
+											<span class="gk-cart-summary__affiliate-label"><?php esc_html_e( 'Affiliate code', 'globalkeys' ); ?></span>
+										</button>
+										<a class="gk-cart-summary__affiliate-asterisk" href="<?php echo esc_url( $gk_affiliate_dashboard_url ); ?>" aria-label="<?php esc_attr_e( 'Affiliate program and account dashboard', 'globalkeys' ); ?>">*</a>
+									</div>
+									<button type="button" class="gk-cart-summary__affiliate-toggle-btn" data-gk-affiliate-toggle-icon aria-expanded="true" aria-controls="gk-cart-affiliate-panel-empty" aria-label="<?php esc_attr_e( 'Hide affiliate code field', 'globalkeys' ); ?>">
+										<span aria-hidden="true" data-gk-affiliate-icon-char>&#8722;</span>
+									</button>
 								</div>
-								<input
-									type="text"
-									id="gk-cart-affiliate-code-empty"
-									class="gk-cart-summary__affiliate-input"
-									name="gk_affiliate_code_empty"
-									value=""
-									autocomplete="off"
-									placeholder="<?php esc_attr_e( 'Enter code', 'globalkeys' ); ?>"
-								/>
+								<div class="gk-cart-summary__affiliate-panel" id="gk-cart-affiliate-panel-empty">
+									<input
+										type="text"
+										id="gk-cart-affiliate-code-empty"
+										class="gk-cart-summary__affiliate-input"
+										name="gk_affiliate_code_empty"
+										value=""
+										autocomplete="off"
+										placeholder="<?php esc_attr_e( 'Enter code', 'globalkeys' ); ?>"
+										aria-labelledby="gk-cart-affiliate-row-trigger-empty"
+									/>
+								</div>
+							</div>
+							<div class="gk-cart-summary__discount gk-cart-summary__discount--collapsible is-collapsed">
+								<div class="gk-cart-summary__discount-header" data-gk-discount-header>
+									<div class="gk-cart-summary__discount-leading">
+										<button type="button" class="gk-cart-summary__discount-row-btn" id="gk-cart-discount-row-trigger-empty" data-gk-discount-row aria-expanded="false" aria-controls="gk-cart-discount-panel-empty">
+											<span class="gk-cart-summary__discount-label"><?php esc_html_e( 'Discount code', 'globalkeys' ); ?></span>
+										</button>
+									</div>
+									<button type="button" class="gk-cart-summary__discount-toggle-btn" data-gk-discount-toggle-icon aria-expanded="false" aria-controls="gk-cart-discount-panel-empty" aria-label="<?php esc_attr_e( 'Show discount code field', 'globalkeys' ); ?>">
+										<span aria-hidden="true" data-gk-discount-icon-char>+</span>
+									</button>
+								</div>
+								<div class="gk-cart-summary__discount-panel" id="gk-cart-discount-panel-empty" hidden>
+									<input
+										type="text"
+										id="gk-cart-discount-code-empty"
+										class="gk-cart-summary__discount-input"
+										name="coupon_code"
+										value=""
+										autocomplete="off"
+										placeholder="<?php esc_attr_e( 'Enter code', 'globalkeys' ); ?>"
+										aria-labelledby="gk-cart-discount-row-trigger-empty"
+									/>
+								</div>
 							</div>
 							<div class="gk-cart-summary__rows">
 								<div class="gk-cart-summary__row gk-cart-summary__row--total gk-cart-summary__row--total-only">
