@@ -20,7 +20,14 @@ get_header();
 
 	<main id="primary" class="site-main site-main--nav-section gk-nav-section-page" data-nav-section="<?php echo esc_attr( $gk_nav_slug ); ?>">
 
-		<!-- Erstmal leer: nur Hintergrund, Inhalt kommt später -->
+		<?php if ( 'support' === $gk_nav_slug ) : ?>
+			<div class="gk-nav-section-inner gk-nav-section-inner--support">
+				<h1 class="screen-reader-text"><?php esc_html_e( '24/7 Support', 'globalkeys' ); ?></h1>
+				<?php /* Inhalt folgt; erstmal nur Abstand unter dem Header über dem Footer. */ ?>
+			</div>
+		<?php else : ?>
+			<!-- Erstmal leer: nur Hintergrund, Inhalt kommt später -->
+		<?php endif; ?>
 
 	</main><!-- #primary -->
 

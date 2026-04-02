@@ -102,8 +102,8 @@
 
 	function init() {
 		if (!document.querySelector('.site-header')) return;
-		/* Warenkorb: fester Header ohne Scroll-Kompakt/Blur */
-		if (document.body.classList.contains('woocommerce-cart')) return;
+		/* Warenkorb + Support: fester Header ohne Scroll-Kompakt/Blur */
+		if (document.body.classList.contains('gk-compact-chrome')) return;
 
 		var y = getScrollTop();
 		if (y > SCROLLED_PX) {

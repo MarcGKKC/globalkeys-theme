@@ -1,6 +1,6 @@
 <?php
 /**
- * Bewertungskarte: Kopf (Avatar + Sterne + Pill), Text & Smileys, Fuß (Datum + Useful).
+ * Bewertungskarte: Kopf (Avatar + Sterne), Text & Smileys, Fuß (Datum + Useful).
  *
  * @package globalkeys
  * @version 9.7.0
@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-global $comment, $product;
+global $comment;
 ?>
 <li <?php comment_class( 'gk-product-review-card__item' ); ?> id="li-comment-<?php comment_ID(); ?>">
 
@@ -29,12 +29,8 @@ global $comment, $product;
 				?>
 			</div>
 			<?php
-			$gk_platform = '';
-			if ( $product && is_a( $product, 'WC_Product' ) ) {
-				$gk_platform = apply_filters( 'gk_product_review_card_platform_label', '', $product );
-			}
-			if ( is_string( $gk_platform ) && $gk_platform !== '' ) {
-				echo '<span class="gk-product-review-card__tag">' . esc_html( $gk_platform ) . '</span>';
+			if ( '0' !== $comment->comment_approved && function_exists( 'globalkeys_product_review_report_menu_markup' ) ) {
+				globalkeys_product_review_report_menu_markup( $comment );
 			}
 			?>
 		</div>

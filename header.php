@@ -8,7 +8,8 @@
 $cart_url         = class_exists( 'WooCommerce' ) ? wc_get_page_permalink( 'cart' ) : '#';
 $account_url      = class_exists( 'WooCommerce' ) ? wc_get_page_permalink( 'myaccount' ) : wp_login_url();
 $gk_account_login = function_exists( 'is_account_page' ) && is_account_page() && ! is_user_logged_in();
-$gk_is_cart_page  = function_exists( 'is_cart' ) && is_cart();
+$gk_is_cart_page    = function_exists( 'is_cart' ) && is_cart();
+$gk_compact_chrome  = $gk_is_cart_page || ( is_string( get_query_var( 'gk_nav_section' ) ) && get_query_var( 'gk_nav_section' ) === 'support' );
 ?>
 <!doctype html>
 <html <?php language_attributes(); ?><?php echo $gk_account_login ? ' class="gk-account-login-page"' : ''; ?>>
@@ -49,9 +50,9 @@ if ( ! $gk_account_login ) {
 	<?php endif; ?>
 
 	<?php if ( ! $gk_account_login ) : ?>
-		<?php if ( $gk_is_cart_page ) : ?>
-		<header id="masthead" class="site-header site-header--cart">
-			<div class="site-header-inner site-header-inner--cart">
+		<?php if ( $gk_compact_chrome ) : ?>
+		<header id="masthead" class="site-header site-header--compact-bar">
+			<div class="site-header-inner site-header-inner--compact-bar">
 				<div class="site-branding">
 					<?php if ( has_custom_logo() ) : ?>
 						<?php the_custom_logo(); ?>
@@ -61,33 +62,26 @@ if ( ! $gk_account_login ) {
 						</a>
 					<?php endif; ?>
 				</div>
-				<nav class="gk-cart-stepper" aria-label="<?php esc_attr_e( 'Checkout-Fortschritt', 'globalkeys' ); ?>">
-					<ol class="gk-cart-stepper__list">
-						<li class="gk-cart-stepper__step gk-cart-stepper__step--active" aria-current="step">
-							<span class="gk-cart-stepper__circle" aria-hidden="true">1</span>
-							<span class="gk-cart-stepper__label"><?php esc_html_e( 'Shopping cart', 'globalkeys' ); ?></span>
-						</li>
-						<li class="gk-cart-stepper__rule" aria-hidden="true"></li>
-						<li class="gk-cart-stepper__step">
-							<span class="gk-cart-stepper__circle" aria-hidden="true">2</span>
-							<span class="gk-cart-stepper__label"><?php esc_html_e( 'Payment', 'globalkeys' ); ?></span>
-						</li>
-						<li class="gk-cart-stepper__rule" aria-hidden="true"></li>
-						<li class="gk-cart-stepper__step">
-							<span class="gk-cart-stepper__circle" aria-hidden="true">3</span>
-							<span class="gk-cart-stepper__label"><?php esc_html_e( 'Game activation', 'globalkeys' ); ?></span>
-						</li>
-					</ol>
-				</nav>
 				<?php
-				$gk_cart_secure_svg = get_template_directory_uri() . '/Pictures/' . rawurlencode( 'Design ohne Titel (55).svg' );
+				$gk_compact_secure_svg = get_template_directory_uri() . '/Pictures/' . rawurlencode( 'Design ohne Titel (55).svg' );
+				$gk_compact_secure_support = is_string( get_query_var( 'gk_nav_section' ) ) && get_query_var( 'gk_nav_section' ) === 'support';
 				?>
-				<div class="gk-cart-secure" style="<?php echo esc_attr( '--gk-cart-secure-svg:url(' . esc_url( $gk_cart_secure_svg ) . ')' ); ?>">
+				<?php if ( $gk_compact_secure_support ) : ?>
+				<div class="gk-compact-bar-title">
+					<span class="gk-compact-bar-title__label"><span class="gk-compact-bar-title__accent">S</span>upport Centrum</span>
+				</div>
+				<?php endif; ?>
+				<div class="gk-cart-secure" style="<?php echo esc_attr( '--gk-cart-secure-svg:url(' . esc_url( $gk_compact_secure_svg ) . ')' ); ?>">
 					<span class="gk-cart-secure__icon" aria-hidden="true"></span>
 					<span class="gk-cart-secure__sep" aria-hidden="true"></span>
 					<div class="gk-cart-secure__text">
-						<span class="gk-cart-secure__title"><?php esc_html_e( 'Sichere Zahlung', 'globalkeys' ); ?></span>
-						<span class="gk-cart-secure__sub"><?php esc_html_e( '256-Bit SSL-verschlüsselt', 'globalkeys' ); ?></span>
+						<?php if ( $gk_compact_secure_support ) : ?>
+							<span class="gk-cart-secure__title"><?php esc_html_e( 'SAFE & SECURE', 'globalkeys' ); ?></span>
+							<span class="gk-cart-secure__sub"><?php esc_html_e( '100% secure and 24h support', 'globalkeys' ); ?></span>
+						<?php else : ?>
+							<span class="gk-cart-secure__title"><?php esc_html_e( 'Sichere Zahlung', 'globalkeys' ); ?></span>
+							<span class="gk-cart-secure__sub"><?php esc_html_e( '256-Bit SSL-verschlüsselt', 'globalkeys' ); ?></span>
+						<?php endif; ?>
 					</div>
 				</div>
 			</div>

@@ -27,20 +27,47 @@ if ( ! $reviews_open && ! $has_reviews ) {
 	<div id="comments" class="gk-product-reviews__comments">
 		<?php if ( $has_reviews ) : ?>
 			<?php
-			$gk_split = function_exists( 'globalkeys_get_product_review_comments_split' )
-				? globalkeys_get_product_review_comments_split( $product, 3, 6 )
+			$gk_recent_days = max( 1, (int) apply_filters( 'gk_product_reviews_recent_days', 30, $product ) );
+			$gk_split       = function_exists( 'globalkeys_get_product_review_comments_split' )
+				? globalkeys_get_product_review_comments_split( $product, 3 )
 				: array( 'best' => array(), 'recent' => array() );
 			$gk_cb = apply_filters( 'woocommerce_product_review_list_args', array( 'callback' => 'woocommerce_comments' ) );
 			$gk_cb = isset( $gk_cb['callback'] ) && is_callable( $gk_cb['callback'] ) ? $gk_cb['callback'] : 'woocommerce_comments';
 			?>
 			<div class="gk-product-reviews__split">
+				<div class="gk-product-reviews__col gk-product-reviews__col--recent">
+					<h3 class="gk-product-reviews__col-title"><?php esc_html_e( 'Recent reviews', 'globalkeys' ); ?></h3>
+					<ol class="commentlist gk-product-reviews__list gk-product-reviews__list--recent">
+						<?php
+						if ( $gk_split['recent'] === array() ) {
+							echo '<li class="gk-product-reviews__col-empty-item"><p class="gk-product-reviews__col-empty">' . esc_html(
+								sprintf(
+									/* translators: %d: number of days (recent reviews window). */
+									_n(
+										'No reviews in the last day.',
+										'No reviews in the last %d days.',
+										$gk_recent_days,
+										'globalkeys'
+									),
+									$gk_recent_days
+								)
+							) . '</p></li>';
+						} else {
+							foreach ( $gk_split['recent'] as $gk_c ) {
+								$GLOBALS['comment'] = $gk_c; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+								call_user_func( $gk_cb, $gk_c, array(), 1 );
+							}
+						}
+						?>
+					</ol>
+				</div>
 				<div class="gk-product-reviews__col gk-product-reviews__col--best">
 					<h3 class="gk-product-reviews__col-title"><?php esc_html_e( 'Best reviews', 'globalkeys' ); ?></h3>
 					<ol class="commentlist gk-product-reviews__list gk-product-reviews__list--best">
 						<?php
 						if ( $gk_split['best'] === array() ) {
 							$gk_best_empty_text = ( isset( $gk_split['recent'] ) && $gk_split['recent'] !== array() )
-								? esc_html__( 'Hier erscheinen Bewertungen mit den meisten „Hilfreich“-Stimmen. Nutze „Useful?“, um sie hervorzuheben.', 'globalkeys' )
+								? esc_html__( 'Hier erscheinen nur Bewertungen mit mindestens einem „Hilfreich“-Like, sortiert nach den meisten Stimmen.', 'globalkeys' )
 								: esc_html__( 'No reviews yet.', 'globalkeys' );
 							echo '<li class="gk-product-reviews__col-empty-item"><p class="gk-product-reviews__col-empty">' . $gk_best_empty_text . '</p></li>';
 						} else {
@@ -52,26 +79,11 @@ if ( ! $reviews_open && ! $has_reviews ) {
 						?>
 					</ol>
 				</div>
-				<div class="gk-product-reviews__col gk-product-reviews__col--recent">
-					<h3 class="gk-product-reviews__col-title"><?php esc_html_e( 'Recent reviews', 'globalkeys' ); ?></h3>
-					<ol class="commentlist gk-product-reviews__list gk-product-reviews__list--recent">
-						<?php
-						if ( $gk_split['recent'] === array() ) {
-							echo '<li class="gk-product-reviews__col-empty-item"><p class="gk-product-reviews__col-empty">' . esc_html__( 'No further recent reviews.', 'globalkeys' ) . '</p></li>';
-						} else {
-							foreach ( $gk_split['recent'] as $gk_c ) {
-								$GLOBALS['comment'] = $gk_c; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-								call_user_func( $gk_cb, $gk_c, array(), 1 );
-							}
-						}
-						?>
-					</ol>
-				</div>
 			</div>
 
 			<?php
 			/*
-			 * Zwei-Spalten-Liste lädt feste Teilmengen; klassische Kommentar-Pagination greift hier nicht.
+			 * Recent zuerst (letzte 30 Tage), Best darunter (nur mit Likes); Pagination greift hier nicht.
 			 */
 			?>
 		<?php else : ?>

@@ -661,12 +661,47 @@ add_filter( 'body_class', 'globalkeys_my_account_body_class' );
 
 
 function globalkeys_nav_section_body_class( $classes ) {
-	if ( get_query_var( 'gk_nav_section' ) !== '' && get_query_var( 'gk_nav_section' ) !== false ) {
+	$slug = get_query_var( 'gk_nav_section' );
+	if ( $slug !== '' && $slug !== false && is_string( $slug ) ) {
 		$classes[] = 'gk-nav-section-page';
+		$classes[] = 'gk-nav-section--' . sanitize_html_class( str_replace( '/', '-', $slug ) );
 	}
 	return $classes;
 }
 add_filter( 'body_class', 'globalkeys_nav_section_body_class' );
+
+/**
+ * Warenkorb + Support: schmale Header-/Footer-Leiste wie beim Cart (Logo-Bar + kompakter Footer).
+ */
+function globalkeys_compact_chrome_body_class( $classes ) {
+	if ( function_exists( 'is_cart' ) && is_cart() ) {
+		$classes[] = 'gk-compact-chrome';
+	}
+	if ( is_string( get_query_var( 'gk_nav_section' ) ) && get_query_var( 'gk_nav_section' ) === 'support' ) {
+		$classes[] = 'gk-compact-chrome';
+	}
+	return $classes;
+}
+add_filter( 'body_class', 'globalkeys_compact_chrome_body_class' );
+
+/**
+ * Nav-Section-Seiten: Seitentitel im Browser-Tab (z. B. Support).
+ */
+function globalkeys_nav_section_document_title_parts( $parts ) {
+	$slug = get_query_var( 'gk_nav_section' );
+	if ( ! is_string( $slug ) || $slug === '' ) {
+		return $parts;
+	}
+	/* Nur Einträge, die von der Startseiten-Logik abweichen sollen. */
+	$map = array(
+		'support' => __( '24/7 Support', 'globalkeys' ),
+	);
+	if ( isset( $map[ $slug ] ) ) {
+		$parts['title'] = $map[ $slug ];
+	}
+	return $parts;
+}
+add_filter( 'document_title_parts', 'globalkeys_nav_section_document_title_parts', 20 );
 
 function globalkeys_search_results_body_class( $classes ) {
 	if ( is_search() && isset( $_GET['post_type'] ) && $_GET['post_type'] === 'product' ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended

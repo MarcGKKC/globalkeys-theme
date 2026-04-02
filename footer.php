@@ -9,7 +9,8 @@ $template_uri   = get_template_directory_uri();
 $myaccount_url  = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'myaccount' ) : home_url( '/' );
 $orders_url     = function_exists( 'wc_get_account_endpoint_url' ) ? wc_get_account_endpoint_url( 'orders', '', $myaccount_url ) : $myaccount_url;
 $privacy_url    = get_privacy_policy_url();
-$gk_is_cart_page = function_exists( 'is_cart' ) && is_cart();
+$gk_is_cart_page      = function_exists( 'is_cart' ) && is_cart();
+$gk_footer_compact_bar = $gk_is_cart_page || ( is_string( get_query_var( 'gk_nav_section' ) ) && get_query_var( 'gk_nav_section' ) === 'support' );
 ?>
 
 	<footer id="colophon" class="site-footer gk-footer">
@@ -25,7 +26,7 @@ $gk_is_cart_page = function_exists( 'is_cart' ) && is_cart();
 					<p class="gk-footer-desc">
 						<?php esc_html_e( 'Every game, DLC, and wallet credit key is sourced directly from publishers—grey-market keys are excluded. GlobalKeys only sells legitimate keys so you get a trusted experience.', 'globalkeys' ); ?>
 					</p>
-					<?php if ( ! $gk_is_cart_page ) : ?>
+					<?php if ( ! $gk_footer_compact_bar ) : ?>
 						<?php
 						$gk_footer_locale_extra_class = '';
 						$gk_fl_tpl = locate_template( 'template-parts/footer-locale.php' );
@@ -123,9 +124,9 @@ $gk_is_cart_page = function_exists( 'is_cart' ) && is_cart();
 		</div>
 
 		<div class="gk-footer-bottom">
-			<div class="gk-footer-bottom-inner<?php echo $gk_is_cart_page ? ' gk-footer-bottom-inner--cart' : ''; ?>">
+			<div class="gk-footer-bottom-inner<?php echo $gk_footer_compact_bar ? ' gk-footer-bottom-inner--cart' : ''; ?>">
 				<p class="gk-footer-copyright">© <?php echo (int) date( 'Y' ); ?> GlobalKeys — <?php esc_html_e( 'All rights reserved.', 'globalkeys' ); ?></p>
-				<?php if ( $gk_is_cart_page ) : ?>
+				<?php if ( $gk_footer_compact_bar ) : ?>
 					<?php
 					$gk_footer_locale_extra_class = 'gk-footer-locale--cart-bar';
 					$gk_fl_tpl = locate_template( 'template-parts/footer-locale.php' );
