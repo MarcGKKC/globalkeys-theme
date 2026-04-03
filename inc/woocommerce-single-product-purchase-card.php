@@ -586,6 +586,18 @@ function globalkeys_single_product_about_game_section() {
 	if ( $has_intro ) {
 		echo '<div class="gk-product-page-about-game__intro">';
 		echo wp_kses_post( wpautop( $intro ) );
+		if ( function_exists( 'globalkeys_product_page_game_description_section_will_render' ) && globalkeys_product_page_game_description_section_will_render( $product ) ) {
+			$more_label = apply_filters( 'gk_about_game_intro_more_link_text', __( 'More about the game', 'globalkeys' ), $product );
+			if ( is_string( $more_label ) && $more_label !== '' ) {
+				$desc_anchor = 'gk-product-page-game-description';
+				if ( $product && is_a( $product, 'WC_Product' ) ) {
+					$desc_anchor .= '-' . (int) $product->get_id();
+				}
+				echo '<p class="gk-product-page-about-game__intro-more">';
+				echo '<a class="gk-product-page-about-game__intro-more-link" href="#' . esc_attr( $desc_anchor ) . '">' . esc_html( $more_label ) . '</a>';
+				echo '</p>';
+			}
+		}
 		echo '</div>';
 	}
 	if ( ! empty( $tag_terms ) ) {
@@ -718,6 +730,28 @@ function globalkeys_single_product_game_images_section() {
 }
 
 /**
+ * Ob die Section „Game Description“ für das Produkt ausgegeben wird (gleiche Logik wie beim Rendern).
+ *
+ * @param WC_Product|null $product Produkt.
+ * @return bool
+ */
+function globalkeys_product_page_game_description_section_will_render( $product ) {
+	if ( ! function_exists( 'globalkeys_single_product_is_purchase_card_active' ) || ! globalkeys_single_product_is_purchase_card_active() ) {
+		return false;
+	}
+	if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
+		return false;
+	}
+	$heading = apply_filters( 'gk_game_description_section_heading_text', __( 'Game Description', 'globalkeys' ), $product );
+	if ( ! is_string( $heading ) || $heading === '' ) {
+		return false;
+	}
+	$content     = apply_filters( 'gk_game_description_section_content_html', '', $product );
+	$has_default = function_exists( 'globalkeys_product_page_has_game_description_text' ) && globalkeys_product_page_has_game_description_text( $product );
+	return ( is_string( $content ) && $content !== '' ) || $has_default;
+}
+
+/**
  * Ob für „Game Description“ ein Standardtext existiert (Lang- und/oder Kurzbeschreibung).
  *
  * @param WC_Product|null $product Produkt.
@@ -756,10 +790,13 @@ function globalkeys_single_product_game_description_section() {
 		return;
 	}
 	$heading_id = 'gk-product-page-game-description-heading';
+	$section_id = 'gk-product-page-game-description';
 	if ( $product && is_a( $product, 'WC_Product' ) ) {
-		$heading_id .= '-' . (int) $product->get_id();
+		$pid = (int) $product->get_id();
+		$heading_id .= '-' . $pid;
+		$section_id  .= '-' . $pid;
 	}
-	echo '<section class="gk-product-page-game-description" aria-labelledby="' . esc_attr( $heading_id ) . '">';
+	echo '<section id="' . esc_attr( $section_id ) . '" class="gk-product-page-game-description" aria-labelledby="' . esc_attr( $heading_id ) . '">';
 	echo '<div class="gk-section-inner gk-section-featured-inner">';
 	echo '<div class="gk-featured-heading-wrap gk-product-page-game-description__heading-wrap">';
 	echo '<h2 id="' . esc_attr( $heading_id ) . '" class="gk-section-title gk-featured-heading">';

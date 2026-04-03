@@ -9484,6 +9484,7 @@ body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-p
 	margin: 2.25rem auto 0;
 	padding: 0;
 	box-sizing: border-box;
+	scroll-margin-top: clamp(4rem, 10vw, 6rem);
 }
 
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements {
@@ -12727,6 +12728,33 @@ body.single-product div.product.type-product > .gk-product-page-about-game .gk-p
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-about-game .gk-product-page-about-game__intro p:first-of-type,
 body.single-product div.product.type-product > .gk-product-page-about-game .gk-product-page-about-game__intro p:first-of-type {
 	line-height: 1.58;
+}
+
+/* Wenig Abstand vor „More about the game“: letzter Fließtext-Absatz ohne großen unteren Rand */
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-about-game .gk-product-page-about-game__intro p:has(+ .gk-product-page-about-game__intro-more),
+body.single-product div.product.type-product > .gk-product-page-about-game .gk-product-page-about-game__intro p:has(+ .gk-product-page-about-game__intro-more) {
+	margin-bottom: 0;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-about-game .gk-product-page-about-game__intro-more,
+body.single-product div.product.type-product > .gk-product-page-about-game .gk-product-page-about-game__intro-more {
+	margin: 0.3em 0 0;
+	padding: 0;
+	font-size: inherit;
+	font-weight: inherit;
+	line-height: 1.58;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-about-game .gk-product-page-about-game__intro-more-link,
+body.single-product div.product.type-product > .gk-product-page-about-game .gk-product-page-about-game__intro-more-link {
+	color: rgba(255, 255, 255, 0.88);
+	text-decoration: underline;
+	text-underline-offset: 0.15em;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-about-game .gk-product-page-about-game__intro-more-link:hover,
+body.single-product div.product.type-product > .gk-product-page-about-game .gk-product-page-about-game__intro-more-link:hover {
+	color: #04da8d;
 }
 
 /* Tags in linker Spalte: nach unten schieben, unten bündig mit Infobox (letzte Zeile), wenn Sidebar höher ist als Fließtext */
