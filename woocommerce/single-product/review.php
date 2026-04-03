@@ -25,11 +25,16 @@ global $comment;
 				 * @hooked woocommerce_review_display_gravatar - 10
 				 */
 				do_action( 'woocommerce_review_before', $comment );
-				wc_get_template( 'single-product/review-rating.php' );
 				?>
+				<div class="gk-product-review-card__rating-col">
+					<?php wc_get_template( 'single-product/review-rating.php' ); ?>
+					<p class="gk-product-review-card__byline">
+						<span class="gk-product-review-card__author-name"><?php echo esc_html( get_comment_author( $comment->comment_ID ) ); ?></span>
+					</p>
+				</div>
 			</div>
 			<?php
-			if ( '0' !== $comment->comment_approved && function_exists( 'globalkeys_product_review_report_menu_markup' ) ) {
+			if ( function_exists( 'globalkeys_product_review_should_show_review_menu' ) && globalkeys_product_review_should_show_review_menu( $comment ) ) {
 				globalkeys_product_review_report_menu_markup( $comment );
 			}
 			?>

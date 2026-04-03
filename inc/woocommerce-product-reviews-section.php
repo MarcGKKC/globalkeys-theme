@@ -65,6 +65,77 @@ function globalkeys_woocommerce_review_gravatar_size() {
 add_filter( 'woocommerce_review_gravatar_size', 'globalkeys_woocommerce_review_gravatar_size', 10 );
 
 /**
+ * Profil-URL für den Verfasser einer Produktbewertung (nur registrierte Nutzer bzw. per E-Mail zuordenbar).
+ *
+ * @param WP_Comment $comment Kommentar.
+ * @return string URL oder leer.
+ */
+function globalkeys_get_product_review_author_profile_url( $comment ) {
+	if ( ! is_object( $comment ) || empty( $comment->comment_ID ) ) {
+		return '';
+	}
+	if ( 'review' !== get_comment_type( $comment ) ) {
+		return '';
+	}
+	$post = get_post( (int) $comment->comment_post_ID );
+	if ( ! $post || ! in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
+		return '';
+	}
+	$uid = (int) $comment->user_id;
+	if ( $uid <= 0 && ! empty( $comment->comment_author_email ) && is_email( $comment->comment_author_email ) ) {
+		$by_email = get_user_by( 'email', $comment->comment_author_email );
+		if ( $by_email ) {
+			$uid = (int) $by_email->ID;
+		}
+	}
+	if ( $uid <= 0 ) {
+		return '';
+	}
+	$user = get_userdata( $uid );
+	if ( ! $user || ! $user->exists() ) {
+		return '';
+	}
+	$url = get_author_posts_url( $uid );
+	/**
+	 * Profil-Link aus einer Produktbewertung (Standard: Autoren-Archiv).
+	 *
+	 * @param string     $url     URL.
+	 * @param int        $uid     WordPress-User-ID.
+	 * @param WP_Comment $comment Bewertung.
+	 */
+	return (string) apply_filters( 'globalkeys_product_review_author_profile_url', $url, $uid, $comment );
+}
+
+/**
+ * Klick auf Bewertungs-Avatar → Profilseite des Verfassers.
+ *
+ * @param string           $avatar      HTML.
+ * @param mixed            $id_or_email Kommentar o. ä.
+ * @param int              $size        Größe.
+ * @param string           $default     Default.
+ * @param string           $alt         Alt-Text.
+ * @param array<string,mixed> $args     Args.
+ * @return string
+ */
+function globalkeys_wrap_product_review_avatar_in_profile_link( $avatar, $id_or_email, $size, $default, $alt, $args ) {
+	if ( ! $id_or_email instanceof WP_Comment ) {
+		return $avatar;
+	}
+	$url = globalkeys_get_product_review_author_profile_url( $id_or_email );
+	if ( '' === $url ) {
+		return $avatar;
+	}
+	$label = sprintf(
+		/* translators: %s: reviewer display name */
+		__( 'Profile of %s', 'globalkeys' ),
+		get_comment_author( $id_or_email )
+	);
+	return '<a class="gk-product-review-card__avatar-link" href="' . esc_url( $url ) . '" aria-label="' . esc_attr( $label ) . '">' . $avatar . '</a>';
+}
+
+add_filter( 'get_avatar', 'globalkeys_wrap_product_review_avatar_in_profile_link', 99, 6 );
+
+/**
  * Modal-Formular / Pflichtfelder: Inline-Footer-Skript `gk-review-modal-validate` (nicht externe JS-Datei, damit Optimierer nichts überschreiben).
  */
 
@@ -696,13 +767,13 @@ function globalkeys_product_review_helpful_markup( $comment ) {
 		<div class="gk-product-review-card__useful-actions">
 			<button type="button" class="gk-product-review-card__vote gk-product-review-card__vote--up<?php echo $up_active ? ' is-active' : ''; ?>" data-gk-review-vote="up" data-comment-id="<?php echo esc_attr( (string) $cid ); ?>" data-nonce="<?php echo esc_attr( $nonce ); ?>" aria-pressed="<?php echo $up_active ? 'true' : 'false'; ?>" aria-label="<?php esc_attr_e( 'Mark review as helpful', 'globalkeys' ); ?>">
 				<span class="gk-product-review-card__vote-icon" aria-hidden="true">
-					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 22V11M2 13v8a2 2 0 002 2h3M16 13h5l-2.5 7.5a2 2 0 01-2 1.5H11V9l3.5-5.5a1 1 0 011.7.5L17 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 22V11M2 13v8a2 2 0 002 2h3M16 13h5l-2.5 7.5a2 2 0 01-2 1.5H11V9l3.5-5.5a1 1 0 011.7.5L17 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 				</span>
 				<span class="gk-product-review-card__vote-count" data-gk-helpful-count="up"><?php echo esc_html( (string) max( 0, $up ) ); ?></span>
 			</button>
 			<button type="button" class="gk-product-review-card__vote gk-product-review-card__vote--down<?php echo $down_active ? ' is-active' : ''; ?>" data-gk-review-vote="down" data-comment-id="<?php echo esc_attr( (string) $cid ); ?>" data-nonce="<?php echo esc_attr( $nonce ); ?>" aria-pressed="<?php echo $down_active ? 'true' : 'false'; ?>" aria-label="<?php esc_attr_e( 'Mark review as not helpful', 'globalkeys' ); ?>">
 				<span class="gk-product-review-card__vote-icon" aria-hidden="true">
-					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17 2v11M22 11V3a2 2 0 00-2-2h-3M8 11H3l2.5-7.5a2 2 0 012-1.5H13v12l-3.5 5.5a1 1 0 01-1.7-.5L7 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17 2v11M22 11V3a2 2 0 00-2-2h-3M8 11H3l2.5-7.5a2 2 0 012-1.5H13v12l-3.5 5.5a1 1 0 01-1.7-.5L7 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 				</span>
 			</button>
 		</div>
@@ -841,7 +912,26 @@ function globalkeys_product_review_report_notify_admin( $comment ) {
 }
 
 /**
- * Drei-Punkte-Menü: Review melden (nur freigegebene Bewertungen).
+ * Ob das Drei-Punkte-Menü für diese Bewertung erscheint (Report bei Freigabe; bei ausstehender eigener Bewertung nur Löschen).
+ *
+ * @param WP_Comment $comment Kommentar.
+ */
+function globalkeys_product_review_should_show_review_menu( $comment ) {
+	if ( ! is_object( $comment ) || empty( $comment->comment_ID ) ) {
+		return false;
+	}
+	$st = (string) $comment->comment_approved;
+	if ( '1' === $st ) {
+		return true;
+	}
+	if ( '0' === $st && is_user_logged_in() && (int) $comment->user_id > 0 && (int) $comment->user_id === get_current_user_id() ) {
+		return true;
+	}
+	return false;
+}
+
+/**
+ * Drei-Punkte-Menü: Review melden (freigegeben) und ggf. eigene Bewertung löschen (nur Verfasser).
  *
  * @param WP_Comment $comment Kommentar.
  */
@@ -849,18 +939,33 @@ function globalkeys_product_review_report_menu_markup( $comment ) {
 	if ( ! is_object( $comment ) || empty( $comment->comment_ID ) ) {
 		return;
 	}
-	$cid    = (int) $comment->comment_ID;
+	$cid     = (int) $comment->comment_ID;
 	$menu_id = 'gk-review-menu-' . $cid;
 	$nonce   = wp_create_nonce( 'gk_report_review_' . $cid );
+	$show_report = ( '1' === (string) $comment->comment_approved );
+	$show_delete = is_user_logged_in()
+		&& (int) $comment->user_id > 0
+		&& (int) $comment->user_id === get_current_user_id();
+	if ( ! $show_report && ! $show_delete ) {
+		return;
+	}
+	$del_nonce = $show_delete ? wp_create_nonce( 'gk_delete_own_review_' . $cid ) : '';
 	?>
 	<div class="gk-product-review-card__menu-wrap">
 		<button type="button" class="gk-product-review-card__menu-btn" id="<?php echo esc_attr( $menu_id ); ?>-btn" aria-expanded="false" aria-haspopup="true" aria-controls="<?php echo esc_attr( $menu_id ); ?>" aria-label="<?php esc_attr_e( 'More options for this review', 'globalkeys' ); ?>">
 			<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><circle cx="12" cy="5.5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="18.5" r="2"/></svg>
 		</button>
 		<div class="gk-product-review-card__menu" id="<?php echo esc_attr( $menu_id ); ?>" role="menu" hidden>
+			<?php if ( $show_report ) : ?>
 			<button type="button" class="gk-product-review-card__menu-item" role="menuitem" data-gk-review-report data-comment-id="<?php echo esc_attr( (string) $cid ); ?>" data-nonce="<?php echo esc_attr( $nonce ); ?>">
 				<?php esc_html_e( 'Report review', 'globalkeys' ); ?>
 			</button>
+			<?php endif; ?>
+			<?php if ( $show_delete ) : ?>
+			<button type="button" class="gk-product-review-card__menu-item gk-product-review-card__menu-item--danger" role="menuitem" data-gk-review-delete data-comment-id="<?php echo esc_attr( (string) $cid ); ?>" data-nonce="<?php echo esc_attr( $del_nonce ); ?>">
+				<?php esc_html_e( 'Delete review', 'globalkeys' ); ?>
+			</button>
+			<?php endif; ?>
 		</div>
 	</div>
 	<?php
@@ -913,6 +1018,51 @@ function globalkeys_product_review_report_ajax() {
 
 add_action( 'wp_ajax_gk_report_review', 'globalkeys_product_review_report_ajax' );
 add_action( 'wp_ajax_nopriv_gk_report_review', 'globalkeys_product_review_report_ajax' );
+
+/**
+ * AJAX: Eigene Produktbewertung löschen (nur Verfasser, eingeloggt).
+ */
+function globalkeys_product_review_delete_own_ajax() {
+	if ( ! is_user_logged_in() ) {
+		wp_send_json_error( array( 'code' => 'auth' ), 403 );
+	}
+	// phpcs:ignore WordPress.Security.NonceVerification.Missing
+	$cid   = isset( $_POST['comment_id'] ) ? absint( wp_unslash( $_POST['comment_id'] ) ) : 0;
+	$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
+	if ( $cid <= 0 || ! wp_verify_nonce( $nonce, 'gk_delete_own_review_' . $cid ) ) {
+		wp_send_json_error( array( 'code' => 'bad_nonce' ), 403 );
+	}
+	$c = get_comment( $cid );
+	if ( ! $c || 'review' !== $c->comment_type ) {
+		wp_send_json_error( array( 'code' => 'not_found' ), 404 );
+	}
+	$pid = (int) $c->comment_post_ID;
+	if ( $pid <= 0 || ! in_array( get_post_type( $pid ), array( 'product', 'product_variation' ), true ) ) {
+		wp_send_json_error( array( 'code' => 'bad_post' ), 400 );
+	}
+	if ( (int) $c->user_id !== get_current_user_id() || (int) $c->user_id <= 0 ) {
+		wp_send_json_error( array( 'code' => 'forbidden' ), 403 );
+	}
+	$st = (string) $c->comment_approved;
+	if ( ! in_array( $st, array( '0', '1' ), true ) ) {
+		wp_send_json_error( array( 'code' => 'bad_status' ), 400 );
+	}
+	if ( ! wp_delete_comment( $cid, true ) ) {
+		wp_send_json_error( array( 'code' => 'delete_failed' ), 500 );
+	}
+	if ( class_exists( 'WC_Comments' ) ) {
+		WC_Comments::clear_transients( $pid );
+		if ( 'product_variation' === get_post_type( $pid ) ) {
+			$parent_id = (int) wp_get_post_parent_id( $pid );
+			if ( $parent_id > 0 ) {
+				WC_Comments::clear_transients( $parent_id );
+			}
+		}
+	}
+	wp_send_json_success( array( 'ok' => true ) );
+}
+
+add_action( 'wp_ajax_gk_delete_own_review', 'globalkeys_product_review_delete_own_ajax' );
 
 /**
  * Review-Modal: Inline-Skript im Footer (unabhängig von externer JS-Datei / Cache / Optimierern).
@@ -1027,9 +1177,11 @@ var U=<?php echo wp_json_encode( admin_url( 'admin-ajax.php' ) ); ?>;
 var MSG=<?php
 	echo wp_json_encode(
 		array(
-			'reported' => __( 'Thank you. Your report was submitted.', 'globalkeys' ),
-			'already'  => __( 'You already reported this review.', 'globalkeys' ),
-			'error'    => __( 'Something went wrong. Please try again.', 'globalkeys' ),
+			'reported'       => __( 'Thank you. Your report was submitted.', 'globalkeys' ),
+			'already'        => __( 'You already reported this review.', 'globalkeys' ),
+			'error'          => __( 'Something went wrong. Please try again.', 'globalkeys' ),
+			'delete_confirm' => __( 'Delete this review permanently?', 'globalkeys' ),
+			'delete_error'   => __( 'Could not delete the review.', 'globalkeys' ),
 		),
 		JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE
 	);
@@ -1045,6 +1197,29 @@ if(m){m.hidden=true;}
 document.addEventListener('keydown',function(ev){if(ev.key==='Escape'){closeAllMenus();}});
 document.addEventListener('click',function(ev){
 var t=ev.target;if(!t||!t.closest){return;}
+var del=t.closest('[data-gk-review-delete]');
+if(del){
+ev.preventDefault();ev.stopPropagation();
+if(del.disabled){return;}
+var cidD=del.getAttribute('data-comment-id'),nxD=del.getAttribute('data-nonce');
+if(!cidD||!nxD){return;}
+if(!window.confirm(MSG.delete_confirm)){return;}
+del.disabled=true;
+var fdD=new FormData();fdD.append('action','gk_delete_own_review');fdD.append('comment_id',cidD);fdD.append('nonce',nxD);
+fetch(U,{method:'POST',body:fdD,credentials:'same-origin'})
+.then(function(r){return r.json();})
+.then(function(j){
+if(j&&j.success){
+closeAllMenus();
+var li=document.getElementById('li-comment-'+cidD);
+if(li&&li.parentNode){li.parentNode.removeChild(li);}
+return;
+}
+del.disabled=false;alert(MSG.delete_error);
+})
+.catch(function(){del.disabled=false;alert(MSG.delete_error);});
+return;
+}
 var rep=t.closest('[data-gk-review-report]');
 if(rep){
 ev.preventDefault();ev.stopPropagation();
@@ -1073,7 +1248,7 @@ if(!open){
 btn.setAttribute('aria-expanded','true');
 var id=btn.getAttribute('aria-controls');
 var menu=id?document.getElementById(id):null;
-if(menu){menu.hidden=false;var fi=menu.querySelector('[data-gk-review-report]');if(fi&&fi.focus){try{fi.focus();}catch(x){}}}
+if(menu){menu.hidden=false;var fi=menu.querySelector('[role="menuitem"]');if(fi&&fi.focus){try{fi.focus();}catch(x){}}}
 }
 return;
 }
@@ -1097,12 +1272,19 @@ function globalkeys_product_reviews_print_hero_bar( $product ) {
 		return;
 	}
 
-	$count = (int) $product->get_review_count();
-	$avg   = (float) $product->get_average_rating();
+	$count          = (int) $product->get_review_count();
+	$avg            = (float) $product->get_average_rating();
+	$score_fill_pct = 0.0;
 
 	if ( $count > 0 && $avg > 0 && function_exists( 'wc_review_ratings_enabled' ) && wc_review_ratings_enabled() ) {
-		$score_display = (string) (int) round( $avg * 2, 0 );
+		// Woo-Durchschnitt 1–5 → Anzeige 2–10 mit einer Nachkommastelle (Punkt als Dezimaltrennzeichen).
+		$score_ten = round( (float) $avg * 2, 1 );
+		$raw           = number_format( $score_ten, 1, '.', '' );
+		$raw           = rtrim( rtrim( $raw, '0' ), '.' );
+		$score_display = $raw;
 		$score_attr    = $score_display;
+		// Kreisfüllung 0–100 % (10/10 = voll); gleiche Basis wie die angezeigte Zahl.
+		$score_fill_pct = min( 100.0, max( 0.0, ( $score_ten / 10.0 ) * 100.0 ) );
 	} else {
 		$score_display = '–';
 		$score_attr    = '';
@@ -1110,7 +1292,7 @@ function globalkeys_product_reviews_print_hero_bar( $product ) {
 
 	$title = apply_filters(
 		'gk_reviews_hero_title',
-		__( 'Game rating', 'globalkeys' ),
+		__( 'Overall game rating', 'globalkeys' ),
 		$product
 	);
 
@@ -1149,7 +1331,11 @@ function globalkeys_product_reviews_print_hero_bar( $product ) {
 			)
 			: __( 'No user score yet', 'globalkeys' )
 	) . '">';
-	echo '<span class="gk-product-reviews-hero__score-ring">';
+	echo '<span class="gk-product-reviews-hero__score-ring" style="' . esc_attr( '--gk-hero-score-fill:' . round( $score_fill_pct, 4 ) ) . '">';
+	echo '<svg class="gk-product-reviews-hero__score-border-svg" viewBox="0 0 100 100" aria-hidden="true" focusable="false">';
+	echo '<circle class="gk-product-reviews-hero__score-border-track" cx="50" cy="50" r="46" fill="none" stroke="rgba(255,255,255,0.16)" stroke-width="5"/>';
+	echo '<circle class="gk-product-reviews-hero__score-border-progress" cx="50" cy="50" r="46" fill="none" stroke="#04da8d" stroke-width="5" stroke-linecap="round" pathLength="100" stroke-dasharray="100" transform="rotate(-90 50 50)"/>';
+	echo '</svg>';
 	echo '<span class="gk-product-reviews-hero__score-value">' . esc_html( $score_display ) . '</span>';
 	echo '</span></div>';
 

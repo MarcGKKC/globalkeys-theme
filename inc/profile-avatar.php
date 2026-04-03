@@ -21,12 +21,27 @@ function globalkeys_add_avatar_image_size() {
  * @param int   $size    Bildgröße.
  * @return string
  */
+/**
+ * Cache-Buster für Profilbild-URLs (Browser/CDN nach Upload).
+ *
+ * @param int    $user_id User-ID.
+ * @param string $url     Bild-URL.
+ * @return string
+ */
+function globalkeys_avatar_url_with_cache_buster( $user_id, $url ) {
+	$ver = (int) get_user_meta( $user_id, 'gk_avatar_ver', true );
+	if ( $ver > 0 ) {
+		$url = add_query_arg( 'gk_av', (string) $ver, $url );
+	}
+	return $url;
+}
+
 function globalkeys_get_user_avatar_url( $user_id, $size = 290 ) {
 	$attach_id = get_user_meta( $user_id, 'custom_avatar_id', true );
 	if ( $attach_id ) {
 		$url = wp_get_attachment_image_url( (int) $attach_id, 'full' );
 		if ( $url ) {
-			return esc_url( $url );
+			return esc_url( globalkeys_avatar_url_with_cache_buster( (int) $user_id, $url ) );
 		}
 	}
 	$custom = get_user_meta( $user_id, 'custom_avatar_url', true );
@@ -36,10 +51,10 @@ function globalkeys_get_user_avatar_url( $user_id, $size = 290 ) {
 			$full_url = wp_get_attachment_image_url( $aid, 'full' );
 			if ( $full_url ) {
 				update_user_meta( $user_id, 'custom_avatar_id', $aid );
-				return esc_url( $full_url );
+				return esc_url( globalkeys_avatar_url_with_cache_buster( (int) $user_id, $full_url ) );
 			}
 		}
-		return esc_url( $custom );
+		return esc_url( globalkeys_avatar_url_with_cache_buster( (int) $user_id, $custom ) );
 	}
 	return get_avatar_url( $user_id, array( 'size' => $size ) );
 }
@@ -55,20 +70,28 @@ function globalkeys_avatar_url_filter( $url, $id_or_email, $args ) {
 		$user = $id_or_email;
 	} elseif ( $id_or_email instanceof WP_Post ) {
 		$user = get_user_by( 'id', (int) $id_or_email->post_author );
+	} elseif ( $id_or_email instanceof WP_Comment ) {
+		// WooCommerce-Bewertungen rufen get_avatar( $comment ) auf – ohne diesen Zweig bliebe Gravatar.
+		if ( ! empty( $id_or_email->user_id ) ) {
+			$user = get_user_by( 'id', (int) $id_or_email->user_id );
+		}
+		if ( ( ! $user || ! $user->ID ) && ! empty( $id_or_email->comment_author_email ) && is_email( $id_or_email->comment_author_email ) ) {
+			$user = get_user_by( 'email', $id_or_email->comment_author_email );
+		}
 	} elseif ( is_string( $id_or_email ) && is_email( $id_or_email ) ) {
 		$user = get_user_by( 'email', $id_or_email );
 	}
 	if ( $user && $user->ID ) {
 		$attach_id = get_user_meta( $user->ID, 'custom_avatar_id', true );
 		if ( $attach_id ) {
-			$url = wp_get_attachment_image_url( (int) $attach_id, 'full' );
-			if ( $url ) {
-				return esc_url( $url );
+			$custom_url = wp_get_attachment_image_url( (int) $attach_id, 'full' );
+			if ( $custom_url ) {
+				return esc_url( globalkeys_avatar_url_with_cache_buster( (int) $user->ID, $custom_url ) );
 			}
 		}
 		$custom = get_user_meta( $user->ID, 'custom_avatar_url', true );
 		if ( ! empty( $custom ) && filter_var( $custom, FILTER_VALIDATE_URL ) ) {
-			return esc_url( $custom );
+			return esc_url( globalkeys_avatar_url_with_cache_buster( (int) $user->ID, $custom ) );
 		}
 	}
 	return $url;
@@ -124,8 +147,11 @@ function globalkeys_ajax_upload_profile_avatar() {
 	if ( ! $url ) {
 		$url = $upload['url'];
 	}
-	update_user_meta( get_current_user_id(), 'custom_avatar_id', $attach_id );
-	update_user_meta( get_current_user_id(), 'custom_avatar_url', $url );
-	wp_send_json_success( array( 'url' => $url ) );
+	$uid = get_current_user_id();
+	update_user_meta( $uid, 'custom_avatar_id', $attach_id );
+	update_user_meta( $uid, 'custom_avatar_url', $url );
+	update_user_meta( $uid, 'gk_avatar_ver', time() );
+	$url_busted = globalkeys_avatar_url_with_cache_buster( $uid, $url );
+	wp_send_json_success( array( 'url' => $url_busted ) );
 }
 add_action( 'wp_ajax_gk_upload_profile_avatar', 'globalkeys_ajax_upload_profile_avatar' );

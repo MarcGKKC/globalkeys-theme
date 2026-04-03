@@ -31,12 +31,16 @@ if ( ! $reviews_open && ! $has_reviews ) {
 			$gk_split       = function_exists( 'globalkeys_get_product_review_comments_split' )
 				? globalkeys_get_product_review_comments_split( $product, 3 )
 				: array( 'best' => array(), 'recent' => array() );
+			$gk_recent_shown = isset( $gk_split['recent'] ) && is_array( $gk_split['recent'] ) ? count( $gk_split['recent'] ) : 0;
+			$gk_best_shown   = isset( $gk_split['best'] ) && is_array( $gk_split['best'] ) ? count( $gk_split['best'] ) : 0;
 			$gk_cb = apply_filters( 'woocommerce_product_review_list_args', array( 'callback' => 'woocommerce_comments' ) );
 			$gk_cb = isset( $gk_cb['callback'] ) && is_callable( $gk_cb['callback'] ) ? $gk_cb['callback'] : 'woocommerce_comments';
 			?>
 			<div class="gk-product-reviews__split">
 				<div class="gk-product-reviews__col gk-product-reviews__col--recent">
-					<h3 class="gk-product-reviews__col-title"><?php esc_html_e( 'Recent reviews', 'globalkeys' ); ?></h3>
+					<h3 class="gk-product-reviews__col-title">
+						<span class="gk-product-reviews__col-title-label"><?php esc_html_e( 'Recent reviews', 'globalkeys' ); ?></span><span class="gk-product-reviews__col-title-count">(<?php echo (int) $gk_recent_shown; ?>)</span>
+					</h3>
 					<ol class="commentlist gk-product-reviews__list gk-product-reviews__list--recent">
 						<?php
 						if ( $gk_split['recent'] === array() ) {
@@ -62,7 +66,9 @@ if ( ! $reviews_open && ! $has_reviews ) {
 					</ol>
 				</div>
 				<div class="gk-product-reviews__col gk-product-reviews__col--best">
-					<h3 class="gk-product-reviews__col-title"><?php esc_html_e( 'Best reviews', 'globalkeys' ); ?></h3>
+					<h3 class="gk-product-reviews__col-title">
+						<span class="gk-product-reviews__col-title-label"><?php esc_html_e( 'Best reviews', 'globalkeys' ); ?></span><span class="gk-product-reviews__col-title-count">(<?php echo (int) $gk_best_shown; ?>)</span>
+					</h3>
 					<ol class="commentlist gk-product-reviews__list gk-product-reviews__list--best">
 						<?php
 						if ( $gk_split['best'] === array() ) {
