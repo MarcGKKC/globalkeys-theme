@@ -787,6 +787,7 @@ require get_template_directory() . '/inc/woocommerce-product-trailer.php';
 require get_template_directory() . '/inc/woocommerce-product-preorder.php';
 require get_template_directory() . '/inc/gk-house-member-access.php';
 require get_template_directory() . '/inc/woocommerce-product-elden-nightreign.php';
+require get_template_directory() . '/inc/woocommerce-product-about-sidebar-info.php';
 require get_template_directory() . '/inc/woocommerce-product-hero-image.php';
 require get_template_directory() . '/inc/woocommerce-product-visuals.php';
 require get_template_directory() . '/inc/woocommerce-single-product-layout.php';
@@ -1976,7 +1977,7 @@ function globalkeys_scripts() {
 		body.gk-account-login .gk-account-title {
 			color: #fff;
 			font-size: 1.75rem;
-			font-weight: 700;
+			font-weight: 600;
 			margin: 0 0 1.5rem;
 		}
 		body.gk-account-login .gk-login-block,

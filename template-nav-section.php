@@ -25,6 +25,7 @@ get_header();
 				<h1 class="screen-reader-text"><?php esc_html_e( '24/7 Support', 'globalkeys' ); ?></h1>
 				<?php get_template_part( 'template-parts/support', 'landing' ); ?>
 			</div>
+			<?php get_template_part( 'template-parts/support', 'guides' ); ?>
 		<?php else : ?>
 			<!-- Erstmal leer: nur Hintergrund, Inhalt kommt später -->
 		<?php endif; ?>

@@ -7,6 +7,13 @@
 
 defined( 'ABSPATH' ) || exit;
 
+if ( ! function_exists( 'globalkeys_get_about_game_sidebar_standard_info_definitions' ) ) {
+	$gk_about_sidebar_file = get_template_directory() . '/inc/woocommerce-product-about-sidebar-info.php';
+	if ( is_readable( $gk_about_sidebar_file ) ) {
+		require_once $gk_about_sidebar_file;
+	}
+}
+
 /**
  * Bei fehlenden kaufbaren Variationen: select deaktivieren, bleibt aber sichtbar (Info).
  *
@@ -305,6 +312,210 @@ function globalkeys_single_product_purchase_actions_open() {
 }
 
 /**
+ * @param string $value Roher Wert aus „Bezeichnung | Wert“.
+ * @return array{0:string,1:bool} Wert ohne Präfix, muted-Flag.
+ */
+function globalkeys_about_game_sidebar_parse_value_modifiers( $value ) {
+	$value = is_string( $value ) ? trim( $value ) : '';
+	$muted = false;
+	if ( preg_match( '/^\[\[muted\]\]\s*/i', $value ) ) {
+		$muted = true;
+		$value = trim( preg_replace( '/^\[\[muted\]\]\s*/i', '', $value ) );
+	}
+	return array( $value, $muted );
+}
+
+/**
+ * Infobox-Bezeichnung mit abschließendem „:“ (ohne doppelten Doppelpunkt).
+ *
+ * @param string $label Rohe Bezeichnung.
+ * @return string
+ */
+function globalkeys_about_game_sidebar_label_with_colon( $label ) {
+	$label = is_string( $label ) ? trim( $label ) : '';
+	if ( $label === '' ) {
+		return '';
+	}
+	$last = substr( $label, -1 );
+	if ( ':' === $last ) {
+		return $label;
+	}
+	return $label . ':';
+}
+
+/**
+ * @param string $raw Textarea-Inhalt (eine Zeile: Bezeichnung | Wert).
+ * @return array<int, array{label:string,value:string,muted:bool}>
+ */
+function globalkeys_parse_about_game_sidebar_rows( $raw ) {
+	if ( ! is_string( $raw ) || trim( $raw ) === '' ) {
+		return array();
+	}
+	$lines = preg_split( '/\r\n|\r|\n/', $raw );
+	$out   = array();
+	foreach ( $lines as $line ) {
+		$line = trim( $line );
+		if ( $line === '' ) {
+			continue;
+		}
+		$pos = strpos( $line, '|' );
+		if ( $pos === false ) {
+			continue;
+		}
+		$label = trim( substr( $line, 0, $pos ) );
+		$value = trim( substr( $line, $pos + 1 ) );
+		if ( $label === '' ) {
+			continue;
+		}
+		list( $value, $muted ) = globalkeys_about_game_sidebar_parse_value_modifiers( $value );
+		if ( $value === '' ) {
+			continue;
+		}
+		$out[] = array(
+			'label' => $label,
+			'value' => $value,
+			'muted' => $muted,
+		);
+	}
+	return $out;
+}
+
+/**
+ * @param WC_Product|null $product Produkt.
+ * @return bool Ob Infobox-Inhalt vorliegt.
+ */
+function globalkeys_product_about_game_sidebar_has_content( $product ) {
+	if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
+		$pid = function_exists( 'get_queried_object_id' ) ? (int) get_queried_object_id() : 0;
+		if ( ! $pid && function_exists( 'get_the_ID' ) ) {
+			$pid = (int) get_the_ID();
+		}
+		if ( $pid && function_exists( 'wc_get_product' ) ) {
+			$product = wc_get_product( $pid );
+		}
+	}
+	if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
+		return false;
+	}
+	/**
+	 * Infobox komplett abschalten (selten).
+	 *
+	 * @param bool       $enable  Standard true.
+	 * @param WC_Product $product Produkt.
+	 */
+	return (bool) apply_filters( 'gk_about_game_sidebar_enable', true, $product );
+}
+
+/**
+ * Infobox rechts neben „About the Game“.
+ *
+ * @param WC_Product|null $product Produkt.
+ */
+function globalkeys_render_about_game_sidebar( $product ) {
+	if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
+		$pid = function_exists( 'get_queried_object_id' ) ? (int) get_queried_object_id() : 0;
+		if ( ! $pid && function_exists( 'get_the_ID' ) ) {
+			$pid = (int) get_the_ID();
+		}
+		if ( $pid && function_exists( 'wc_get_product' ) ) {
+			$product = wc_get_product( $pid );
+		}
+	}
+
+	$custom = apply_filters( 'gk_about_game_sidebar_html', '', $product );
+	if ( is_string( $custom ) && $custom !== '' ) {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Filter liefert fertiges Markup; Verantwortung beim Anbieter des Filters.
+		echo $custom;
+		return;
+	}
+	if ( ! $product || ! is_a( $product, 'WC_Product' ) || ! globalkeys_product_about_game_sidebar_has_content( $product ) ) {
+		return;
+	}
+
+	$extra_rows = globalkeys_parse_about_game_sidebar_rows( $product->get_meta( '_gk_about_game_sidebar_rows' ) );
+	$extra_rows = apply_filters( 'gk_about_game_sidebar_rows', $extra_rows, $product );
+	if ( ! is_array( $extra_rows ) ) {
+		$extra_rows = array();
+	}
+
+	$standard_rows = function_exists( 'globalkeys_build_about_game_sidebar_standard_display_rows' )
+		? globalkeys_build_about_game_sidebar_standard_display_rows( $product )
+		: array();
+
+	$combined = array();
+	foreach ( $standard_rows as $sr ) {
+		$combined[] = array(
+			'label'      => $sr['label'],
+			'value'      => $sr['value'],
+			'muted'      => ! empty( $sr['muted'] ),
+			'allow_html' => ! empty( $sr['allow_html'] ),
+		);
+	}
+	foreach ( $extra_rows as $er ) {
+		if ( empty( $er['label'] ) || ! isset( $er['value'] ) ) {
+			continue;
+		}
+		$combined[] = array(
+			'label'      => $er['label'],
+			'value'      => $er['value'],
+			'muted'      => ! empty( $er['muted'] ),
+			'allow_html' => true,
+		);
+	}
+	$combined_before_filter = $combined;
+	$combined               = apply_filters( 'gk_about_game_sidebar_combined_rows', $combined, $product );
+	if ( ! is_array( $combined ) || $combined === array() ) {
+		$combined = $combined_before_filter;
+	}
+
+	$show_score_block = (bool) apply_filters( 'gk_about_game_sidebar_auto_overall_rating', true, $product );
+	$rating_data      = ( $show_score_block && function_exists( 'globalkeys_get_product_overall_game_rating_display_data' ) )
+		? globalkeys_get_product_overall_game_rating_display_data( $product, 'about_sidebar' )
+		: null;
+
+	echo '<aside class="gk-product-page-about-game__sidebar" aria-label="' . esc_attr__( 'Produktinformationen', 'globalkeys' ) . '">';
+	if ( is_array( $rating_data ) && function_exists( 'globalkeys_product_print_overall_game_rating_score_block' ) ) {
+		echo '<div class="gk-product-page-about-game__sidebar-rating">';
+		globalkeys_product_print_overall_game_rating_score_block(
+			$rating_data,
+			'gk-product-page-about-game__sidebar-hero-score'
+		);
+		echo '<div class="gk-product-page-about-game__sidebar-rating-text">';
+		if ( $rating_data['title'] !== '' ) {
+			echo '<p class="gk-product-page-about-game__sidebar-rating-line gk-product-page-about-game__sidebar-rating-line--main">' . esc_html( globalkeys_about_game_sidebar_label_with_colon( $rating_data['title'] ) ) . '</p>';
+		}
+		if ( $rating_data['subtitle'] !== '' ) {
+			echo '<p class="gk-product-page-about-game__sidebar-rating-line gk-product-page-about-game__sidebar-rating-line--sub">' . esc_html( $rating_data['subtitle'] ) . '</p>';
+		}
+		echo '</div>';
+		echo '</div>';
+	}
+
+	if ( ! empty( $combined ) ) {
+		echo '<dl class="gk-product-page-about-game__sidebar-rows">';
+		foreach ( $combined as $row ) {
+			if ( empty( $row['label'] ) || ! isset( $row['value'] ) ) {
+				continue;
+			}
+			$muted = ! empty( $row['muted'] );
+			echo '<div class="gk-product-page-about-game__sidebar-row">';
+			echo '<dt class="gk-product-page-about-game__sidebar-dt">' . esc_html( globalkeys_about_game_sidebar_label_with_colon( $row['label'] ) ) . '</dt>';
+			echo '<dd class="gk-product-page-about-game__sidebar-dd' . ( $muted ? ' gk-product-page-about-game__sidebar-dd--muted' : '' ) . '">';
+			if ( ! empty( $row['allow_html'] ) ) {
+				echo wp_kses_post( $row['value'] );
+			} else {
+				echo esc_html( $row['value'] );
+			}
+			echo '</dd>';
+			echo '</div>';
+		}
+		echo '</dl>';
+	}
+
+	echo '</aside>';
+}
+
+/**
  * Section „About the Game“ auf Produktdetail (unter Keyart + Kaufkarte), nicht in der Kaufkarten-Spalte.
  *
  * Ausgabe über woocommerce_after_single_product_summary (Geschwister von .summary).
@@ -324,25 +535,17 @@ function globalkeys_single_product_about_game_section() {
 	}
 	echo '<section class="gk-product-page-about-game" aria-labelledby="' . esc_attr( $heading_id ) . '">';
 	echo '<div class="gk-section-inner gk-section-featured-inner">';
-	echo '<div class="gk-featured-heading-wrap gk-product-page-about-game__heading-wrap">';
-	echo '<h2 id="' . esc_attr( $heading_id ) . '" class="gk-section-title gk-featured-heading">';
-	echo '<span class="gk-featured-heading-text-wrap">';
-	echo '<span class="gk-featured-heading-text">' . esc_html( $text ) . '</span>';
-	echo '<span class="gk-featured-title-underline" aria-hidden="true"></span>';
-	echo '</span>';
-	echo '</h2>';
-	echo '</div>';
 
 	$intro = '';
 	if ( $product && is_a( $product, 'WC_Product' ) ) {
 		$intro = $product->get_meta( '_gk_about_game_intro' );
 	}
 	$intro = apply_filters( 'gk_about_game_intro_text', $intro, $product );
-	if ( is_string( $intro ) && $intro !== '' ) {
-		echo '<div class="gk-product-page-about-game__intro">';
-		echo wp_kses_post( wpautop( $intro ) );
-		echo '</div>';
-	}
+	$has_intro = is_string( $intro ) && $intro !== '';
+
+	ob_start();
+	globalkeys_render_about_game_sidebar( $product );
+	$sidebar_html = trim( (string) ob_get_clean() );
 
 	$tag_terms = array();
 	if ( $product && is_a( $product, 'WC_Product' ) ) {
@@ -365,6 +568,26 @@ function globalkeys_single_product_about_game_section() {
 		}
 	}
 	$tag_terms = apply_filters( 'gk_about_game_product_tags', $tag_terms, $product );
+
+	$layout_classes = array( 'gk-product-page-about-game__layout' );
+	if ( $sidebar_html === '' ) {
+		$layout_classes[] = 'gk-product-page-about-game__layout--no-sidebar';
+	}
+	echo '<div class="' . esc_attr( implode( ' ', $layout_classes ) ) . '">';
+	echo '<div class="gk-product-page-about-game__main">';
+	echo '<div class="gk-featured-heading-wrap gk-product-page-about-game__heading-wrap">';
+	echo '<h2 id="' . esc_attr( $heading_id ) . '" class="gk-section-title gk-featured-heading">';
+	echo '<span class="gk-featured-heading-text-wrap">';
+	echo '<span class="gk-featured-heading-text">' . esc_html( $text ) . '</span>';
+	echo '<span class="gk-featured-title-underline" aria-hidden="true"></span>';
+	echo '</span>';
+	echo '</h2>';
+	echo '</div>';
+	if ( $has_intro ) {
+		echo '<div class="gk-product-page-about-game__intro">';
+		echo wp_kses_post( wpautop( $intro ) );
+		echo '</div>';
+	}
 	if ( ! empty( $tag_terms ) ) {
 		$tags_label = apply_filters( 'gk_about_game_tags_label', __( 'Game-tags:', 'globalkeys' ), $product );
 		echo '<div class="gk-product-page-about-game__tags">';
@@ -385,6 +608,12 @@ function globalkeys_single_product_about_game_section() {
 		echo '</div>';
 		echo '</div>';
 	}
+	echo '</div>';
+	if ( $sidebar_html !== '' ) {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Markup aus globalkeys_render_about_game_sidebar(), bereits escaped.
+		echo $sidebar_html;
+	}
+	echo '</div>';
 
 	echo '</div>';
 	echo '</section>';

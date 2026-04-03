@@ -767,13 +767,13 @@ function globalkeys_product_review_helpful_markup( $comment ) {
 		<div class="gk-product-review-card__useful-actions">
 			<button type="button" class="gk-product-review-card__vote gk-product-review-card__vote--up<?php echo $up_active ? ' is-active' : ''; ?>" data-gk-review-vote="up" data-comment-id="<?php echo esc_attr( (string) $cid ); ?>" data-nonce="<?php echo esc_attr( $nonce ); ?>" aria-pressed="<?php echo $up_active ? 'true' : 'false'; ?>" aria-label="<?php esc_attr_e( 'Mark review as helpful', 'globalkeys' ); ?>">
 				<span class="gk-product-review-card__vote-icon" aria-hidden="true">
-					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 22V11M2 13v8a2 2 0 002 2h3M16 13h5l-2.5 7.5a2 2 0 01-2 1.5H11V9l3.5-5.5a1 1 0 011.7.5L17 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+					<svg class="gk-product-review-card__vote-icon-svg" width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" focusable="false"><path fill="currentColor" d="M14.6 8H21a2 2 0 0 1 2 2v2.104a2 2 0 0 1-.15.762l-3.095 7.515a1 1 0 0 1-.925.619H2a1 1 0 0 1-1-1V10a1 1 0 0 1 1-1h3.482a1 1 0 0 0 .817-.423L11.752.85a.5.5 0 0 1 .632-.159l1.814.907a2.5 2.5 0 0 1 1.305 2.853L14.6 8zM7 10.588V19h11.16L21 12.104V10h-6.4a2 2 0 0 1-1.938-2.493l.903-3.548a.5.5 0 0 0-.261-.571l-.661-.33-4.71 6.672c-.25.354-.57.644-.933.858zM5 11H3v8h2v-8z"/></svg>
 				</span>
 				<span class="gk-product-review-card__vote-count" data-gk-helpful-count="up"><?php echo esc_html( (string) max( 0, $up ) ); ?></span>
 			</button>
 			<button type="button" class="gk-product-review-card__vote gk-product-review-card__vote--down<?php echo $down_active ? ' is-active' : ''; ?>" data-gk-review-vote="down" data-comment-id="<?php echo esc_attr( (string) $cid ); ?>" data-nonce="<?php echo esc_attr( $nonce ); ?>" aria-pressed="<?php echo $down_active ? 'true' : 'false'; ?>" aria-label="<?php esc_attr_e( 'Mark review as not helpful', 'globalkeys' ); ?>">
 				<span class="gk-product-review-card__vote-icon" aria-hidden="true">
-					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17 2v11M22 11V3a2 2 0 00-2-2h-3M8 11H3l2.5-7.5a2 2 0 012-1.5H13v12l-3.5 5.5a1 1 0 01-1.7-.5L7 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+					<svg class="gk-product-review-card__vote-icon-svg" width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" focusable="false"><path fill="currentColor" d="M9.4 16H3a2 2 0 0 1-2-2v-2.104a2 2 0 0 1 .15-.762L4.246 3.62A1 1 0 0 1 5.17 3H22a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-3.482a1 1 0 0 0-.817.423l-5.453 7.726a.5.5 0 0 1-.632.159L9.802 22.4a2.5 2.5 0 0 1-1.305-2.853L9.4 16zm7.6-2.588V5H5.84L3 11.896V14h6.4a2 2 0 0 1 1.938 2.493l-.903 3.548a.5.5 0 0 0 .261.571l.661.33 4.71-6.672c.25-.354.57-.644.933-.858zM19 13h2V5h-2v8z"/></svg>
 				</span>
 			</button>
 		</div>
@@ -1263,66 +1263,104 @@ closeAllMenus();
 add_action( 'wp_footer', 'globalkeys_product_reviews_footer_modal_inline', 999 );
 
 /**
- * Hero-Zeile unter der Reviews-Überschrift (Score / Text / CTA).
+ * Anzeigedaten für „Overall game rating“ (Reviews-Hero) bzw. „Game rating“ (About-Infobox).
  *
- * @param WC_Product $product Produkt.
+ * @param WC_Product|null $product Produkt.
+ * @param string          $context 'hero' = Reviews-Bereich (Standard), 'about_sidebar' = Infobox neben „About the Game“.
+ * @return array{count:int,score_display:string,score_fill_pct:float,score_attr:string,title:string,subtitle:string}|null
  */
-function globalkeys_product_reviews_print_hero_bar( $product ) {
+function globalkeys_get_product_overall_game_rating_display_data( $product, $context = 'hero' ) {
 	if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
-		return;
+		return null;
 	}
+
+	$context = is_string( $context ) && $context !== '' ? $context : 'hero';
 
 	$count          = (int) $product->get_review_count();
 	$avg            = (float) $product->get_average_rating();
 	$score_fill_pct = 0.0;
+	$score_display  = '–';
+	$score_attr     = '';
 
 	if ( $count > 0 && $avg > 0 && function_exists( 'wc_review_ratings_enabled' ) && wc_review_ratings_enabled() ) {
 		// Woo-Durchschnitt 1–5 → Anzeige 2–10 mit einer Nachkommastelle (Punkt als Dezimaltrennzeichen).
 		$score_ten = round( (float) $avg * 2, 1 );
-		$raw           = number_format( $score_ten, 1, '.', '' );
-		$raw           = rtrim( rtrim( $raw, '0' ), '.' );
+		$raw       = number_format( $score_ten, 1, '.', '' );
+		$raw       = rtrim( rtrim( $raw, '0' ), '.' );
 		$score_display = $raw;
 		$score_attr    = $score_display;
-		// Kreisfüllung 0–100 % (10/10 = voll); gleiche Basis wie die angezeigte Zahl.
 		$score_fill_pct = min( 100.0, max( 0.0, ( $score_ten / 10.0 ) * 100.0 ) );
-	} else {
-		$score_display = '–';
-		$score_attr    = '';
 	}
 
-	$title = apply_filters(
-		'gk_reviews_hero_title',
-		__( 'Overall game rating', 'globalkeys' ),
-		$product
-	);
-
-	$subtitle = apply_filters(
-		'gk_reviews_hero_subtitle',
-		sprintf(
-			/* translators: %d: number of reviews */
-			_n(
-				'Based on %d review, all languages included.',
-				'Based on %d reviews, all languages included.',
-				$count,
-				'globalkeys'
+	if ( 'about_sidebar' === $context ) {
+		$title = apply_filters(
+			'gk_about_game_sidebar_rating_title',
+			__( 'Game rating', 'globalkeys' ),
+			$product
+		);
+		$subtitle = apply_filters(
+			'gk_about_game_sidebar_rating_subtitle',
+			sprintf(
+				/* translators: %d: number of reviews */
+				_n(
+					'Based on %d review.',
+					'Based on %d reviews.',
+					$count,
+					'globalkeys'
+				),
+				$count
 			),
+			$product,
 			$count
-		),
-		$product,
-		$count
+		);
+	} else {
+		$title = apply_filters(
+			'gk_reviews_hero_title',
+			__( 'Overall game rating', 'globalkeys' ),
+			$product
+		);
+
+		$subtitle = apply_filters(
+			'gk_reviews_hero_subtitle',
+			sprintf(
+				/* translators: %d: number of reviews */
+				_n(
+					'Based on %d review, all languages included.',
+					'Based on %d reviews, all languages included.',
+					$count,
+					'globalkeys'
+				),
+				$count
+			),
+			$product,
+			$count
+		);
+	}
+
+	return array(
+		'count'           => $count,
+		'score_display'   => $score_display,
+		'score_fill_pct'  => $score_fill_pct,
+		'score_attr'      => $score_attr,
+		'title'           => is_string( $title ) ? $title : '',
+		'subtitle'        => is_string( $subtitle ) ? $subtitle : '',
 	);
+}
 
-	$cta_text = apply_filters(
-		'gk_reviews_hero_cta_text',
-		__( 'Rate this game!', 'globalkeys' ),
-		$product
-	);
+/**
+ * Kreis-Score wie im Reviews-Hero (SVG-Ring + Zahl).
+ *
+ * @param array  $data           Rückgabe von globalkeys_get_product_overall_game_rating_display_data().
+ * @param string $extra_classes  Zusätzliche CSS-Klassen am äußeren Score-Wrapper.
+ */
+function globalkeys_product_print_overall_game_rating_score_block( array $data, $extra_classes = '' ) {
+	$score_display  = isset( $data['score_display'] ) ? (string) $data['score_display'] : '–';
+	$score_fill_pct = isset( $data['score_fill_pct'] ) ? (float) $data['score_fill_pct'] : 0.0;
+	$score_attr     = isset( $data['score_attr'] ) ? (string) $data['score_attr'] : '';
 
-	$gk_hero_review_done = is_user_logged_in()
-		&& globalkeys_product_has_existing_review_for_product( (int) $product->get_id(), get_current_user_id(), '' );
+	$classes = trim( 'gk-product-reviews-hero__score ' . ( is_string( $extra_classes ) ? $extra_classes : '' ) );
 
-	echo '<div class="gk-product-reviews-hero">';
-	echo '<div class="gk-product-reviews-hero__score" role="img" aria-label="' . esc_attr(
+	echo '<div class="' . esc_attr( $classes ) . '" role="img" aria-label="' . esc_attr(
 		$score_attr !== ''
 			? sprintf(
 				/* translators: %s: score out of 10 */
@@ -1338,10 +1376,51 @@ function globalkeys_product_reviews_print_hero_bar( $product ) {
 	echo '</svg>';
 	echo '<span class="gk-product-reviews-hero__score-value">' . esc_html( $score_display ) . '</span>';
 	echo '</span></div>';
+}
+
+/**
+ * Hero-Zeile unter der Reviews-Überschrift (Score / Text / CTA).
+ *
+ * @param WC_Product $product Produkt.
+ */
+function globalkeys_product_reviews_print_hero_bar( $product ) {
+	if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
+		return;
+	}
+
+	$data = globalkeys_get_product_overall_game_rating_display_data( $product );
+	if ( ! is_array( $data ) ) {
+		return;
+	}
+
+	$score_display   = $data['score_display'];
+	$score_fill_pct  = $data['score_fill_pct'];
+	$score_attr      = $data['score_attr'];
+	$title           = $data['title'];
+	$subtitle        = $data['subtitle'];
+
+	$cta_text = apply_filters(
+		'gk_reviews_hero_cta_text',
+		__( 'Rate this game!', 'globalkeys' ),
+		$product
+	);
+
+	$gk_hero_review_done = is_user_logged_in()
+		&& globalkeys_product_has_existing_review_for_product( (int) $product->get_id(), get_current_user_id(), '' );
+
+	echo '<div class="gk-product-reviews-hero">';
+	globalkeys_product_print_overall_game_rating_score_block(
+		array(
+			'score_display'  => $score_display,
+			'score_fill_pct' => $score_fill_pct,
+			'score_attr'     => $score_attr,
+		),
+		''
+	);
 
 	echo '<div class="gk-product-reviews-hero__text">';
-	echo '<p class="gk-product-reviews-hero__title">' . esc_html( is_string( $title ) ? $title : '' ) . '</p>';
-	echo '<p class="gk-product-reviews-hero__sub">' . esc_html( is_string( $subtitle ) ? $subtitle : '' ) . '</p>';
+	echo '<p class="gk-product-reviews-hero__title">' . esc_html( $title ) . '</p>';
+	echo '<p class="gk-product-reviews-hero__sub">' . esc_html( $subtitle ) . '</p>';
 	echo '</div>';
 
 	if ( $gk_hero_review_done ) {

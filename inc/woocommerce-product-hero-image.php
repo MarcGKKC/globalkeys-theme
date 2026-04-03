@@ -91,6 +91,45 @@ function globalkeys_product_hero_image_field() {
 			<textarea name="_gk_about_game_intro" id="_gk_about_game_intro" class="large-text" rows="8" style="width:100%;"><?php echo esc_textarea( is_string( $about_intro ) ? $about_intro : '' ); ?></textarea>
 			<span class="description"><?php esc_html_e( 'Wird unter der Überschrift „About the Game“ auf der Produktdetailseite angezeigt (Produkthero-Layout). Leerzeilen werden zu Absätzen.', 'globalkeys' ); ?></span>
 		</p>
+		<?php
+		$sb_rows = $post ? get_post_meta( $post->ID, '_gk_about_game_sidebar_rows', true ) : '';
+		?>
+		<p class="form-field"><strong><?php esc_html_e( 'About the Game – Infobox rechts (neben der Überschrift)', 'globalkeys' ); ?></strong></p>
+		<p class="form-field">
+			<span class="description"><?php esc_html_e( 'Die Bewertung (Kreis, Titel, Review-Anzahl) nutzt hier die Texte „Game rating“ / „Based on … reviews.“ (Filter: gk_about_game_sidebar_rating_title, gk_about_game_sidebar_rating_subtitle). Im Reviews-Bereich der Seite bleibt „Overall game rating“ (Filter: gk_reviews_hero_title, gk_reviews_hero_subtitle). Darunter erscheinen die Infobox-Zeilen; leere Felder werden als Gedankenstrich angezeigt.', 'globalkeys' ); ?></span>
+		</p>
+		<?php
+		if ( function_exists( 'globalkeys_get_about_game_sidebar_standard_info_definitions' ) ) {
+			foreach ( globalkeys_get_about_game_sidebar_standard_info_definitions() as $def ) {
+				$mid = $def['meta'];
+				$val = $post ? get_post_meta( $post->ID, $mid, true ) : '';
+				$val = is_string( $val ) ? $val : '';
+				$rows_h = ( isset( $def['type'] ) && $def['type'] === 'textarea' ) ? ( ( $mid === '_gk_about_info_steam_all' ) ? 4 : 3 ) : 0;
+				if ( $rows_h > 0 ) {
+					?>
+					<p class="form-field form-field-wide">
+						<label for="<?php echo esc_attr( $mid ); ?>"><?php echo esc_html( $def['label'] ); ?></label>
+						<textarea name="<?php echo esc_attr( $mid ); ?>" id="<?php echo esc_attr( $mid ); ?>" class="large-text" rows="<?php echo (int) $rows_h; ?>" style="width:100%;"><?php echo esc_textarea( $val ); ?></textarea>
+					</p>
+					<?php
+				} else {
+					woocommerce_wp_text_input(
+						array(
+							'id'    => $mid,
+							'name'  => $mid,
+							'label' => $def['label'],
+							'value' => $val,
+						)
+					);
+				}
+			}
+		}
+		?>
+		<p class="form-field _gk_about_game_sidebar_rows_field">
+			<label for="_gk_about_game_sidebar_rows"><?php esc_html_e( 'Infobox: zusätzliche Zeilen (optional)', 'globalkeys' ); ?></label>
+			<textarea name="_gk_about_game_sidebar_rows" id="_gk_about_game_sidebar_rows" class="large-text" rows="6" style="width:100%;"><?php echo esc_textarea( is_string( $sb_rows ) ? $sb_rows : '' ); ?></textarea>
+			<span class="description"><?php esc_html_e( 'Zusätzlich unter der Standardtabelle. Eine Zeile pro Eintrag: Bezeichnung | Wert. HTML-Links im Wert erlaubt. Gedämpft: Wert mit [[muted]] beginnen.', 'globalkeys' ); ?></span>
+		</p>
 	</div>
 	<?php
 }
@@ -135,6 +174,19 @@ function globalkeys_save_product_hero_image_id( $product ) {
 		} else {
 			$product->update_meta_data( '_gk_about_game_intro', $raw );
 		}
+	}
+
+	if ( isset( $_POST['_gk_about_game_sidebar_rows'] ) ) {
+		$raw = sanitize_textarea_field( wp_unslash( $_POST['_gk_about_game_sidebar_rows'] ) );
+		if ( $raw === '' ) {
+			$product->delete_meta_data( '_gk_about_game_sidebar_rows' );
+		} else {
+			$product->update_meta_data( '_gk_about_game_sidebar_rows', $raw );
+		}
+	}
+
+	if ( function_exists( 'globalkeys_save_about_game_sidebar_standard_info' ) ) {
+		globalkeys_save_about_game_sidebar_standard_info( $product );
 	}
 }
 add_action( 'woocommerce_admin_process_product_object', 'globalkeys_save_product_hero_image_id', 12, 1 );

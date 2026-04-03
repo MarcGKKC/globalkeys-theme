@@ -66,11 +66,6 @@ if ( ! $gk_account_login ) {
 				$gk_compact_secure_svg = get_template_directory_uri() . '/Pictures/' . rawurlencode( 'Design ohne Titel (55).svg' );
 				$gk_compact_secure_support = is_string( get_query_var( 'gk_nav_section' ) ) && get_query_var( 'gk_nav_section' ) === 'support';
 				?>
-				<?php if ( $gk_compact_secure_support ) : ?>
-				<div class="gk-compact-bar-title">
-					<span class="gk-compact-bar-title__label"><span class="gk-compact-bar-title__accent">S</span>upport Centrum</span>
-				</div>
-				<?php endif; ?>
 				<div class="gk-cart-secure" style="<?php echo esc_attr( '--gk-cart-secure-svg:url(' . esc_url( $gk_compact_secure_svg ) . ')' ); ?>">
 					<span class="gk-cart-secure__icon" aria-hidden="true"></span>
 					<span class="gk-cart-secure__sep" aria-hidden="true"></span>

@@ -236,7 +236,7 @@ function globalkeys_single_product_layout_force_print( $suffix = '' ) {
 		body.single-product main.site-main:has(.gk-product-page-hero-root) div.product .up-sells.products {
 			display: none !important;
 		}
-		body.single-product.gk-has-product-page-hero #gk-product-page-root aside {
+		body.single-product.gk-has-product-page-hero #gk-product-page-root aside:not(.gk-product-page-about-game__sidebar) {
 			display: none !important;
 		}
 		@media screen and (max-width: 782px) {

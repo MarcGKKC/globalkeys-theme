@@ -428,7 +428,7 @@ body.gk-account-dashboard-page {
 /* Content: Tab-Nummer anzeigen, Original-Inhalt ausblenden */
 .gk-accdash__tab-num {
   font-size: 4rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--gk-muted);
   line-height: 1;
 }
@@ -727,7 +727,7 @@ body.gk-header-scrolled.woocommerce-account.logged-in .site-main {
 .gk-dashboard__cardHalf .gk-dashboard__cardValue {
   color: var(--gk-accent);
   font-size: 17px;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .gk-dashboard__cardHalf .gk-dashboard__cardBtn {
@@ -765,7 +765,7 @@ body.gk-header-scrolled.woocommerce-account.logged-in .site-main {
 }
 
 .gk-dashboard__cardValue {
-  font-weight: 700;
+  font-weight: 600;
   font-size: 17px;
   color: rgba(255, 255, 255, 0.95);
 }
