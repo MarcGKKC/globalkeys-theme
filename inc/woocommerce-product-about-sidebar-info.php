@@ -72,7 +72,7 @@ function globalkeys_get_about_game_sidebar_standard_info_definitions() {
 		),
 		array(
 			'meta'  => '_gk_about_info_steam_recent',
-			'label' => __( 'Recent Steam reviews', 'globalkeys' ),
+			'label' => __( 'System Requirements', 'globalkeys' ),
 			'muted' => true,
 			'type'  => 'text',
 			'max'   => 500,

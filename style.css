@@ -9571,6 +9571,25 @@ body.single-product div.product.type-product > .gk-product-page-about-game .gk-p
 	margin-bottom: 1.35rem;
 }
 
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-about-game a.gk-product-page-about-game__sidebar-rating--hit,
+body.single-product div.product.type-product > .gk-product-page-about-game a.gk-product-page-about-game__sidebar-rating--hit {
+	display: inline-flex;
+	width: fit-content;
+	max-width: 100%;
+	text-decoration: none;
+	color: inherit;
+	cursor: pointer;
+	box-sizing: border-box;
+	vertical-align: top;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-about-game a.gk-product-page-about-game__sidebar-rating--hit:focus-visible,
+body.single-product div.product.type-product > .gk-product-page-about-game a.gk-product-page-about-game__sidebar-rating--hit:focus-visible {
+	outline: 2px solid #04da8d;
+	outline-offset: 4px;
+	border-radius: 6px;
+}
+
 /* Gleicher Score-Ring wie Reviews-Hero „Overall game rating“, kompakter */
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-about-game .gk-product-page-about-game__sidebar .gk-product-reviews-hero__score.gk-product-page-about-game__sidebar-hero-score,
 body.single-product div.product.type-product > .gk-product-page-about-game .gk-product-page-about-game__sidebar .gk-product-reviews-hero__score.gk-product-page-about-game__sidebar-hero-score {
@@ -9647,9 +9666,22 @@ body.single-product div.product.type-product > .gk-product-page-about-game .gk-p
 
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-about-game .gk-product-page-about-game__sidebar-rating-line--sub,
 body.single-product div.product.type-product > .gk-product-page-about-game .gk-product-page-about-game__sidebar-rating-line--sub {
-	color: rgba(255, 255, 255, 0.58);
+	color: #fff;
 	font-size: 15.68px;
 	font-weight: 400;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-about-game .gk-product-page-about-game__sidebar-rating-sub-label,
+body.single-product div.product.type-product > .gk-product-page-about-game .gk-product-page-about-game__sidebar-rating-sub-label {
+	color: #fff;
+	text-decoration: underline;
+	text-underline-offset: 0.15em;
+	transition: color 0.15s ease;
+}
+
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-about-game a.gk-product-page-about-game__sidebar-rating--hit:hover .gk-product-page-about-game__sidebar-rating-sub-label,
+body.single-product div.product.type-product > .gk-product-page-about-game a.gk-product-page-about-game__sidebar-rating--hit:hover .gk-product-page-about-game__sidebar-rating-sub-label {
+	color: #04da8d;
 }
 
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-about-game .gk-product-page-about-game__sidebar-rating-line--main,
@@ -10044,6 +10076,7 @@ body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-p
 	margin: 2.25rem auto 0;
 	padding: 0;
 	box-sizing: border-box;
+	scroll-margin-top: clamp(4rem, 10vw, 6rem);
 }
 
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-reviews .gk-section-featured-inner {

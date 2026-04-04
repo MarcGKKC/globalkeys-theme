@@ -1438,6 +1438,26 @@ function globalkeys_product_reviews_print_hero_bar( $product ) {
 }
 
 /**
+ * Ob die Reviews-Section auf der Produktdetailseite ausgegeben wird (gleiche Logik wie beim Rendern).
+ *
+ * @param WC_Product|null $product Produkt.
+ * @return bool
+ */
+function globalkeys_product_page_reviews_section_will_render( $product ) {
+	if ( ! function_exists( 'globalkeys_single_product_is_purchase_card_active' ) || ! globalkeys_single_product_is_purchase_card_active() ) {
+		return false;
+	}
+	if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
+		return false;
+	}
+	if ( ! function_exists( 'wc_reviews_enabled' ) || ! wc_reviews_enabled() ) {
+		return false;
+	}
+	$heading = apply_filters( 'gk_reviews_section_heading_text', __( 'Reviews', 'globalkeys' ), $product );
+	return is_string( $heading ) && $heading !== '';
+}
+
+/**
  * Section unter „Similar products“ – Überschrift wie andere Produkt-Sections; Body per Filter befüllbar oder Standard: comments_template.
  */
 function globalkeys_single_product_reviews_section() {
@@ -1458,8 +1478,9 @@ function globalkeys_single_product_reviews_section() {
 	}
 
 	$heading_id = 'gk-product-page-reviews-heading-' . (int) $product->get_id();
+	$section_id = 'gk-product-page-reviews-' . (int) $product->get_id();
 
-	echo '<section class="gk-product-page-reviews" aria-labelledby="' . esc_attr( $heading_id ) . '">';
+	echo '<section id="' . esc_attr( $section_id ) . '" class="gk-product-page-reviews" aria-labelledby="' . esc_attr( $heading_id ) . '">';
 	echo '<div class="gk-section-inner gk-section-featured-inner">';
 	echo '<div class="gk-featured-heading-wrap gk-product-page-reviews__heading-wrap">';
 	echo '<h2 id="' . esc_attr( $heading_id ) . '" class="gk-section-title gk-featured-heading">';

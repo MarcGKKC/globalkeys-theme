@@ -475,7 +475,13 @@ function globalkeys_render_about_game_sidebar( $product ) {
 
 	echo '<aside class="gk-product-page-about-game__sidebar" aria-label="' . esc_attr__( 'Produktinformationen', 'globalkeys' ) . '">';
 	if ( is_array( $rating_data ) && function_exists( 'globalkeys_product_print_overall_game_rating_score_block' ) ) {
-		echo '<div class="gk-product-page-about-game__sidebar-rating">';
+		$reviews_hit = function_exists( 'globalkeys_product_page_reviews_section_will_render' ) && globalkeys_product_page_reviews_section_will_render( $product );
+		$reviews_anchor = 'gk-product-page-reviews-' . (int) $product->get_id();
+		if ( $reviews_hit ) {
+			echo '<a class="gk-product-page-about-game__sidebar-rating gk-product-page-about-game__sidebar-rating--hit" href="' . esc_url( '#' . $reviews_anchor ) . '">';
+		} else {
+			echo '<div class="gk-product-page-about-game__sidebar-rating">';
+		}
 		globalkeys_product_print_overall_game_rating_score_block(
 			$rating_data,
 			'gk-product-page-about-game__sidebar-hero-score'
@@ -485,10 +491,20 @@ function globalkeys_render_about_game_sidebar( $product ) {
 			echo '<p class="gk-product-page-about-game__sidebar-rating-line gk-product-page-about-game__sidebar-rating-line--main">' . esc_html( globalkeys_about_game_sidebar_label_with_colon( $rating_data['title'] ) ) . '</p>';
 		}
 		if ( $rating_data['subtitle'] !== '' ) {
-			echo '<p class="gk-product-page-about-game__sidebar-rating-line gk-product-page-about-game__sidebar-rating-line--sub">' . esc_html( $rating_data['subtitle'] ) . '</p>';
+			echo '<p class="gk-product-page-about-game__sidebar-rating-line gk-product-page-about-game__sidebar-rating-line--sub">';
+			if ( $reviews_hit ) {
+				echo '<span class="gk-product-page-about-game__sidebar-rating-sub-label">' . esc_html( $rating_data['subtitle'] ) . '</span>';
+			} else {
+				echo esc_html( $rating_data['subtitle'] );
+			}
+			echo '</p>';
 		}
 		echo '</div>';
-		echo '</div>';
+		if ( $reviews_hit ) {
+			echo '</a>';
+		} else {
+			echo '</div>';
+		}
 	}
 
 	if ( ! empty( $combined ) ) {
