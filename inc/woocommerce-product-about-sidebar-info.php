@@ -137,10 +137,82 @@ function globalkeys_save_about_game_sidebar_standard_info( $product ) {
 }
 
 /**
+ * Mappt einen Genre-Text (z. B. „Action“) auf einen Browse-Filter-Slug.
+ *
+ * @param string $segment Einzelner Genre-Teil (ohne Komma).
+ * @return string Slug oder leer.
+ */
+function globalkeys_about_game_genre_segment_to_filter_slug( $segment ) {
+	$segment = trim( wp_strip_all_tags( (string) $segment ) );
+	if ( $segment === '' ) {
+		return '';
+	}
+	$lower = mb_strtolower( $segment, 'UTF-8' );
+	$cats  = function_exists( 'globalkeys_get_filter_categories' ) ? globalkeys_get_filter_categories() : array();
+	foreach ( $cats as $slug => $label ) {
+		if ( $lower === $slug ) {
+			return $slug;
+		}
+		$label_lower = mb_strtolower( trim( (string) $label ), 'UTF-8' );
+		if ( $lower === $label_lower ) {
+			return $slug;
+		}
+	}
+	$hyphen = str_replace( array( ' ', '_' ), '-', $lower );
+	if ( isset( $cats[ $hyphen ] ) ) {
+		return $hyphen;
+	}
+	if ( preg_match( '/^open\s*-?\s*world$/iu', $segment ) ) {
+		return 'open-world';
+	}
+	if ( preg_match( '/^new\s*-?\s*releases?$/iu', $segment ) ) {
+		return 'new-releases';
+	}
+	return '';
+}
+
+/**
+ * Genre-Zeile „Action, Adventure“ → verlinkte Fragmente zur Browse-Seite mit gesetztem Kategorie-Filter.
+ *
+ * @param string $raw Komma-getrennte Genres.
+ * @return string HTML (bereits escaped).
+ */
+function globalkeys_about_game_genre_value_to_linked_html( $raw ) {
+	if ( ! is_string( $raw ) || trim( $raw ) === '' ) {
+		return '';
+	}
+	if ( ! function_exists( 'globalkeys_get_browse_all_games_url' ) || ! class_exists( 'WooCommerce' ) ) {
+		return esc_html( $raw );
+	}
+	$parts = preg_split( '/\s*,\s*/u', trim( $raw ) );
+	$frag  = array();
+	foreach ( $parts as $part ) {
+		$part = trim( $part );
+		if ( $part === '' ) {
+			continue;
+		}
+		$slug = globalkeys_about_game_genre_segment_to_filter_slug( $part );
+		if ( $slug !== '' ) {
+			$url  = add_query_arg(
+				array(
+					'gk_filters'  => 'open',
+					'gk_category' => $slug,
+				),
+				globalkeys_get_browse_all_games_url()
+			);
+			$frag[] = '<a class="gk-product-page-about-game__sidebar-dd-link" href="' . esc_url( $url ) . '">' . esc_html( $part ) . '</a>';
+		} else {
+			$frag[] = esc_html( $part );
+		}
+	}
+	return implode( ', ', $frag );
+}
+
+/**
  * Zeilen für die Infobox-Tabelle (alle Standardfelder; leer → Platzhalter).
  *
  * @param WC_Product|null $product Produkt.
- * @return array<int, array{label:string,value:string,muted:bool,allow_html:bool}>
+ * @return array<int, array{label:string,value:string,muted:bool,allow_html:bool,meta?:string}>
  */
 function globalkeys_build_about_game_sidebar_standard_display_rows( $product ) {
 	$rows = array();
@@ -162,12 +234,35 @@ function globalkeys_build_about_game_sidebar_standard_display_rows( $product ) {
 		}
 		$val     = is_string( $raw ) ? trim( $raw ) : '';
 		$display = $val === '' ? $placeholder : $val;
-		$rows[]  = array(
+		$row     = array(
 			'label'      => $def['label'],
 			'value'      => $display,
 			'muted'      => ! empty( $def['muted'] ),
 			'allow_html' => ! empty( $def['allow_html'] ),
+			'meta'       => $def['meta'],
 		);
+		if ( '_gk_about_info_genre' === $def['meta'] && $val !== '' && $display !== $placeholder ) {
+			$row['value']      = globalkeys_about_game_genre_value_to_linked_html( $val );
+			$row['allow_html'] = true;
+		}
+		if (
+			'_gk_about_info_steam_recent' === $def['meta']
+			&& $pid > 0
+			&& function_exists( 'globalkeys_product_page_system_requirements_section_will_render' )
+			&& globalkeys_product_page_system_requirements_section_will_render( $product )
+		) {
+			$anchor = 'gk-product-page-system-requirements-heading-' . $pid;
+			$link_text = ( $val !== '' && $display !== $placeholder )
+				? $val
+				: apply_filters(
+					'gk_about_game_sidebar_system_requirements_link_text',
+					__( 'Look at system requirements.', 'globalkeys' ),
+					$product
+				);
+			$row['value']      = '<a class="gk-product-page-about-game__sidebar-dd-link" href="' . esc_url( '#' . $anchor ) . '">' . esc_html( $link_text ) . '</a>';
+			$row['allow_html'] = true;
+		}
+		$rows[] = $row;
 	}
 
 	return $rows;

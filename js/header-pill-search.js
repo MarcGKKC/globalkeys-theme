@@ -1252,6 +1252,25 @@
 		}
 		initCategoriesFilter();
 
+		function applyGkCategoryFromUrl() {
+			if ( typeof URLSearchParams === 'undefined' ) {
+				return;
+			}
+			try {
+				var spUrl = new URLSearchParams( window.location.search );
+				var cat = spUrl.get( 'gk_category' );
+				if ( ! cat || ! /^[a-z0-9-]+$/.test( cat ) ) {
+					return;
+				}
+				var inp = document.querySelector( '.gk-filter-categories-content input[data-cat-slug="' + cat + '"]' );
+				if ( inp ) {
+					inp.checked = true;
+					document.dispatchEvent( new CustomEvent( 'gk_search_filters_changed' ) );
+				}
+			} catch ( eGkCat ) {}
+		}
+		applyGkCategoryFromUrl();
+
 		function initGamepadsFilter() {
 			var wrap = document.querySelector( '.gk-filter-gamepads' );
 			var toggleBtn = document.getElementById( 'gk-gamepads-toggle' );

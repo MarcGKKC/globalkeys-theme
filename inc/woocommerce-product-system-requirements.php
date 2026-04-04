@@ -277,6 +277,31 @@ function globalkeys_render_system_requirements_column( $defs, $col, $title ) {
 }
 
 /**
+ * Ob die System-Requirements-Section auf der Produktdetailseite ausgegeben wird (gleiche Logik wie beim Rendern).
+ *
+ * @param WC_Product|null $product Produkt.
+ * @return bool
+ */
+function globalkeys_product_page_system_requirements_section_will_render( $product ) {
+	if ( ! function_exists( 'globalkeys_single_product_is_purchase_card_active' ) || ! globalkeys_single_product_is_purchase_card_active() ) {
+		return false;
+	}
+	if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
+		return false;
+	}
+	$heading = apply_filters( 'gk_system_requirements_section_heading_text', 'System Requirements', $product );
+	if ( ! is_string( $heading ) || $heading === '' ) {
+		return false;
+	}
+	$content     = apply_filters( 'gk_system_requirements_section_content_html', '', $product );
+	$has_default = globalkeys_product_page_has_system_requirements( $product );
+	if ( ( ! is_string( $content ) || $content === '' ) && ! $has_default ) {
+		return false;
+	}
+	return true;
+}
+
+/**
  * Section unter Game Description.
  */
 function globalkeys_single_product_system_requirements_section() {

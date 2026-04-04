@@ -1287,15 +1287,21 @@ function globalkeys_get_product_type_for_filter( $product ) {
  */
 function globalkeys_get_filter_categories() {
 	return array(
-		'survival'   => __( 'Survival', 'globalkeys' ),
-		'rpg'        => __( 'RPG', 'globalkeys' ),
-		'shooter'    => __( 'Shooter', 'globalkeys' ),
-		'simulation' => __( 'Simulation', 'globalkeys' ),
-		'strategy'   => __( 'Strategy', 'globalkeys' ),
-		'horror'     => __( 'Horror', 'globalkeys' ),
-		'indie'      => __( 'Indie', 'globalkeys' ),
-		'story'      => __( 'Story', 'globalkeys' ),
-		'open-world' => __( 'Open World', 'globalkeys' ),
+		'action'       => __( 'Action', 'globalkeys' ),
+		'adventure'    => __( 'Adventure', 'globalkeys' ),
+		'survival'     => __( 'Survival', 'globalkeys' ),
+		'rpg'          => __( 'RPG', 'globalkeys' ),
+		'shooter'      => __( 'Shooter', 'globalkeys' ),
+		'simulation'   => __( 'Simulation', 'globalkeys' ),
+		'sport'        => __( 'Sport', 'globalkeys' ),
+		'strategy'     => __( 'Strategy', 'globalkeys' ),
+		'horror'       => __( 'Horror', 'globalkeys' ),
+		'indie'        => __( 'Indie', 'globalkeys' ),
+		'story'        => __( 'Story', 'globalkeys' ),
+		'multiplayer'  => __( 'Multiplayer', 'globalkeys' ),
+		'casual'       => __( 'Casual', 'globalkeys' ),
+		'open-world'   => __( 'Open World', 'globalkeys' ),
+		'new-releases' => __( 'New Releases', 'globalkeys' ),
 	);
 }
 
@@ -1364,6 +1370,10 @@ function globalkeys_term_matches_category_filter( $term, $cat_key ) {
 	$hay  = $slug . ' ' . $name;
 
 	switch ( $cat_key ) {
+		case 'action':
+			return (bool) preg_match( '/\baction\b/', $hay );
+		case 'adventure':
+			return (bool) preg_match( '/\badventure\b/', $hay );
 		case 'survival':
 			return (bool) preg_match( '/\bsurvival\b/', $hay );
 		case 'rpg':
@@ -1373,7 +1383,7 @@ function globalkeys_term_matches_category_filter( $term, $cat_key ) {
 		case 'simulation':
 			return (bool) preg_match( '/\bsimulation\b/', $hay );
 		case 'sport':
-			return (bool) preg_match( '/\bsport\b/', $hay );
+			return (bool) preg_match( '/\bsports?\b/', $hay );
 		case 'strategy':
 			return (bool) preg_match( '/\bstrategy\b/', $hay );
 		case 'horror':
@@ -1382,8 +1392,14 @@ function globalkeys_term_matches_category_filter( $term, $cat_key ) {
 			return (bool) preg_match( '/\bindie\b/', $hay );
 		case 'story':
 			return (bool) preg_match( '/\bstory\b/', $hay );
+		case 'multiplayer':
+			return (bool) preg_match( '/multi[\s_-]?player|multiplayer/', $hay );
+		case 'casual':
+			return (bool) preg_match( '/\bcasual\b/', $hay );
 		case 'open-world':
 			return (bool) preg_match( '/open[\s_-]?world|openworld/', $hay );
+		case 'new-releases':
+			return (bool) preg_match( '/new[\s_-]?releases?|newreleases/', $hay );
 		default:
 			return false;
 	}

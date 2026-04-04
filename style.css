@@ -9495,6 +9495,11 @@ body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-p
 	box-sizing: border-box;
 }
 
+/* Anker aus Infobox „System Requirements“: Überschrift nicht unter fixierter Leiste */
+body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-system-requirements .gk-section-title.gk-featured-heading {
+	scroll-margin-top: clamp(4rem, 10vw, 6rem);
+}
+
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-about-game .gk-section-featured-inner,
 body.single-product div.product .gk-product-page-about-game .gk-section-featured-inner,
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-visuals .gk-section-featured-inner,
@@ -9732,19 +9737,20 @@ body.single-product div.product.type-product > .gk-product-page-about-game .gk-p
 
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-about-game .gk-product-page-about-game__sidebar-dd--muted,
 body.single-product div.product.type-product > .gk-product-page-about-game .gk-product-page-about-game__sidebar-dd--muted {
-	color: rgba(255, 255, 255, 0.52);
+	color: rgba(255, 255, 255, 0.88);
 }
 
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-about-game .gk-product-page-about-game__sidebar-dd a,
 body.single-product div.product.type-product > .gk-product-page-about-game .gk-product-page-about-game__sidebar-dd a {
-	color: #5ee9c8;
+	color: #fff;
 	text-decoration: underline;
 	text-underline-offset: 0.12em;
+	transition: color 0.15s ease;
 }
 
 body.gk-purchase-card-ui.single-product div.product.type-product > .gk-product-page-about-game .gk-product-page-about-game__sidebar-dd a:hover,
 body.single-product div.product.type-product > .gk-product-page-about-game .gk-product-page-about-game__sidebar-dd a:hover {
-	color: #8af0d8;
+	color: #04da8d;
 }
 
 /* Kein translateX wie auf der Startseite (Produktzeile hat anderes Raster) */
@@ -17196,8 +17202,15 @@ a.gk-test-box:focus-visible {
 
 .gk-featured-heading-wrap {
 	display: inline-block;
-	transform: translateX(calc(-6.5rem - 8px));
+	transform: none;
 	margin-bottom: 1.5rem;
+}
+
+/* Überschrift nach links wie Produktraster – nur ab großem Desktop (vermeidet Überbreite/Overflow auf 1280–1399px-Laptops) */
+@media screen and (min-width: 1400px) {
+	.gk-featured-heading-wrap {
+		transform: translateX(calc(-6.5rem - 8px));
+	}
 }
 
 .gk-featured-heading-text-wrap {
@@ -17279,7 +17292,7 @@ body.has-front-page-sections .gk-featured-heading-arrow {
 
 .gk-featured-products {
 	display: grid;
-	grid-template-columns: repeat( 3, 1fr );
+	grid-template-columns: repeat(3, minmax(0, 1fr));
 	gap: 1.25rem;
 	list-style: none;
 	margin: 0;
@@ -17288,6 +17301,7 @@ body.has-front-page-sections .gk-featured-heading-arrow {
 
 .gk-featured-product {
 	margin: 0;
+	min-width: 0;
 }
 
 .gk-featured-product-link,
@@ -17373,22 +17387,27 @@ body.has-front-page-sections .gk-featured-heading-arrow {
 	opacity: 0.7;
 }
 
-/* Bestsellers: Raster wie Überschrift nach links; ab Tablet zusätzlich symmetrisch nach rechts → gleiche „Außenluft“, größere Karten */
+/*
+ * Bestsellers/Featured-Karten: Standard = volle Innenbreite (kein negativer Einzug).
+ * Breiter Einzug nur ab 1400px – sonst wirkt das Layout auf vielen Laptops (1280–1366px) zu breit / overflow.
+ */
 .gk-section-bestsellers .gk-featured-products {
 	--gk-bestsellers-heading-shift: calc(6.5rem + 8px);
-	margin-left: calc(-1 * var(--gk-bestsellers-heading-shift));
+	margin-left: 0;
 	margin-right: 0;
-	width: calc(100% + var(--gk-bestsellers-heading-shift));
-	max-width: none;
+	width: 100%;
+	max-width: 100%;
 	box-sizing: border-box;
-	grid-template-columns: repeat(3, 1fr);
+	grid-template-columns: repeat(3, minmax(0, 1fr));
 	gap: calc(1.25rem + 4px); /* ganz leicht mehr Abstand zwischen den Karten */
 }
 
-@media screen and (min-width: 768px) {
+@media screen and (min-width: 1400px) {
 	.gk-section-bestsellers .gk-featured-products {
+		margin-left: calc(-1 * var(--gk-bestsellers-heading-shift));
 		margin-right: calc(-1 * var(--gk-bestsellers-heading-shift));
 		width: calc(100% + 2 * var(--gk-bestsellers-heading-shift));
+		max-width: none;
 	}
 }
 
@@ -17943,13 +17962,63 @@ body.gk-platform-page .gk-section-platform-spotlight .gk-bestseller-price-now {
 
 @media screen and (max-width: 767px) {
 	.gk-featured-products {
-		grid-template-columns: repeat( 2, 1fr );
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 }
 
 @media screen and (max-width: 479px) {
 	.gk-featured-products {
-		grid-template-columns: 1fr;
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+/*
+ * Unter „großem Desktop“ (<1400px): Stats-Bar nicht per max-height/overflow beschneiden; Hero/Innernrand/Header-Pill etwas robuster.
+ * (Bestseller-Einzug + Heading-Translate sind per Default aus – siehe min-width: 1400px oben.)
+ * Zum Zurücknehmen: diesen @media-Block löschen.
+ */
+@media screen and (max-width: 1399px) {
+	.gk-hero-stats-bar-wrapper {
+		max-height: none;
+		overflow: visible;
+	}
+
+	.gk-hero-stat-number {
+		font-size: clamp(1.35rem, 5.25vw, 2.25rem);
+		line-height: 1.15;
+	}
+
+	.gk-hero-stats-bar {
+		padding: 1.1rem 0.85rem;
+		gap: 0.65rem 1.15rem;
+	}
+
+	.gk-hero-stat-divider {
+		height: 2.35rem;
+	}
+
+	.gk-hero-product-overlay {
+		padding-left: max(1rem, env(safe-area-inset-left, 0px));
+		padding-right: max(1rem, env(safe-area-inset-right, 0px));
+	}
+
+	.gk-section-featured-inner,
+	.gk-section-categories-inner {
+		padding-left: max(1rem, env(safe-area-inset-left, 0px));
+		padding-right: max(1rem, env(safe-area-inset-right, 0px));
+	}
+
+	.header-pill-wrapper {
+		min-width: 0;
+	}
+
+	.header-pill-container {
+		max-width: min(46rem, 100%);
+	}
+
+	.header-pill {
+		max-width: min(46rem, 100%);
+		min-width: 0;
 	}
 }
 
